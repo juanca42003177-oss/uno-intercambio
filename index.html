@@ -24,76 +24,57 @@
     <div id="status">Iniciando MiniKit...</div>
   </div>
 
-<script>
+<script type="module">
+  import { MiniKit } from "https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@0.7.6/+esm";
+
   const APP_ID = "app_d0a270229b8199adb79b64d5c7aa7c0f";
   const WALLET = "0x49bcFe3c2ba24f90d2E07917fA4504793f5C9B22";
   const statusEl = document.getElementById('status');
   const log = m => statusEl.textContent = m;
 
-  function init() {
-    // World App inyecta window.MiniKit o window.WorldApp
-    const MiniKit = window.MiniKit || window.WorldApp?.MiniKit;
-    
-    if (!window.MiniKit && !window.WorldApp) {
-      log("Esperando World App... Si ves esto en Chrome es normal.\nEn World App debe cambiar a 'Listo'.");
-      setTimeout(init, 500);
-      return;
-    }
+  // Instalar
+  MiniKit.install(APP_ID);
+  log("✅ MiniKit Listo! Instalado: " + MiniKit.isInstalled() + "\nListo para conectar.");
 
-    const kit = window.MiniKit;
+  // Compatibilidad: funciona con commandsAsync y con commands
+  const getCmds = () => MiniKit.commandsAsync || MiniKit.commands;
+
+  document.getElementById('login').onclick = async () => {
     try {
-      kit.install(APP_ID);
-      log("✅ MiniKit Listo!\nInstalado: " + kit.isInstalled() + "\nApp: " + APP_ID + "\n\nAhora dale a Conectar.");
-    } catch(e) {
-      log("Instalado sin App ID (modo dev):\n" + e.message);
-      try { kit.install(); log("✅ MiniKit Listo en modo dev!"); } catch(e2){}
-    }
-
-    document.getElementById('login').onclick = async () => {
-      try {
-        log("Pidiendo permiso...");
-        const { finalPayload } = await kit.commandsAsync.walletAuth({
-          nonce: Math.random().toString(36).substring(2),
-          statement: "Login Uno Intercambio"
-        });
-        log("Respuesta:\n" + JSON.stringify(finalPayload, null, 2));
-        if (finalPayload.status === "success") {
-          document.getElementById('login').style.display = "none";
-          document.getElementById('pay').style.display = "block";
-          document.getElementById('sub').textContent = "¡Conectado!";
-        }
-      } catch (err) { log("Error login: " + err.message); }
-    };
-
-    document.getElementById('pay').onclick = async () => {
-      try {
-        log("Abriendo pago...");
-        const { finalPayload } = await kit.commandsAsync.pay({
-          reference: "uno_" + Date.now(),
-          to: WALLET,
-          tokens: [{ symbol: "WLD", token_amount: "1.0" }],
-          description: "Uno Intercambio"
-        });
-        log("Pago:\n" + JSON.stringify(finalPayload, null, 2));
-      } catch (err) { log("Error pago: " + err.message); }
-    };
-  }
-
-  init();
-
-  // Fallback: si no hay MiniKit inyectado, intenta cargar el CDN
-  setTimeout(async () => {
-    if (!window.MiniKit) {
-      log("Intentando cargar SDK externo...");
-      try {
-        const mod = await import("https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@0.7.6/+esm");
-        window.MiniKit = mod.MiniKit;
-        init();
-      } catch(e) {
-        log("❌ No se pudo cargar CDN. Abre esta pagina DENTRO de World App, no en Chrome.");
+      log("Pidiendo permiso...");
+      const cmds = getCmds();
+      const res = await cmds.walletAuth({
+        nonce: Math.random().toString(36).substring(2),
+        statement: "Login Uno Intercambio"
+      });
+      const finalPayload = res.finalPayload || res;
+      log("Respuesta:\n" + JSON.stringify(finalPayload, null, 2));
+      if (finalPayload.status === "success") {
+        document.getElementById('login').style.display = "none";
+        document.getElementById('pay').style.display = "block";
+        document.getElementById('sub').textContent = "¡Conectado!";
       }
+    } catch (err) {
+      log("Error login: " + err.message);
     }
-  }, 2000);
+  };
+
+  document.getElementById('pay').onclick = async () => {
+    try {
+      log("Abriendo pago...");
+      const cmds = getCmds();
+      const res = await cmds.pay({
+        reference: "uno_" + Date.now(),
+        to: WALLET,
+        tokens: [{ symbol: "WLD", token_amount: "1.0" }],
+        description: "Uno Intercambio 1 WLD"
+      });
+      const finalPayload = res.finalPayload || res;
+      log("Pago:\n" + JSON.stringify(finalPayload, null, 2));
+    } catch (err) {
+      log("Error pago: " + err.message);
+    }
+  };
 </script>
 </body>
 </html>

@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Uno Intercambio</title>
-    <!-- Cargamos la librería oficial del MiniKit de Worldcoin -->
-    <script src="https://unpkg.com"></script>
+    
+    <!-- SDK Oficial de Worldcoin MiniKit -->
+    <script src="https://jsdelivr.net"></script>
+
     <style>
         * {
             box-sizing: border-box;
@@ -19,171 +21,77 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             min-height: 100vh;
             padding: 24px;
         }
         .container {
-            width: 100%;
-            max-width: 400px;
             text-align: center;
-            margin: auto;
+            max-width: 400px;
+            width: 100%;
         }
-        .logo-area {
-            margin-bottom: 30px;
-        }
-        .logo-circle {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            font-weight: bold;
-            margin: 0 auto 16px auto;
-            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
-        }
-        h1 {
-            font-size: 26px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            margin-bottom: 8px;
-        }
-        .subtitle {
-            color: #9ca3af;
-            font-size: 15px;
-            margin-bottom: 32px;
-        }
-        .card {
-            background-color: #1e2329;
-            border: 1px solid #2b3139;
-            border-radius: 16px;
-            padding: 20px;
-            text-align: left;
-            margin-bottom: 32px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        .card-title {
-            font-size: 14px;
-            color: #9ca3af;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
-        }
-        .balance {
-            font-size: 32px;
-            font-weight: 700;
-            color: #fcd535;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .currency {
-            font-size: 16px;
-            color: #9ca3af;
-            font-weight: normal;
-        }
-        .btn-wallet {
+        .btn-worldcoin {
             background-color: #ffffff;
             color: #000000;
             border: none;
+            padding: 14px 24px;
             border-radius: 50px;
-            width: 100%;
-            padding: 16px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(255,255,255,0.1);
+            margin-top: 20px;
+            width: 100%;
+            transition: background 0.2s;
         }
-        .btn-wallet:active {
-            transform: scale(0.98);
-            background-color: #e5e7eb;
-        }
-        .footer-text {
-            color: #6b7280;
-            font-size: 12px;
-            margin-top: 16px;
-        }
-        .status-msg {
-            margin-top: 15px;
-            font-size: 14px;
-            color: #fcd535;
+        .btn-worldcoin:active {
+            background-color: #e0e0e0;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="logo-area">
-            <div class="logo-circle">U</div>
-            <h1>Uno Intercambio</h1>
-            <p class="subtitle">Gestión de operaciones seguras</p>
-        </div>
-
-        <div class="card">
-            <p class="card-title">Balance de Operación</p>
-            <div class="balance">
-                130 <span class="currency">WLD</span>
-            </div>
-        </div>
-
-        <!-- Botón que ejecuta la transacción real -->
-        <button class="btn-wallet" id="payBtn">
-            Pagar 1 WLD con World App
-        </button>
+        <h1>Uno Intercambio</h1>
+        <p style="color: #9aa0a6; margin-top: 8px;">Conecta tu World ID para continuar</p>
         
-        <div id="status" class="status-msg"></div>
-        
-        <p class="footer-text">Conexión encriptada mediante World ID</p>
+        <!-- Botón para iniciar la autenticación -->
+        <button class="btn-worldcoin" id="login-btn">Conectar con World App</button>
     </div>
 
     <script>
-        // 1. Inicializamos el MiniKit con tu ID de aplicación de Worldcoin
-        window.MiniKit.init({
-            appId: 'app_d0a270229b8199adb79b64d5c7aa7c0f', 
+        // Inicializar el SDK con tus datos cuando la página cargue en World App
+        document.addEventListener("DOMContentLoaded", () => {
+            if (window.MiniKit) {
+                // Se inicializa asignando tu RP ID asignado de Worldcoin
+                window.MiniKit.init({
+                    rpId: "rp_5cf05109127fa1fa"
+                });
+                console.log("MiniKit listo para usar");
+            } else {
+                console.error("El SDK de Worldcoin no se cargó correctamente");
+            }
         });
 
-        // 2. Programamos la función de cobro al presionar el botón
-        document.getElementById('payBtn').addEventListener('click', async () => {
-            const statusDiv = document.getElementById('status');
-            statusDiv.innerText = "Procesando pago...";
+        // Configurar la acción del botón
+        document.getElementById("login-btn").addEventListener("click", async () => {
+            if (!window.MiniKit) return;
 
             try {
-                // Generamos la orden de cobro en criptomonedas (WLD)
-                const payload = {
-                    reference: "pago_uno_intercambio_" + Date.now(), 
-                    to: "0x49bcFe3c2ba24f90d2E07917fA4504793f5C9B22", 
-                    tokens: [
-                        {
-                            amount: "1.0", 
-                            token: "WLD"
-                        }
-                    ],
-                    description: "Intercambio de saldos en Uno Intercambio"
-                };
+                // Llamada al login usando tu App ID de la captura de pantalla
+                const response = await window.MiniKit.login({
+                    app_id: "app_d0a270229b8199adb79b64d5c7aa7c0f",
+                    nonce: Math.random().toString(36).substring(2),
+                });
 
-                // Solicitamos el pago a la billetera móvil del usuario
-                const response = await window.MiniKit.exec('pay', payload);
-
-                if (response.status === 'success') {
-                    statusDiv.style.color = "#10b981"; 
-                    statusDiv.innerText = "¡Pago procesado con éxito en la Blockchain!";
-                    alert("Transacción completada correctamente.");
-                } else {
-                    statusDiv.style.color = "#ef4444"; 
-                    statusDiv.innerText = "Pago cancelado o fallido.";
+                if (response.command_status === "success") {
+                    alert("¡Conexión exitosa con World ID!");
+                    console.log("Datos recibidos:", response);
                 }
             } catch (error) {
-                console.error(error);
-                statusDiv.style.color = "#ef4444";
-                statusDiv.innerText = "Error de conexión con la wallet.";
+                console.error("Error al conectar:", error);
             }
         });
     </script>
 
 </body>
 </html>
-

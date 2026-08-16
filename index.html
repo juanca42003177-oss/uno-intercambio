@@ -113,8 +113,8 @@
           // AQUÍ VA TU SIGUIENTE PASO:
           // enviar address, message y signature a tu backend
           // Ejemplo:
-          /*
-          const res = await fetch("https://tu-backend.com/api/verify-wallet", {
+          
+          const res = await fetch("/api/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ address, message, signature, nonce })
@@ -127,7 +127,7 @@
           } else {
             setStatus("La firma no pudo verificarse en el servidor.");
           }
-          */
+          
         } else {
           setStatus("No se recibió una respuesta válida de walletAuth.");
         }

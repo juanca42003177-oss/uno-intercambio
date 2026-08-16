@@ -1,4 +1,4 @@
-import { verifyMessage } from "ethers";
+const { verifyMessage } = require("ethers");
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -8,7 +8,10 @@ export default async function handler(req, res) {
   try {
     const { address, message, signature } = req.body;
     
-    // Usamos directamente verifyMessage de Ethers v6
+    if (!address || !message || !signature) {
+      return res.status(400).json({ ok: false, error: "Faltan datos obligatorios" });
+    }
+    
     const recoveredAddress = verifyMessage(message, signature);
     
     if (recoveredAddress.toLowerCase() === address.toLowerCase()) {

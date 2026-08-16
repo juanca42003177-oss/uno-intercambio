@@ -41,20 +41,27 @@
       word-break: break-word;
       font-size: 14px;
     }
+    .ok {
+      margin-top: 16px;
+      color: #4ade80;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Uno Intercambio</h1>
     <p>Conecta tu World App para continuar</p>
-    <button id="test-btn">Probar MiniKit</button>
-    <div id="status">Cargando...</div>
+    <button id="test-btn">Conectar Wallet</button>
+    <div class="ok" id="ok"></div>
+    <div id="status">Listo para conectar.</div>
   </div>
 
   <script type="module">
     import { MiniKit } from "https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js/+esm";
 
     const statusEl = document.getElementById("status");
+    const okEl = document.getElementById("ok");
     const btn = document.getElementById("test-btn");
 
     function setStatus(msg) {
@@ -62,50 +69,72 @@
       console.log(msg);
     }
 
+    function setOk(msg) {
+      okEl.textContent = msg;
+      console.log(msg);
+    }
+
     try {
-      setStatus("Import OK. Revisando MiniKit...");
+      MiniKit.install();
 
-      setStatus(
-        "Tipo de MiniKit: " + typeof MiniKit + "\n\n" +
-        "Claves disponibles:\n" + Object.keys(MiniKit).sort().join(", ")
-      );
-
-      if (typeof MiniKit.install === "function") {
-        const result = MiniKit.install();
-        setStatus(
-          "MiniKit.install() existe.\n\n" +
-          "Resultado:\n" + JSON.stringify(result, null, 2) + "\n\n" +
-          "Claves disponibles:\n" + Object.keys(MiniKit).sort().join(", ")
-        );
+      if (!MiniKit.isInstalled()) {
+        setStatus("Abre esta mini app dentro de World App.");
       } else {
-        setStatus(
-          "MiniKit cargó, pero install() no existe.\n\n" +
-          "Claves disponibles:\n" + Object.keys(MiniKit).sort().join(", ")
-        );
+        setStatus("MiniKit detectado correctamente.");
       }
     } catch (e) {
-      setStatus("Error al importar/instalar MiniKit:\n" + (e.message || String(e)));
+      setStatus("Error al cargar MiniKit: " + (e.message || String(e)));
     }
 
     btn.addEventListener("click", async () => {
       try {
-        const methods = Object.keys(MiniKit).sort();
-
-        if (typeof MiniKit.walletAuth === "function") {
-          const nonce = crypto.randomUUID().replace(/-/g, "");
-          setStatus("walletAuth existe. Ejecutando...");
-
-          const result = await MiniKit.walletAuth({ nonce });
-          setStatus("walletAuth OK:\n" + JSON.stringify(result, null, 2));
+        if (!MiniKit.isInstalled()) {
+          setStatus("World App no detectada.");
           return;
         }
 
-        setStatus(
-          "walletAuth NO existe en esta versión.\n\n" +
-          "Métodos encontrados:\n" + methods.join(", ")
-        );
+        btn.disabled = true;
+        setOk("");
+        setStatus("Solicitando firma...");
+
+        const nonce = crypto.randomUUID().replace(/-/g, "");
+        const result = await MiniKit.walletAuth({ nonce });
+
+        if (result?.executedWith === "minikit" && result?.data) {
+          const { address, message, signature } = result.data;
+
+          setOk("✅ Wallet conectada correctamente");
+          setStatus(
+            "Dirección:\n" + address +
+            "\n\nMensaje firmado:\n" + message +
+            "\n\nFirma:\n" + signature
+          );
+
+          // AQUÍ VA TU SIGUIENTE PASO:
+          // enviar address, message y signature a tu backend
+          // Ejemplo:
+          /*
+          const res = await fetch("https://tu-backend.com/api/verify-wallet", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ address, message, signature, nonce })
+          });
+
+          const data = await res.json();
+
+          if (data.ok) {
+            window.location.href = "/dashboard.html";
+          } else {
+            setStatus("La firma no pudo verificarse en el servidor.");
+          }
+          */
+        } else {
+          setStatus("No se recibió una respuesta válida de walletAuth.");
+        }
       } catch (e) {
-        setStatus("Error al probar método:\n" + (e.message || String(e)));
+        setStatus("Error: " + (e.message || String(e)));
+      } finally {
+        btn.disabled = false;
       }
     });
   </script>

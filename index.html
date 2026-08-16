@@ -5,159 +5,88 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Uno Intercambio</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-    body {
-      background-color: #0b0e11;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 24px;
-    }
-    .container {
-      text-align: center;
-      max-width: 400px;
-      width: 100%;
-      background: #161a1e;
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-    h1 {
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
-    p {
-      color: #9aa0a6;
-      font-size: 14px;
-      margin-bottom: 24px;
-    }
-    .btn {
-      background-color: #ffffff;
-      color: #000000;
-      border: none;
-      padding: 14px 24px;
-      border-radius: 50px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      margin-bottom: 12px;
-      transition: background 0.2s;
-    }
-    .btn:hover {
-      background-color: #e2e8f0;
-    }
-    .btn-pay {
-      background-color: #10b981;
-      color: white;
-      display: none;
-    }
-    .btn-pay:hover {
-      background-color: #059669;
-    }
-    #status {
-      margin-top: 16px;
-      font-size: 13px;
-      color: #a0aec0;
-      white-space: pre-wrap;
-      text-align: left;
-      background: #23282d;
-      padding: 12px;
-      border-radius: 8px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: #0b0e11; color: #ffffff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
+    .container { text-align: center; max-width: 400px; width: 100%; background: #161a1e; padding: 30px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    p { color: #9aa0a6; font-size: 14px; margin-bottom: 24px; }
+    .btn { background-color: #ffffff; color: #000000; border: none; padding: 14px 24px; border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; margin-bottom: 12px; transition: all 0.2s; }
+    .btn:disabled { opacity: 0.5; }
+    .btn-pay { background-color: #10b981; color: white; display: none; }
+    .btn-pay:hover { background-color: #059669; }
+    #status { margin-top: 16px; font-size: 12px; color: #a0aec0; white-space: pre-wrap; text-align: left; background: #23282d; padding: 12px; border-radius: 8px; max-height: 250px; overflow-y: auto; word-break: break-all; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Uno Intercambio</h1>
     <p id="sub-title">Conecta tu World App para continuar</p>
-    
     <button class="btn" id="login-btn">Conectar con World App</button>
-    <button class="btn btn-pay" id="pay-btn">Simular Intercambio (Pago)</button>
-    
-    <div id="status">Iniciando aplicación...</div>
+    <button class="btn btn-pay" id="pay-btn">Simular Intercambio (1 WLD)</button>
+    <div id="status">Iniciando...</div>
   </div>
 
   <script type="module">
-    // CDN Optimizado y ultrarrápido para entornos WebView móviles
-    import { MiniKit } from "https://jsdelivr.net";
+    import { MiniKit } from "https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@0.7.6/+esm";
+
+    // TUS DATOS REALES - YA CONFIGURADOS
+    const APP_ID = "app_d0a270229b8199adb79b64d5c7aa7c0f";
+    const MI_WALLET = "0x49bcFe3c2ba24f90d2E07917fA4504793f5C9B22";
 
     const statusEl = document.getElementById("status");
     const loginBtn = document.getElementById("login-btn");
     const payBtn = document.getElementById("pay-btn");
     const subTitle = document.getElementById("sub-title");
 
-    function setStatus(msg) {
-      if (statusEl) statusEl.textContent = msg;
-      console.log(msg);
+    const setStatus = (msg) => { statusEl.textContent = msg; console.log(msg); };
+
+    MiniKit.install(APP_ID);
+
+    if (!MiniKit.isInstalled()) {
+      setStatus("⚠️ ERROR: Abre esto DENTRO de World App.\n\n1. Sube este archivo a Vercel\n2. Pega la URL en developer.worldcoin.org\n3. Abre World App > Tu Mini App\n\nSi lo abres en Chrome no va a funcionar.");
+      loginBtn.disabled = true;
+    } else {
+      setStatus("✅ Listo. MiniKit conectado.\nApp ID: " + APP_ID);
     }
 
-    // Inicialización asíncrona estándar de la SDK
-    try {
-      MiniKit.install();
-      setStatus("🚀 MiniKit inicializado correctamente.");
-    } catch (err) {
-      setStatus("⚠️ Error al cargar MiniKit automáticamente: " + err.message);
-    }
+    loginBtn.addEventListener("click", async () => {
+      try {
+        setStatus("⏳ Solicitando firma...");
+        const { finalPayload } = await MiniKit.commandsAsync.walletAuth({
+          nonce: crypto.randomUUID().replace(/-/g, ""),
+          requestId: "uno_" + Date.now(),
+          expirationTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          notBefore: new Date(Date.now() - 60 * 1000),
+          statement: "Iniciar sesion en Uno Intercambio",
+        });
 
-    if (loginBtn) {
-      loginBtn.addEventListener("click", async () => {
-        try {
-          setStatus("⏳ Solicitando firma a tu billetera...");
-          
-          // Ejecuta la autenticación de firmas obligatoria
-          const response = await MiniKit.commands.walletAuth({ 
-            nonce: "uno_intercambio_123",
-            requestId: "login_uno",
-            statement: "Iniciar sesion en Uno Intercambio"
-          });
-
-          // Comprobamos la respuesta de la Wallet
-          if (response && response.finalPayload) {
-            setStatus("✅ Autenticación exitosa:\n" + JSON.stringify(response.finalPayload, null, 2));
-            loginBtn.style.display = "none";
-            if (payBtn) payBtn.style.display = "block";
-            if (subTitle) subTitle.textContent = "¡Billetera vinculada con éxito!";
-          } else {
-            setStatus("⚠️ Respuesta sin firma o el usuario rechazó la solicitud.");
-          }
-        } catch (err) {
-          setStatus("❌ Error en autenticación: " + (err.message || String(err)));
+        if (finalPayload.status === "success") {
+          setStatus("✅ Conectado:\n" + JSON.stringify(finalPayload, null, 2));
+          loginBtn.style.display = "none";
+          payBtn.style.display = "block";
+          subTitle.textContent = "¡Billetera vinculada!";
+        } else {
+          setStatus("Rechazado:\n" + JSON.stringify(finalPayload, null, 2));
         }
-      });
-    }
+      } catch (err) {
+        setStatus("❌ Error login: " + (err.message || String(err)));
+      }
+    });
 
-    if (payBtn) {
-      payBtn.addEventListener("click", async () => {
-        try {
-          setStatus("⏳ Procesando ventana de transacción...");
-          
-          const payResult = await MiniKit.commands.pay({
-            reference: "ref_" + Math.floor(Math.random() * 100000),
-            to: "0x0000000000000000000000000000000000000000", // Modifica con tu clave pública DeFi de destino
-            tokens: [
-              {
-                symbol: "WLD", 
-                amount: "1.0" 
-              }
-            ]
-          });
-
-          setStatus("Resultado de la operación:\n" + JSON.stringify(payResult, null, 2));
-        } catch (err) {
-          setStatus("❌ Error en la transacción: " + err.message);
-        }
-      });
-    }
+    payBtn.addEventListener("click", async () => {
+      try {
+        setStatus("⏳ Abriendo pago...");
+        const { finalPayload } = await MiniKit.commandsAsync.pay({
+          reference: "uno_" + Date.now(),
+          to: MI_WALLET,
+          tokens: [{ symbol: "WLD", token_amount: "1.0" }],
+          description: "Intercambio Uno - 1 WLD",
+        });
+        setStatus("Resultado:\n" + JSON.stringify(finalPayload, null, 2));
+      } catch (err) {
+        setStatus("❌ Error pago: " + (err.message || String(err)));
+      }
+    });
   </script>
 </body>
 </html>

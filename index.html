@@ -1,142 +1,111 @@
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Uno Intercambio</title>
-  <style>
-    body {
-      background: #0b0e11;
-      color: white;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 24px;
-    }
-    .container {
-      max-width: 420px;
-      width: 100%;
-      text-align: center;
-    }
-    button {
-      width: 100%;
-      padding: 14px 20px;
-      border: 0;
-      border-radius: 999px;
-      background: white;
-      color: black;
-      font-weight: bold;
-      margin-top: 18px;
-      cursor: pointer;
-    }
-    #status {
-      margin-top: 18px;
-      color: #b0b7c3;
-      text-align: left;
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-size: 14px;
-    }
-    .ok {
-      margin-top: 16px;
-      color: #4ade80;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Uno Intercambio</h1>
-    <p>Conecta tu World App para continuar</p>
-    <button id="test-btn">Conectar Wallet</button>
-    <div class="ok" id="ok"></div>
-    <div id="status">Listo para conectar.</div>
-  </div>
+import express from "express";
+import cors from "cors";
+import crypto from "crypto";
+import { SiweMessage } from "siwe";
 
-  <script type="module">
-    import { MiniKit } from "https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js/+esm";
+const app = express();
+const PORT = 3000;
+const FRONTEND_ORIGIN = "https://juanca42003177-oss.github.io";
 
-    const statusEl = document.getElementById("status");
-    const okEl = document.getElementById("ok");
-    const btn = document.getElementById("test-btn");
+const nonces = new Map();
+const sessions = new Map();
 
-    function setStatus(msg) {
-      statusEl.textContent = msg;
-      console.log(msg);
+app.use(cors({
+  origin: FRONTEND_ORIGIN,
+  credentials: true
+}));
+
+app.use(express.json());
+
+app.get("/api/nonce", (req, res) => {
+  const nonce = crypto.randomBytes(16).toString("hex");
+  nonces.set(nonce, { createdAt: Date.now() });
+  res.json({ ok: true, nonce });
+});
+
+app.post("/api/verify-wallet", async (req, res) => {
+  try {
+    const { address, message, signature, nonce } = req.body;
+
+    if (!address || !message || !signature || !nonce) {
+      return res.status(400).json({
+        ok: false,
+        error: "Faltan campos requeridos"
+      });
     }
 
-    function setOk(msg) {
-      okEl.textContent = msg;
-      console.log(msg);
+    if (!nonces.has(nonce)) {
+      return res.status(400).json({
+        ok: false,
+        error: "Nonce inválido o ya usado"
+      });
     }
 
-    try {
-      MiniKit.install();
+    const siweMessage = new SiweMessage(message);
 
-      if (!MiniKit.isInstalled()) {
-        setStatus("Abre esta mini app dentro de World App.");
-      } else {
-        setStatus("MiniKit detectado correctamente.");
-      }
-    } catch (e) {
-      setStatus("Error al cargar MiniKit: " + (e.message || String(e)));
-    }
-
-    btn.addEventListener("click", async () => {
-      try {
-        if (!MiniKit.isInstalled()) {
-          setStatus("World App no detectada.");
-          return;
-        }
-
-        btn.disabled = true;
-        setOk("");
-        setStatus("Solicitando firma...");
-
-        const nonce = crypto.randomUUID().replace(/-/g, "");
-        const result = await MiniKit.walletAuth({ nonce });
-
-        if (result?.executedWith === "minikit" && result?.data) {
-          const { address, message, signature } = result.data;
-
-          setOk("✅ Wallet conectada correctamente");
-          setStatus(
-            "Dirección:\n" + address +
-            "\n\nMensaje firmado:\n" + message +
-            "\n\nFirma:\n" + signature
-          );
-
-          // AQUÍ VA TU SIGUIENTE PASO:
-          // enviar address, message y signature a tu backend
-          // Ejemplo:
-          /*
-          const res = await fetch("https://tu-backend.com/api/verify-wallet", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ address, message, signature, nonce })
-          });
-
-          const data = await res.json();
-
-          if (data.ok) {
-            window.location.href = "/dashboard.html";
-          } else {
-            setStatus("La firma no pudo verificarse en el servidor.");
-          }
-          */
-        } else {
-          setStatus("No se recibió una respuesta válida de walletAuth.");
-        }
-      } catch (e) {
-        setStatus("Error: " + (e.message || String(e)));
-      } finally {
-        btn.disabled = false;
-      }
+    const result = await siweMessage.verify({
+      signature,
+      nonce
     });
-  </script>
-</body>
-</html>
+
+    if (!result.success) {
+      return res.status(401).json({
+        ok: false,
+        error: "Firma inválida"
+      });
+    }
+
+    const verifiedAddress = siweMessage.address?.toLowerCase();
+    const inputAddress = address.toLowerCase();
+
+    if (verifiedAddress !== inputAddress) {
+      return res.status(401).json({
+        ok: false,
+        error: "La dirección no coincide con la firma"
+      });
+    }
+
+    nonces.delete(nonce);
+
+    const sessionToken = crypto.randomBytes(32).toString("hex");
+    sessions.set(sessionToken, {
+      address: inputAddress,
+      createdAt: Date.now()
+    });
+
+    res.json({
+      ok: true,
+      sessionToken,
+      address: inputAddress
+    });
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      error: error.message || "Error interno del servidor"
+    });
+  }
+});
+
+app.get("/api/me", (req, res) => {
+  const auth = req.headers.authorization || "";
+  const token = auth.replace("Bearer ", "").trim();
+
+  if (!token || !sessions.has(token)) {
+    return res.status(401).json({
+      ok: false,
+      error: "Sesión no válida"
+    });
+  }
+
+  const session = sessions.get(token);
+
+  res.json({
+    ok: true,
+    address: session.address
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});

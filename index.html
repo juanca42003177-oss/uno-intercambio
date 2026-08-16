@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -25,8 +24,21 @@
       text-align: center;
       max-width: 400px;
       width: 100%;
+      background: #161a1e;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
-    .btn-worldcoin {
+    h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    p {
+      color: #9aa0a6;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .btn {
       background-color: #ffffff;
       color: #000000;
       border: none;
@@ -35,24 +47,45 @@
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
-      margin-top: 20px;
       width: 100%;
+      margin-bottom: 12px;
+      transition: background 0.2s;
+    }
+    .btn:hover {
+      background-color: #e2e8f0;
+    }
+    .btn-pay {
+      background-color: #10b981;
+      color: white;
+      display: none; /* Se muestra tras autenticarse */
+    }
+    .btn-pay:hover {
+      background-color: #059669;
     }
     #status {
       margin-top: 16px;
-      font-size: 14px;
-      color: #9aa0a6;
+      font-size: 13px;
+      color: #a0aec0;
       white-space: pre-wrap;
       text-align: left;
+      background: #23282d;
+      padding: 12px;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Uno Intercambio</h1>
-    <p style="color: #9aa0a6; margin-top: 8px;">Conecta tu World App para continuar</p>
-    <button class="btn-worldcoin" id="login-btn">Conectar con World App</button>
-    <div id="status">Cargando...</div>
+    <p id="sub-title">Conecta tu World App para continuar</p>
+    
+    <!-- Botones de Acción -->
+    <button class="btn" id="login-btn">Conectar con World App</button>
+    <button class="btn btn-pay" id="pay-btn">Simular Intercambio (Pago)</button>
+    
+    <div id="status">Iniciando MiniKit...</div>
   </div>
 
   <script type="module">
@@ -60,41 +93,85 @@
 
     const statusEl = document.getElementById("status");
     const loginBtn = document.getElementById("login-btn");
+    const payBtn = document.getElementById("pay-btn");
+    const subTitle = document.getElementById("sub-title");
 
     function setStatus(msg) {
       statusEl.textContent = msg;
       console.log(msg);
     }
 
-    // Inicialización
+    // 1. Inicialización Automática de MiniKit
     try {
-      const result = MiniKit.install();
-      setStatus("MiniKit instalado: " + JSON.stringify(result));
-
+      MiniKit.install();
       if (!MiniKit.isInstalled()) {
-        setStatus("MiniKit no está disponible. Abre esta página dentro de World App, no en un navegador normal.");
+        setStatus("⚠️ MiniKit no disponible. Abre este enlace dentro de la World App.");
       } else {
-        setStatus("MiniKit detectado correctamente dentro de World App.");
+        setStatus("✅ MiniKit listo dentro de World App.");
       }
     } catch (err) {
-      setStatus("Error al instalar MiniKit: " + (err.message || String(err)));
+      setStatus("❌ Error en instalación: " + err.message);
     }
 
+    // 2. Autenticación de Billetera (walletAuth)
     loginBtn.addEventListener("click", async () => {
+      if (!MiniKit.isInstalled()) return;
+
       try {
-        if (!MiniKit.isInstalled()) {
-          setStatus("No estás dentro de World App o MiniKit no inicializó.");
-          return;
-        }
-
+        // Generar un nonce seguro en el backend es lo ideal, aquí usamos un uuid temporal
         const nonce = crypto.randomUUID().replace(/-/g, "");
-        setStatus("Iniciando walletAuth...");
+        setStatus("⏳ Esperando firma en World App...");
 
-        const result = await MiniKit.walletAuth({ nonce });
+        const result = await MiniKit.walletAuth({ 
+          nonce,
+          requestId: "login_uno_intercambio" 
+        });
 
-        setStatus("Respuesta:\n" + JSON.stringify(result, null, 2));
+        if (result.status === "success") {
+          setStatus("✅ Autenticado con éxito:\n" + JSON.stringify(result, null, 2));
+          
+          // Lógica de interfaz: Ocultar login y mostrar botón de pago/intercambio
+          loginBtn.style.display = "none";
+          payBtn.style.display = "block";
+          subTitle.textContent = "¡Billetera conectada con éxito!";
+          
+          // NOTA: Envía 'result' a tu servidor para validar la firma criptográfica
+          // verificarFirmaEnServidor(result);
+          
+        } else {
+          setStatus("⚠️ Autenticación rechazada o cancelada.");
+        }
       } catch (err) {
-        setStatus("Error en walletAuth: " + (err.message || String(err)));
+        setStatus("❌ Error en walletAuth: " + err.message);
+      }
+    });
+
+    // 3. Ejecución de un Pago / Envío de Tokens (Opcional para Intercambios)
+    payBtn.addEventListener("click", async () => {
+      if (!MiniKit.isInstalled()) return;
+
+      try {
+        setStatus("⏳ Procesando solicitud de pago...");
+        
+        // Configuración básica de un pago mediante MiniKit
+        const payResult = await MiniKit.sendTransaction({
+          payload: {
+            // Aquí configuras los parámetros de tu contrato inteligente o transacción estándar
+            // Ejemplo conceptual para solicitar una transacción
+            reference: "intercambio_ref_" + Date.now(),
+            to: "0x0000000000000000000000000000000000000000", // Dirección destino (ej. tu contrato de intercambio)
+            tokens: [
+              {
+                symbol: "WLD", 
+                amount: "1.0" // Cantidad en formato String
+              }
+            ]
+          }
+        });
+
+        setStatus("Resultado de la transacción:\n" + JSON.stringify(payResult, null, 2));
+      } catch (err) {
+        setStatus("❌ Error en transacción: " + err.message);
       }
     });
   </script>

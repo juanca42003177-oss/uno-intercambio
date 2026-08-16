@@ -1,104 +1,112 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Uno Intercambio</title>
-  <!-- Cargamos la librería oficial de Worldcoin de forma clásica -->
-  <script src="https://jsdelivr.net"></script>
-  <style>
-    body {
-      background: #0b0e11;
-      color: white;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 24px;
-    }
-    .container {
-      max-width: 420px;
-      width: 100%;
-      text-align: center;
-    }
-    button {
-      background: white;
-      color: black;
-      border: none;
-      padding: 16px 24px;
-      font-size: 16px;
-      font-weight: bold;
-      border-radius: 8px;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 20px;
-      transition: background 0.2s;
-    }
-    button:active {
-      background: #cccccc;
-    }
-    button:disabled {
-      background: #555;
-      color: #aaa;
-      cursor: not-allowed;
-    }
-    .status {
-      margin-top: 15px;
-      font-size: 14px;
-      color: #aaa;
-    }
-    #panel-intercambio {
-      display: none;
-      max-width: 500px;
-      width: 100%;
-      text-align: center;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Uno Intercambio</title>
+    
+    <!-- SDK Oficial de Worldcoin MiniKit (Soluciona la pantalla de carga infinita) -->
+    <script src="https://jsdelivr.net"></script>
+
+    <style>
+        body {
+            background: #0b0e11;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            background: #1e2329;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: #f3ba2f; /* Color estilo Binance / Intercambio */
+        }
+
+        p {
+            font-size: 14px;
+            color: #eaecef;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .btn-connect {
+            background: #f3ba2f;
+            color: #000000;
+            border: none;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .btn-connect:disabled {
+            background: #474d57;
+            color: #848e9c;
+            cursor: not-allowed;
+        }
+
+        #statusText {
+            margin-top: 16px;
+            font-size: 13px;
+            color: #f0b90b;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- Pantalla de Inicio de Sesión -->
-  <div class="container" id="login-screen">
-    <h1>Uno Intercambio</h1>
-    <p>Conecta tu World App para continuar</p>
-    <button id="btn-connect">Conectar Wallet</button>
-    <div class="status" id="status-text">Listo para conectar.</div>
-  </div>
+    <div class="container">
+        <!-- Pantalla Inicial del Intercambio -->
+        <div id="panel-intercambio">
+            <h1>Uno Intercambio</h1>
+            <p>Conecta tu World App para continuar con la verificación segura de tu cuenta.</p>
+            
+            <button id="btnConnect" class="btn-connect">Conectar Wallet</button>
+            <p id="statusText"></p>
+        </div>
+    </div>
 
-  <!-- Pantalla del Intercambio (Se activa al iniciar sesión con éxito) -->
-  <div id="panel-intercambio">
-    <h1>¡Bienvenido a Uno Intercambio!</h1>
-    <p>Tu sesión ha sido iniciada correctamente con tu World ID.</p>
-    <!-- Aquí irá el diseño o menú de tu pasarela de intercambio -->
-  </div>
-
-  <script>
-// 1. Inicialización automática al cargar el documento
+<script>
+// 1. Inicialización automática del sistema apenas carga la página
 document.addEventListener("DOMContentLoaded", () => {
     if (typeof MiniKit !== 'undefined') {
         MiniKit.install();
-        console.log("MiniKit inicializado.");
+        console.log("MiniKit inicializado de manera correcta.");
     }
 });
 
-// 2. Vinculación de elementos del DOM
-// Buscamos el botón dentro de tu div id="panel-intercambio"
-const btnConnect = document.getElementById("panel-intercambio")?.querySelector("button") || document.getElementById("btnConnect");
-// Asegúrate de que el texto de error/estado tenga id="statusText" en tu HTML o cámbialo por el ID real
-const statusText = document.getElementById("statusText") || document.getElementById("panel-intercambio")?.querySelector("p");
+const btnConnect = document.getElementById("btnConnect");
+const statusText = document.getElementById("statusText");
 
 if (btnConnect) {
     btnConnect.addEventListener("click", async () => {
+        // Deshabilitar botón para evitar múltiples clics
         btnConnect.disabled = true;
-        if (statusText) statusText.innerText = "Solicitando autorización...";
+        statusText.innerText = "Solicitando autorización en World App...";
 
-        // 3. Obtener el SDK global inyectado
+        // 2. Obtener el SDK global inyectado por la app madre
         const sdk = window.MiniKit;
 
+        // Validación de entorno seguro de ejecución
         if (!sdk || !sdk.isInstalled()) {
-            if (statusText) statusText.innerText = "Error: No se detectó el entorno de World App.";
+            statusText.innerText = "Error: No se detectó el entorno de World App. Por favor, abre este enlace únicamente dentro de la aplicación oficial.";
             btnConnect.disabled = false;
             return;
         }
@@ -107,26 +115,33 @@ if (btnConnect) {
             // Generación de nonce seguro para mitigar ataques de replay
             const generadoNonce = btoa(Math.random().toString(36).substring(2));
 
-            // 4. Ejecución del comando de autenticación de billetera oficial
+            // 3. Ejecución del comando oficial de autenticación de billetera
             const resSign = await sdk.commands.walletAuth({
                 nonce: generadoNonce,
-                requestId: "uno-intercambio-login" // Puedes cambiarlo por tu ID de proyecto
+                requestId: "uno-intercambio-login" 
             });
 
+            // 4. Procesamiento de la respuesta devuelta por World App
             if (resSign && resSign.status === "success") {
-                if (statusText) statusText.innerText = "¡Conexión exitosa!";
-                console.log("Datos de la Wallet:", resSign);
-                // Aquí guardas la sesión o rediriges al menú del intercambio
+                statusText.style.color = "#0ecb81"; // Color verde éxito
+                statusText.innerText = "¡Conexión exitosa! Redirigiendo...";
+                console.log("Datos de la Wallet recibidos:", resSign);
+                
+                // AQUÍ puedes agregar la lógica para guardar la sesión del usuario o enviarla al backend
+                
             } else {
-                if (statusText) statusText.innerText = "Conexión rechazada por el usuario.";
+                statusText.innerText = "Conexión rechazada o cancelada por el usuario.";
                 btnConnect.disabled = false;
             }
 
         } catch (error) {
-            console.error("Error en la conexión:", error);
-            if (statusText) statusText.innerText = "Ocurrió un error al conectar la Wallet.";
+            console.error("Error crítico en la conexión:", error);
+            statusText.innerText = "Ocurrió un error inesperado al intentar conectar la Wallet.";
             btnConnect.disabled = false;
         }
     });
 }
 </script>
+
+</body>
+</html>

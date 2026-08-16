@@ -57,7 +57,7 @@
     .btn-pay {
       background-color: #10b981;
       color: white;
-      display: none; /* Se muestra tras autenticarse */
+      display: none; /* Oculto hasta que se conecte la wallet */
     }
     .btn-pay:hover {
       background-color: #059669;
@@ -81,7 +81,7 @@
     <h1>Uno Intercambio</h1>
     <p id="sub-title">Conecta tu World App para continuar</p>
     
-    <!-- Botones de Acción -->
+    <!-- Botones de Interfaz -->
     <button class="btn" id="login-btn">Conectar con World App</button>
     <button class="btn btn-pay" id="pay-btn">Simular Intercambio (Pago)</button>
     
@@ -89,7 +89,7 @@
   </div>
 
   <script type="module">
-    import { MiniKit } from "https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@1/+esm";
+    import { MiniKit } from "https://jsdelivr.net";
 
     const statusEl = document.getElementById("status");
     const loginBtn = document.getElementById("login-btn");
@@ -101,7 +101,7 @@
       console.log(msg);
     }
 
-    // 1. Inicialización Automática de MiniKit
+    // 1. Inicialización Automática Obligatoria
     try {
       MiniKit.install();
       if (!MiniKit.isInstalled()) {
@@ -113,60 +113,60 @@
       setStatus("❌ Error en instalación: " + err.message);
     }
 
-    // 2. Autenticación de Billetera (walletAuth)
+    // 2. Autenticación de Billetera (Bajo comando MiniKit.commands.walletAuth)
     loginBtn.addEventListener("click", async () => {
-      if (!MiniKit.isInstalled()) return;
+      if (!MiniKit.isInstalled()) {
+        setStatus("⚠️ No estás dentro de World App o MiniKit no inicializó.");
+        return;
+      }
 
       try {
-        // Generar un nonce seguro en el backend es lo ideal, aquí usamos un uuid temporal
-        const nonce = crypto.randomUUID().replace(/-/g, "");
+        // Generar nonce corto compatible con especificaciones SIWE
+        const nonce = crypto.randomUUID().replace(/-/g, "").substring(0, 16);
         setStatus("⏳ Esperando firma en World App...");
 
-        const result = await MiniKit.walletAuth({ 
-          nonce,
-          requestId: "login_uno_intercambio" 
+        // Llamada corregida utilizando el contenedor oficial de comandos
+        const response = await MiniKit.commands.walletAuth({ 
+          nonce: nonce,
+          requestId: "login_uno_intercambio",
+          statement: "Iniciar sesión en Uno Intercambio", // Requerido por Worldcoin
+          expirationTime: new Date(Date.now() + 1000 * 60 * 60 * 24), // Expira en 24 horas
+          notBefore: new Date()
         });
 
-        if (result.status === "success") {
-          setStatus("✅ Autenticado con éxito:\n" + JSON.stringify(result, null, 2));
+        // Evaluación de respuesta exitosa
+        if (response && response.finalPayload) {
+          setStatus("✅ Autenticado con éxito:\n" + JSON.stringify(response.finalPayload, null, 2));
           
-          // Lógica de interfaz: Ocultar login y mostrar botón de pago/intercambio
+          // Ajustes dinámicos de UI
           loginBtn.style.display = "none";
           payBtn.style.display = "block";
           subTitle.textContent = "¡Billetera conectada con éxito!";
-          
-          // NOTA: Envía 'result' a tu servidor para validar la firma criptográfica
-          // verificarFirmaEnServidor(result);
-          
         } else {
-          setStatus("⚠️ Autenticación rechazada o cancelada.");
+          setStatus("⚠️ Autenticación rechazada o cancelada por el usuario.");
         }
       } catch (err) {
-        setStatus("❌ Error en walletAuth: " + err.message);
+        setStatus("❌ Error en walletAuth: " + (err.message || String(err)));
       }
     });
 
-    // 3. Ejecución de un Pago / Envío de Tokens (Opcional para Intercambios)
+    // 3. Pasarela de Pago Integrada (Bajo comando MiniKit.commands.pay)
     payBtn.addEventListener("click", async () => {
       if (!MiniKit.isInstalled()) return;
 
       try {
         setStatus("⏳ Procesando solicitud de pago...");
         
-        // Configuración básica de un pago mediante MiniKit
-        const payResult = await MiniKit.sendTransaction({
-          payload: {
-            // Aquí configuras los parámetros de tu contrato inteligente o transacción estándar
-            // Ejemplo conceptual para solicitar una transacción
-            reference: "intercambio_ref_" + Date.now(),
-            to: "0x0000000000000000000000000000000000000000", // Dirección destino (ej. tu contrato de intercambio)
-            tokens: [
-              {
-                symbol: "WLD", 
-                amount: "1.0" // Cantidad en formato String
-              }
-            ]
-          }
+        // Llamada corregida utilizando .commands para transacciones
+        const payResult = await MiniKit.commands.pay({
+          reference: "intercambio_ref_" + Date.now(),
+          to: "0x0000000000000000000000000000000000000000", // IMPORTANTE: Cambia por tu wallet de destino
+          tokens: [
+            {
+              symbol: "WLD", 
+              amount: "1.0" // Cantidad a cobrar en formato texto
+            }
+          ]
         });
 
         setStatus("Resultado de la transacción:\n" + JSON.stringify(payResult, null, 2));

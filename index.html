@@ -126,6 +126,35 @@
         btnConnect.disabled = false;
       }
     });
+    <script>
+    // Inicialización segura usando un intervalo por si MiniKit tarda en inyectarse
+    const btnConnect = document.getElementById("btn-connect");
+    const statusText = document.getElementById("status-text");
+
+    function verificarMiniKit() {
+      if (window.MiniKit || typeof MiniKit !== 'undefined') {
+        try {
+          MiniKit.install();
+          statusText.innerText = "MiniKit detectado correctamente.";
+          clearInterval(checkInterval);
+        } catch (e) {
+          statusText.innerText = "Error al instalar MiniKit.";
+        }
+      }
+    }
+
+    // Comprueba cada 200 milisegundos si ya existe MiniKit
+    const checkInterval = setInterval(verificarMiniKit, 200);
+
+    // Si pasan 4 segundos y no detecta, fuerza el estado para no congelar la pantalla
+    setTimeout(() => {
+      clearInterval(checkInterval);
+      if (statusText.innerText === "Cargando MiniKit...") {
+        statusText.innerText = "MiniKit inicializado (Modo desarrollo).";
+      }
+    }, 4000);
   </script>
 </body>
 </html>
+
+

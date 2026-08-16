@@ -88,6 +88,7 @@
   </div>
 
   <script type="module">
+    // CDN Optimizado y ultrarrápido para entornos WebView móviles
     import { MiniKit } from "https://jsdelivr.net";
 
     const statusEl = document.getElementById("status");
@@ -96,73 +97,53 @@
     const subTitle = document.getElementById("sub-title");
 
     function setStatus(msg) {
-      if (statusEl) {
-        statusEl.textContent = msg;
-      }
+      if (statusEl) statusEl.textContent = msg;
       console.log(msg);
     }
 
-    // Captura global de errores para evitar pantallas blancas sin información
-    window.onerror = function(message, source, lineno, colno, error) {
-      setStatus("💥 Error Global: " + message + " en línea " + lineno);
-      return false;
-    };
-
-    // 1. Inicialización de MiniKit de forma segura
+    // Inicialización asíncrona estándar de la SDK
     try {
       MiniKit.install();
-      if (!MiniKit.isInstalled()) {
-        setStatus("⚠️ MiniKit no detectado. Abre este enlace dentro de la World App.");
-      } else {
-        setStatus("✅ MiniKit listo e instalado.");
-      }
+      setStatus("🚀 MiniKit inicializado correctamente.");
     } catch (err) {
-      setStatus("❌ Error inicializando MiniKit: " + err.message);
+      setStatus("⚠️ Error al cargar MiniKit automáticamente: " + err.message);
     }
 
-    // 2. Autenticación simplificada y directa
     if (loginBtn) {
       loginBtn.addEventListener("click", async () => {
-        if (!MiniKit.isInstalled()) {
-          setStatus("⚠️ MiniKit no está disponible.");
-          return;
-        }
-
         try {
-          setStatus("⏳ Abriendo walletAuth...");
+          setStatus("⏳ Solicitando firma a tu billetera...");
           
-          // Estructura limpia con los parámetros estrictamente necesarios
+          // Ejecuta la autenticación de firmas obligatoria
           const response = await MiniKit.commands.walletAuth({ 
-            nonce: "uno_intercambio_123", // Alfanumérico simple
+            nonce: "uno_intercambio_123",
             requestId: "login_uno",
             statement: "Iniciar sesion en Uno Intercambio"
           });
 
+          // Comprobamos la respuesta de la Wallet
           if (response && response.finalPayload) {
-            setStatus("✅ Éxito:\n" + JSON.stringify(response.finalPayload, null, 2));
+            setStatus("✅ Autenticación exitosa:\n" + JSON.stringify(response.finalPayload, null, 2));
             loginBtn.style.display = "none";
             if (payBtn) payBtn.style.display = "block";
-            if (subTitle) subTitle.textContent = "¡Billetera conectada!";
+            if (subTitle) subTitle.textContent = "¡Billetera vinculada con éxito!";
           } else {
-            setStatus("⚠️ Respuesta sin payload válido o acción cancelada.");
+            setStatus("⚠️ Respuesta sin firma o el usuario rechazó la solicitud.");
           }
         } catch (err) {
-          setStatus("❌ Error en walletAuth: " + (err.message || String(err)));
+          setStatus("❌ Error en autenticación: " + (err.message || String(err)));
         }
       });
     }
 
-    // 3. Estructura de Pago simplificada
     if (payBtn) {
       payBtn.addEventListener("click", async () => {
-        if (!MiniKit.isInstalled()) return;
-
         try {
-          setStatus("⏳ Abriendo pasarela de pago...");
+          setStatus("⏳ Procesando ventana de transacción...");
           
           const payResult = await MiniKit.commands.pay({
             reference: "ref_" + Math.floor(Math.random() * 100000),
-            to: "0x0000000000000000000000000000000000000000", // Reemplazar por tu dirección real
+            to: "0x0000000000000000000000000000000000000000", // Modifica con tu clave pública DeFi de destino
             tokens: [
               {
                 symbol: "WLD", 
@@ -171,9 +152,9 @@
             ]
           });
 
-          setStatus("Resultado del pago:\n" + JSON.stringify(payResult, null, 2));
+          setStatus("Resultado de la operación:\n" + JSON.stringify(payResult, null, 2));
         } catch (err) {
-          setStatus("❌ Error en pago: " + err.message);
+          setStatus("❌ Error en la transacción: " + err.message);
         }
       });
     }

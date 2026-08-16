@@ -5,7 +5,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Uno Intercambio</title>
-
   <style>
     * {
       box-sizing: border-box;
@@ -17,7 +16,6 @@
       background-color: #0b0e11;
       color: #ffffff;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
@@ -52,12 +50,14 @@
 <body>
   <div class="container">
     <h1>Uno Intercambio</h1>
-    <p style="color: #9aa0a6; margin-top: 8px;">Conecta tu World ID para continuar</p>
+    <p style="color: #9aa0a6; margin-top: 8px;">Conecta tu World App para continuar</p>
     <button class="btn-worldcoin" id="login-btn">Conectar con World App</button>
-    <div id="status">Esperando...</div>
+    <div id="status">Cargando...</div>
   </div>
 
-  <script>
+  <script type="module">
+    import { MiniKit } from "https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@1/+esm";
+
     const statusEl = document.getElementById("status");
     const loginBtn = document.getElementById("login-btn");
 
@@ -66,41 +66,35 @@
       console.log(msg);
     }
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      setStatus("Página cargada. Verificando MiniKit...");
+    // Inicialización
+    try {
+      const result = MiniKit.install();
+      setStatus("MiniKit instalado: " + JSON.stringify(result));
 
-      if (!window.MiniKit) {
-        setStatus("Error: window.MiniKit no existe. El SDK no se cargó o no estás dentro de World App.");
-        return;
+      if (!MiniKit.isInstalled()) {
+        setStatus("MiniKit no está disponible. Abre esta página dentro de World App, no en un navegador normal.");
+      } else {
+        setStatus("MiniKit detectado correctamente dentro de World App.");
       }
-
-      try {
-        window.MiniKit.init({
-          rpId: "TU_RP_ID_CORRECTO"
-        });
-        setStatus("MiniKit inicializado correctamente.");
-      } catch (err) {
-        setStatus("Error al inicializar MiniKit: " + (err.message || JSON.stringify(err)));
-      }
-    });
+    } catch (err) {
+      setStatus("Error al instalar MiniKit: " + (err.message || String(err)));
+    }
 
     loginBtn.addEventListener("click", async () => {
-      if (!window.MiniKit) {
-        setStatus("MiniKit no está disponible.");
-        return;
-      }
-
       try {
-        setStatus("Intentando login...");
+        if (!MiniKit.isInstalled()) {
+          setStatus("No estás dentro de World App o MiniKit no inicializó.");
+          return;
+        }
 
-        const response = await window.MiniKit.login({
-          app_id: "TU_APP_ID_CORRECTO",
-          nonce: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)
-        });
+        const nonce = crypto.randomUUID().replace(/-/g, "");
+        setStatus("Iniciando walletAuth...");
 
-        setStatus("Respuesta:\n" + JSON.stringify(response, null, 2));
-      } catch (error) {
-        setStatus("Error al conectar: " + (error.message || JSON.stringify(error)));
+        const result = await MiniKit.walletAuth({ nonce });
+
+        setStatus("Respuesta:\n" + JSON.stringify(result, null, 2));
+      } catch (err) {
+        setStatus("Error en walletAuth: " + (err.message || String(err)));
       }
     });
   </script>

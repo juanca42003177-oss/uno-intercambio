@@ -6,44 +6,94 @@
   <title>Uno Intercambio</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;font-family:sans-serif}
-    body{background:#0b0e11;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
-    .container{text-align:center;max-width:400px;width:100%;background:#161a1e;padding:30px;border-radius:16px}
-    .btn{background:#fff;color:#000;border:none;padding:14px 24px;border-radius:50px;font-weight:600;width:100%;margin-bottom:12px;cursor:pointer}
-    .btn-pay{background:#10b981;color:#fff;display:none}
-    #status{margin-top:16px;font-size:11px;background:#23282d;padding:12px;border-radius:8px;text-align:left;word-break:break-all;white-space:pre-wrap}
+    body{background:#0b0e11;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+    .container{width:100%;max-width:380px;background:#161a1e;padding:28px;border-radius:16px;text-align:center}
+    h1{font-size:22px;margin-bottom:6px}
+    p{color:#9aa0a6;font-size:14px;margin-bottom:20px}
+    .btn{background:#fff;color:#000;border:none;padding:14px;border-radius:50px;font-weight:700;width:100%;cursor:pointer}
+    .btn-pay{background:#10b981;color:#fff;display:none;margin-top:12px}
+    #status{margin-top:14px;font-size:11px;background:#23282d;padding:10px;border-radius:8px;word-break:break-all;white-space:pre-wrap;text-align:left;min-height:40px}
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Uno Intercambio</h1>
-    <p id="sub-title">Conecta tu World App</p>
-    <button class="btn" id="login-btn">Conectar con World App</button>
-    <button class="btn btn-pay" id="pay-btn">Pagar 1 WLD</button>
-    <div id="status">Iniciando...</div>
+    <p id="sub">Conecta tu World App</p>
+    <button class="btn" id="login">Conectar con World App</button>
+    <button class="btn btn-pay" id="pay">Pagar 1 WLD</button>
+    <div id="status">Iniciando MiniKit...</div>
   </div>
-<script type="module">
-  import { MiniKit } from "https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@0.7.6/+esm";
+
+<script>
   const APP_ID = "app_d0a270229b8199adb79b64d5c7aa7c0f";
-  const MI_WALLET = "0x49bcFe3c2ba24f90d2E07917fA4504793f5C9B22";
-  const s = document.getElementById("status");
-  const log = m => s.textContent = m;
-  MiniKit.install(APP_ID);
-  log("MiniKit: " + MiniKit.isInstalled() + "\nApp: " + APP_ID + "\n\nSi dice false, es normal en Chrome. Abre en World App y dira true.");
-  document.getElementById("login-btn").onclick = async () => {
+  const WALLET = "0x49bcFe3c2ba24f90d2E07917fA4504793f5C9B22";
+  const statusEl = document.getElementById('status');
+  const log = m => statusEl.textContent = m;
+
+  function init() {
+    // World App inyecta window.MiniKit o window.WorldApp
+    const MiniKit = window.MiniKit || window.WorldApp?.MiniKit;
+    
+    if (!window.MiniKit && !window.WorldApp) {
+      log("Esperando World App... Si ves esto en Chrome es normal.\nEn World App debe cambiar a 'Listo'.");
+      setTimeout(init, 500);
+      return;
+    }
+
+    const kit = window.MiniKit;
     try {
-      log("Pidiendo firma...");
-      const {finalPayload} = await MiniKit.commandsAsync.walletAuth({ nonce: crypto.randomUUID().replace(/-/g,""), requestId: "uno_"+Date.now(), statement: "Login Uno Intercambio" });
-      log(JSON.stringify(finalPayload,null,2));
-      if(finalPayload.status==="success"){document.getElementById("login-btn").style.display="none";document.getElementById("pay-btn").style.display="block";}
-    } catch(e){log("Error: "+e.message)}
-  };
-  document.getElementById("pay-btn").onclick = async () => {
-    try {
-      log("Abriendo pago...");
-      const {finalPayload} = await MiniKit.commandsAsync.pay({ reference: "uno_"+Date.now(), to: MI_WALLET, tokens:[{symbol:"WLD",token_amount:"1.0"}], description:"Uno 1 WLD" });
-      log(JSON.stringify(finalPayload,null,2));
-    } catch(e){log("Error pago: "+e.message)}
-  };
+      kit.install(APP_ID);
+      log("✅ MiniKit Listo!\nInstalado: " + kit.isInstalled() + "\nApp: " + APP_ID + "\n\nAhora dale a Conectar.");
+    } catch(e) {
+      log("Instalado sin App ID (modo dev):\n" + e.message);
+      try { kit.install(); log("✅ MiniKit Listo en modo dev!"); } catch(e2){}
+    }
+
+    document.getElementById('login').onclick = async () => {
+      try {
+        log("Pidiendo permiso...");
+        const { finalPayload } = await kit.commandsAsync.walletAuth({
+          nonce: Math.random().toString(36).substring(2),
+          statement: "Login Uno Intercambio"
+        });
+        log("Respuesta:\n" + JSON.stringify(finalPayload, null, 2));
+        if (finalPayload.status === "success") {
+          document.getElementById('login').style.display = "none";
+          document.getElementById('pay').style.display = "block";
+          document.getElementById('sub').textContent = "¡Conectado!";
+        }
+      } catch (err) { log("Error login: " + err.message); }
+    };
+
+    document.getElementById('pay').onclick = async () => {
+      try {
+        log("Abriendo pago...");
+        const { finalPayload } = await kit.commandsAsync.pay({
+          reference: "uno_" + Date.now(),
+          to: WALLET,
+          tokens: [{ symbol: "WLD", token_amount: "1.0" }],
+          description: "Uno Intercambio"
+        });
+        log("Pago:\n" + JSON.stringify(finalPayload, null, 2));
+      } catch (err) { log("Error pago: " + err.message); }
+    };
+  }
+
+  init();
+
+  // Fallback: si no hay MiniKit inyectado, intenta cargar el CDN
+  setTimeout(async () => {
+    if (!window.MiniKit) {
+      log("Intentando cargar SDK externo...");
+      try {
+        const mod = await import("https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@0.7.6/+esm");
+        window.MiniKit = mod.MiniKit;
+        init();
+      } catch(e) {
+        log("❌ No se pudo cargar CDN. Abre esta pagina DENTRO de World App, no en Chrome.");
+      }
+    }
+  }, 2000);
 </script>
 </body>
 </html>

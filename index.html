@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Uno Intercambio</title>
   <!-- Cargamos la librería oficial de Worldcoin de forma clásica -->
-  <script src="https://esm.sh"></script>
+  <script src="https://jsdelivr.net"></script>
   <style>
     body {
       background: #0b0e11;
@@ -75,70 +75,58 @@
   </div>
 
   <script>
-    const btnConnect = document.getElementById("btn-connect");
-    const statusText = document.getElementById("status-text");
+// 1. Inicialización automática al cargar el documento
+document.addEventListener("DOMContentLoaded", () => {
+    if (typeof MiniKit !== 'undefined') {
+        MiniKit.install();
+        console.log("MiniKit inicializado.");
+    }
+});
 
-    // Lógica principal al presionar el botón
+// 2. Vinculación de elementos del DOM
+// Buscamos el botón dentro de tu div id="panel-intercambio"
+const btnConnect = document.getElementById("panel-intercambio")?.querySelector("button") || document.getElementById("btnConnect");
+// Asegúrate de que el texto de error/estado tenga id="statusText" en tu HTML o cámbialo por el ID real
+const statusText = document.getElementById("statusText") || document.getElementById("panel-intercambio")?.querySelector("p");
+
+if (btnConnect) {
     btnConnect.addEventListener("click", async () => {
-      btnConnect.disabled = true;
-      statusText.innerText = "Solicitando firma en World App...";
+        btnConnect.disabled = true;
+        if (statusText) statusText.innerText = "Solicitando autorización...";
 
-      try {
-        // Inicializamos la librería justo antes de llamar a la billetera
-        if (typeof MiniKit !== 'undefined') {
-          MiniKit.install();
-        } else if (window.MiniKit) {
-          window.MiniKit.install();
+        // 3. Obtener el SDK global inyectado
+        const sdk = window.MiniKit;
+
+        if (!sdk || !sdk.isInstalled()) {
+            if (statusText) statusText.innerText = "Error: No se detectó el entorno de World App.";
+            btnConnect.disabled = false;
+            return;
         }
 
-        // Buscamos el objeto global inyectado por World App
-        const sdk = window.MiniKit || (typeof MiniKit !== 'undefined' ? MiniKit : null);
+        try {
+            // Generación de nonce seguro para mitigar ataques de replay
+            const generadoNonce = btoa(Math.random().toString(36).substring(2));
 
-        if (!sdk) {
-          statusText.innerText = "Error: No se detectó el entorno de World App.";
-          btnConnect.disabled = false;
-          return;
+            // 4. Ejecución del comando de autenticación de billetera oficial
+            const resSign = await sdk.commands.walletAuth({
+                nonce: generadoNonce,
+                requestId: "uno-intercambio-login" // Puedes cambiarlo por tu ID de proyecto
+            });
+
+            if (resSign && resSign.status === "success") {
+                if (statusText) statusText.innerText = "¡Conexión exitosa!";
+                console.log("Datos de la Wallet:", resSign);
+                // Aquí guardas la sesión o rediriges al menú del intercambio
+            } else {
+                if (statusText) statusText.innerText = "Conexión rechazada por el usuario.";
+                btnConnect.disabled = false;
+            }
+
+        } catch (error) {
+            console.error("Error en la conexión:", error);
+            if (statusText) statusText.innerText = "Ocurrió un error al conectar la Wallet.";
+            btnConnect.disabled = false;
         }
-
-        // Ejecutar comando para pedir autenticación y firma criptográfica
-        const resSign = await sdk.commands.walletAuth({
-          nonce: Math.random().toString(36).substring(2),
-          requestId: "login"
-        });
-
-        if (resSign && resSign.address) {
-          statusText.innerText = "Verificando credenciales en el servidor...";
-
-          // Enviamos los datos limpios al endpoint de Vercel
-          const res = await fetch("/api/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              address: resSign.address,
-              message: resSign.message,
-              signature: resSign.signature
-            })
-          });
-
-          const data = await res.json();
-
-          if (data.ok) {
-            statusText.innerText = "¡Conexión exitosa!";
-            // Cambio visual de pantallas
-            document.getElementById("login-screen").style.display = "none";
-            document.getElementById("panel-intercambio").style.display = "block";
-          } else {
-            statusText.innerText = "La firma no pudo ser validada por el servidor.";
-          }
-        } else {
-          statusText.innerText = "La autenticación fue cancelada o no devolvió datos.";
-        }
-      } catch (e) {
-        statusText.innerText = "Error de conexión: " + (e.message || String(e));
-      } finally {
-        btnConnect.disabled = false;
-      }
     });
-  </script>
-</body>
-</html>
+}
+</script>

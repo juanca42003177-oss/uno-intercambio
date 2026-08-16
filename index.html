@@ -57,7 +57,7 @@
     .btn-pay {
       background-color: #10b981;
       color: white;
-      display: none; /* Oculto hasta que se conecte la wallet */
+      display: none;
     }
     .btn-pay:hover {
       background-color: #059669;
@@ -81,11 +81,10 @@
     <h1>Uno Intercambio</h1>
     <p id="sub-title">Conecta tu World App para continuar</p>
     
-    <!-- Botones de Interfaz -->
     <button class="btn" id="login-btn">Conectar con World App</button>
     <button class="btn btn-pay" id="pay-btn">Simular Intercambio (Pago)</button>
     
-    <div id="status">Iniciando MiniKit...</div>
+    <div id="status">Iniciando aplicación...</div>
   </div>
 
   <script type="module">
@@ -97,83 +96,87 @@
     const subTitle = document.getElementById("sub-title");
 
     function setStatus(msg) {
-      statusEl.textContent = msg;
+      if (statusEl) {
+        statusEl.textContent = msg;
+      }
       console.log(msg);
     }
 
-    // 1. Inicialización Automática Obligatoria
+    // Captura global de errores para evitar pantallas blancas sin información
+    window.onerror = function(message, source, lineno, colno, error) {
+      setStatus("💥 Error Global: " + message + " en línea " + lineno);
+      return false;
+    };
+
+    // 1. Inicialización de MiniKit de forma segura
     try {
       MiniKit.install();
       if (!MiniKit.isInstalled()) {
-        setStatus("⚠️ MiniKit no disponible. Abre este enlace dentro de la World App.");
+        setStatus("⚠️ MiniKit no detectado. Abre este enlace dentro de la World App.");
       } else {
-        setStatus("✅ MiniKit listo dentro de World App.");
+        setStatus("✅ MiniKit listo e instalado.");
       }
     } catch (err) {
-      setStatus("❌ Error en instalación: " + err.message);
+      setStatus("❌ Error inicializando MiniKit: " + err.message);
     }
 
-    // 2. Autenticación de Billetera (Bajo comando MiniKit.commands.walletAuth)
-    loginBtn.addEventListener("click", async () => {
-      if (!MiniKit.isInstalled()) {
-        setStatus("⚠️ No estás dentro de World App o MiniKit no inicializó.");
-        return;
-      }
-
-      try {
-        // Generar nonce corto compatible con especificaciones SIWE
-        const nonce = crypto.randomUUID().replace(/-/g, "").substring(0, 16);
-        setStatus("⏳ Esperando firma en World App...");
-
-        // Llamada corregida utilizando el contenedor oficial de comandos
-        const response = await MiniKit.commands.walletAuth({ 
-          nonce: nonce,
-          requestId: "login_uno_intercambio",
-          statement: "Iniciar sesión en Uno Intercambio", // Requerido por Worldcoin
-          expirationTime: new Date(Date.now() + 1000 * 60 * 60 * 24), // Expira en 24 horas
-          notBefore: new Date()
-        });
-
-        // Evaluación de respuesta exitosa
-        if (response && response.finalPayload) {
-          setStatus("✅ Autenticado con éxito:\n" + JSON.stringify(response.finalPayload, null, 2));
-          
-          // Ajustes dinámicos de UI
-          loginBtn.style.display = "none";
-          payBtn.style.display = "block";
-          subTitle.textContent = "¡Billetera conectada con éxito!";
-        } else {
-          setStatus("⚠️ Autenticación rechazada o cancelada por el usuario.");
+    // 2. Autenticación simplificada y directa
+    if (loginBtn) {
+      loginBtn.addEventListener("click", async () => {
+        if (!MiniKit.isInstalled()) {
+          setStatus("⚠️ MiniKit no está disponible.");
+          return;
         }
-      } catch (err) {
-        setStatus("❌ Error en walletAuth: " + (err.message || String(err)));
-      }
-    });
 
-    // 3. Pasarela de Pago Integrada (Bajo comando MiniKit.commands.pay)
-    payBtn.addEventListener("click", async () => {
-      if (!MiniKit.isInstalled()) return;
+        try {
+          setStatus("⏳ Abriendo walletAuth...");
+          
+          // Estructura limpia con los parámetros estrictamente necesarios
+          const response = await MiniKit.commands.walletAuth({ 
+            nonce: "uno_intercambio_123", // Alfanumérico simple
+            requestId: "login_uno",
+            statement: "Iniciar sesion en Uno Intercambio"
+          });
 
-      try {
-        setStatus("⏳ Procesando solicitud de pago...");
-        
-        // Llamada corregida utilizando .commands para transacciones
-        const payResult = await MiniKit.commands.pay({
-          reference: "intercambio_ref_" + Date.now(),
-          to: "0x0000000000000000000000000000000000000000", // IMPORTANTE: Cambia por tu wallet de destino
-          tokens: [
-            {
-              symbol: "WLD", 
-              amount: "1.0" // Cantidad a cobrar en formato texto
-            }
-          ]
-        });
+          if (response && response.finalPayload) {
+            setStatus("✅ Éxito:\n" + JSON.stringify(response.finalPayload, null, 2));
+            loginBtn.style.display = "none";
+            if (payBtn) payBtn.style.display = "block";
+            if (subTitle) subTitle.textContent = "¡Billetera conectada!";
+          } else {
+            setStatus("⚠️ Respuesta sin payload válido o acción cancelada.");
+          }
+        } catch (err) {
+          setStatus("❌ Error en walletAuth: " + (err.message || String(err)));
+        }
+      });
+    }
 
-        setStatus("Resultado de la transacción:\n" + JSON.stringify(payResult, null, 2));
-      } catch (err) {
-        setStatus("❌ Error en transacción: " + err.message);
-      }
-    });
+    // 3. Estructura de Pago simplificada
+    if (payBtn) {
+      payBtn.addEventListener("click", async () => {
+        if (!MiniKit.isInstalled()) return;
+
+        try {
+          setStatus("⏳ Abriendo pasarela de pago...");
+          
+          const payResult = await MiniKit.commands.pay({
+            reference: "ref_" + Math.floor(Math.random() * 100000),
+            to: "0x0000000000000000000000000000000000000000", // Reemplazar por tu dirección real
+            tokens: [
+              {
+                symbol: "WLD", 
+                amount: "1.0" 
+              }
+            ]
+          });
+
+          setStatus("Resultado del pago:\n" + JSON.stringify(payResult, null, 2));
+        } catch (err) {
+          setStatus("❌ Error en pago: " + err.message);
+        }
+      });
+    }
   </script>
 </body>
 </html>

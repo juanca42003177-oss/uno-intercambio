@@ -1,97 +1,108 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uno Intercambio</title>
-    
-    <!-- SDK Oficial de Worldcoin MiniKit -->
-    <script src="https://jsdelivr.net"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Uno Intercambio</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-        body {
-            background-color: #0b0e11;
-            color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 24px;
-        }
-        .container {
-            text-align: center;
-            max-width: 400px;
-            width: 100%;
-        }
-        .btn-worldcoin {
-            background-color: #ffffff;
-            color: #000000;
-            border: none;
-            padding: 14px 24px;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 20px;
-            width: 100%;
-            transition: background 0.2s;
-        }
-        .btn-worldcoin:active {
-            background-color: #e0e0e0;
-        }
-    </style>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background-color: #0b0e11;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .container {
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+    .btn-worldcoin {
+      background-color: #ffffff;
+      color: #000000;
+      border: none;
+      padding: 14px 24px;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 20px;
+      width: 100%;
+    }
+    #status {
+      margin-top: 16px;
+      font-size: 14px;
+      color: #9aa0a6;
+      white-space: pre-wrap;
+      text-align: left;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>Uno Intercambio</h1>
+    <p style="color: #9aa0a6; margin-top: 8px;">Conecta tu World ID para continuar</p>
+    <button class="btn-worldcoin" id="login-btn">Conectar con World App</button>
+    <div id="status">Esperando...</div>
+  </div>
 
-    <div class="container">
-        <h1>Uno Intercambio</h1>
-        <p style="color: #9aa0a6; margin-top: 8px;">Conecta tu World ID para continuar</p>
-        
-        <!-- Botón para iniciar la autenticación -->
-        <button class="btn-worldcoin" id="login-btn">Conectar con World App</button>
-    </div>
+  <script>
+    const statusEl = document.getElementById("status");
+    const loginBtn = document.getElementById("login-btn");
 
-    <script>
-        // Inicializar el SDK con tus datos cuando la página cargue en World App
-        document.addEventListener("DOMContentLoaded", () => {
-            if (window.MiniKit) {
-                // Se inicializa asignando tu RP ID asignado de Worldcoin
-                window.MiniKit.init({
-                    rpId: "rp_5cf05109127fa1fa"
-                });
-                console.log("MiniKit listo para usar");
-            } else {
-                console.error("El SDK de Worldcoin no se cargó correctamente");
-            }
+    function setStatus(msg) {
+      statusEl.textContent = msg;
+      console.log(msg);
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      setStatus("Página cargada. Verificando MiniKit...");
+
+      if (!window.MiniKit) {
+        setStatus("Error: window.MiniKit no existe. El SDK no se cargó o no estás dentro de World App.");
+        return;
+      }
+
+      try {
+        window.MiniKit.init({
+          rpId: "TU_RP_ID_CORRECTO"
+        });
+        setStatus("MiniKit inicializado correctamente.");
+      } catch (err) {
+        setStatus("Error al inicializar MiniKit: " + (err.message || JSON.stringify(err)));
+      }
+    });
+
+    loginBtn.addEventListener("click", async () => {
+      if (!window.MiniKit) {
+        setStatus("MiniKit no está disponible.");
+        return;
+      }
+
+      try {
+        setStatus("Intentando login...");
+
+        const response = await window.MiniKit.login({
+          app_id: "TU_APP_ID_CORRECTO",
+          nonce: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)
         });
 
-        // Configurar la acción del botón
-        document.getElementById("login-btn").addEventListener("click", async () => {
-            if (!window.MiniKit) return;
-
-            try {
-                // Llamada al login usando tu App ID de la captura de pantalla
-                const response = await window.MiniKit.login({
-                    app_id: "app_d0a270229b8199adb79b64d5c7aa7c0f",
-                    nonce: Math.random().toString(36).substring(2),
-                });
-
-                if (response.command_status === "success") {
-                    alert("¡Conexión exitosa con World ID!");
-                    console.log("Datos recibidos:", response);
-                }
-            } catch (error) {
-                console.error("Error al conectar:", error);
-            }
-        });
-    </script>
-
-    </body>
-    </html>
+        setStatus("Respuesta:\n" + JSON.stringify(response, null, 2));
+      } catch (error) {
+        setStatus("Error al conectar: " + (error.message || JSON.stringify(error)));
+      }
+    });
+  </script>
+</body>
+</html>

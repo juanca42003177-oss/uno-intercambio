@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -23,118 +22,108 @@
       text-align: center;
     }
     button {
-      width: 100%;
-      padding: 14px 20px;
-      border: 0;
-      border-radius: 999px;
       background: white;
       color: black;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
       font-weight: bold;
-      margin-top: 18px;
+      border-radius: 8px;
       cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
     }
-    #status {
-      margin-top: 18px;
-      color: #b0b7c3;
-      text-align: left;
-      white-space: pre-wrap;
-      word-break: break-word;
+    button:disabled {
+      background: #555;
+      color: #aaa;
+    }
+    .status {
+      margin-top: 15px;
       font-size: 14px;
+      color: #aaa;
     }
-    .ok {
-      margin-top: 16px;
-      color: #4ade80;
-      font-weight: bold;
+    #panel-intercambio {
+      display: none;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+
+  <!-- Pantalla de Conexión -->
+  <div class="container" id="login-screen">
     <h1>Uno Intercambio</h1>
     <p>Conecta tu World App para continuar</p>
-    <button id="test-btn">Conectar Wallet</button>
-    <div class="ok" id="ok"></div>
-    <div id="status">Listo para conectar.</div>
+    <button id="btn-connect">Conectar Wallet</button>
+    <div class="status" id="status-text">Cargando MiniKit...</div>
+  </div>
+
+  <!-- Pantalla del Intercambio (Se activa al loguearse) -->
+  <div id="panel-intercambio">
+    <h1>¡Bienvenido a Uno Intercambio!</h1>
+    <p>Tu sesión ha sido iniciada correctamente con World ID.</p>
+    <!-- Aquí puedes meter todo el diseño de tu pasarela o juego de intercambio -->
   </div>
 
   <script type="module">
-    import { MiniKit } from "https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js/+esm";
+    // Importamos MiniKit de forma segura
+    import { MiniKit } from 'https://esm.sh';
 
-    const statusEl = document.getElementById("status");
-    const okEl = document.getElementById("ok");
-    const btn = document.getElementById("test-btn");
+    const btnConnect = document.getElementById("btn-connect");
+    const statusText = document.getElementById("status-text");
 
-    function setStatus(msg) {
-      statusEl.textContent = msg;
-      console.log(msg);
-    }
-
-    function setOk(msg) {
-      okEl.textContent = msg;
-      console.log(msg);
-    }
-
+    // Inicializar MiniKit
     try {
       MiniKit.install();
-
-      if (!MiniKit.isInstalled()) {
-        setStatus("Abre esta mini app dentro de World App.");
-      } else {
-        setStatus("MiniKit detectado correctamente.");
-      }
+      statusText.innerText = "MiniKit detectado correctamente.";
     } catch (e) {
-      setStatus("Error al cargar MiniKit: " + (e.message || String(e)));
+      statusText.innerText = "Error al iniciar MiniKit.";
     }
 
-    btn.addEventListener("click", async () => {
+    btnConnect.addEventListener("click", async () => {
+      btnConnect.disabled = true;
+      statusText.innerText = "Solicitando firma en World App...";
+
       try {
-        if (!MiniKit.isInstalled()) {
-          setStatus("World App no detectada.");
-          return;
-        }
+        // Pedir la firma criptográfica a la World App
+        const resSign = await MiniKit.commands.walletAuth({
+          nonce: Math.random().toString(36).substring(2),
+          requestId: "login"
+        });
 
-        btn.disabled = true;
-        setOk("");
-        setStatus("Solicitando firma...");
+        if (resSign && resSign.address) {
+          statusText.innerText = "Verificando credenciales en el servidor...";
 
-        const nonce = crypto.randomUUID().replace(/-/g, "");
-        const result = await MiniKit.walletAuth({ nonce });
-
-        if (result?.executedWith === "minikit" && result?.data) {
-          const { address, message, signature } = result.data;
-
-          setOk("✅ Wallet conectada correctamente");
-          setStatus(
-            "Dirección:\n" + address +
-            "\n\nMensaje firmado:\n" + message +
-            "\n\nFirma:\n" + signature
-          );
-
-          // AQUÍ VA TU SIGUIENTE PASO:
-          // enviar address, message y signature a tu backend
-          // Ejemplo:
-          
+          // Mandar los datos al Backend (verify.js)
           const res = await fetch("/api/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ address, message, signature, nonce })
+            body: JSON.stringify({
+              address: resSign.address,
+              message: resSign.message,
+              signature: resSign.signature
+            })
           });
 
           const data = await res.json();
 
           if (data.ok) {
-            window.location.href = "/dashboard.html";
+            statusText.innerText = "¡Conexión exitosa!";
+            // Ocultamos la pantalla de login y mostramos el intercambio
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("panel-intercambio").style.display = "block";
           } else {
-            setStatus("La firma no pudo verificarse en el servidor.");
+            statusText.innerText = "La firma no pudo verificarse en el servidor.";
           }
-          
         } else {
-          setStatus("No se recibió una respuesta válida de walletAuth.");
+          statusText.innerText = "No se recibió una respuesta válida de la wallet.";
         }
       } catch (e) {
-        setStatus("Error: " + (e.message || String(e)));
+        statusText.innerText = "Error: " + (e.message || String(e));
       } finally {
-        btn.disabled = false;
+        btnConnect.disabled = false;
       }
     });
   </script>

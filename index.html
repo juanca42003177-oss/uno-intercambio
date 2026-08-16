@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Uno Intercambio</title>
+  <!-- Cargamos la librería oficial de Worldcoin de forma clásica -->
+  <script src="https://esm.sh"></script>
   <style>
     body {
       background: #0b0e11;
@@ -25,17 +27,22 @@
       background: white;
       color: black;
       border: none;
-      padding: 12px 24px;
+      padding: 16px 24px;
       font-size: 16px;
       font-weight: bold;
       border-radius: 8px;
       cursor: pointer;
       width: 100%;
       margin-top: 20px;
+      transition: background 0.2s;
+    }
+    button:active {
+      background: #cccccc;
     }
     button:disabled {
       background: #555;
       color: #aaa;
+      cursor: not-allowed;
     }
     .status {
       margin-top: 15px;
@@ -52,43 +59,49 @@
 </head>
 <body>
 
-  <!-- Pantalla de Conexión -->
+  <!-- Pantalla de Inicio de Sesión -->
   <div class="container" id="login-screen">
     <h1>Uno Intercambio</h1>
     <p>Conecta tu World App para continuar</p>
     <button id="btn-connect">Conectar Wallet</button>
-    <div class="status" id="status-text">Cargando MiniKit...</div>
+    <div class="status" id="status-text">Listo para conectar.</div>
   </div>
 
-  <!-- Pantalla del Intercambio (Se activa al loguearse) -->
+  <!-- Pantalla del Intercambio (Se activa al iniciar sesión con éxito) -->
   <div id="panel-intercambio">
     <h1>¡Bienvenido a Uno Intercambio!</h1>
-    <p>Tu sesión ha sido iniciada correctamente con World ID.</p>
-    <!-- Aquí puedes meter todo el diseño de tu pasarela o juego de intercambio -->
+    <p>Tu sesión ha sido iniciada correctamente con tu World ID.</p>
+    <!-- Aquí irá el diseño o menú de tu pasarela de intercambio -->
   </div>
 
-  <script type="module">
-    // Importamos MiniKit de forma segura
-    import { MiniKit } from 'https://esm.sh';
-
+  <script>
     const btnConnect = document.getElementById("btn-connect");
     const statusText = document.getElementById("status-text");
 
-    // Inicializar MiniKit
-    try {
-      MiniKit.install();
-      statusText.innerText = "MiniKit detectado correctamente.";
-    } catch (e) {
-      statusText.innerText = "Error al iniciar MiniKit.";
-    }
-
+    // Lógica principal al presionar el botón
     btnConnect.addEventListener("click", async () => {
       btnConnect.disabled = true;
       statusText.innerText = "Solicitando firma en World App...";
 
       try {
-        // Pedir la firma criptográfica a la World App
-        const resSign = await MiniKit.commands.walletAuth({
+        // Inicializamos la librería justo antes de llamar a la billetera
+        if (typeof MiniKit !== 'undefined') {
+          MiniKit.install();
+        } else if (window.MiniKit) {
+          window.MiniKit.install();
+        }
+
+        // Buscamos el objeto global inyectado por World App
+        const sdk = window.MiniKit || (typeof MiniKit !== 'undefined' ? MiniKit : null);
+
+        if (!sdk) {
+          statusText.innerText = "Error: No se detectó el entorno de World App.";
+          btnConnect.disabled = false;
+          return;
+        }
+
+        // Ejecutar comando para pedir autenticación y firma criptográfica
+        const resSign = await sdk.commands.walletAuth({
           nonce: Math.random().toString(36).substring(2),
           requestId: "login"
         });
@@ -96,7 +109,7 @@
         if (resSign && resSign.address) {
           statusText.innerText = "Verificando credenciales en el servidor...";
 
-          // Mandar los datos al Backend (verify.js)
+          // Enviamos los datos limpios al endpoint de Vercel
           const res = await fetch("/api/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -111,50 +124,21 @@
 
           if (data.ok) {
             statusText.innerText = "¡Conexión exitosa!";
-            // Ocultamos la pantalla de login y mostramos el intercambio
+            // Cambio visual de pantallas
             document.getElementById("login-screen").style.display = "none";
             document.getElementById("panel-intercambio").style.display = "block";
           } else {
-            statusText.innerText = "La firma no pudo verificarse en el servidor.";
+            statusText.innerText = "La firma no pudo ser validada por el servidor.";
           }
         } else {
-          statusText.innerText = "No se recibió una respuesta válida de la wallet.";
+          statusText.innerText = "La autenticación fue cancelada o no devolvió datos.";
         }
       } catch (e) {
-        statusText.innerText = "Error: " + (e.message || String(e));
+        statusText.innerText = "Error de conexión: " + (e.message || String(e));
       } finally {
         btnConnect.disabled = false;
       }
     });
-    <script>
-    // Inicialización segura usando un intervalo por si MiniKit tarda en inyectarse
-    const btnConnect = document.getElementById("btn-connect");
-    const statusText = document.getElementById("status-text");
-
-    function verificarMiniKit() {
-      if (window.MiniKit || typeof MiniKit !== 'undefined') {
-        try {
-          MiniKit.install();
-          statusText.innerText = "MiniKit detectado correctamente.";
-          clearInterval(checkInterval);
-        } catch (e) {
-          statusText.innerText = "Error al instalar MiniKit.";
-        }
-      }
-    }
-
-    // Comprueba cada 200 milisegundos si ya existe MiniKit
-    const checkInterval = setInterval(verificarMiniKit, 200);
-
-    // Si pasan 4 segundos y no detecta, fuerza el estado para no congelar la pantalla
-    setTimeout(() => {
-      clearInterval(checkInterval);
-      if (statusText.innerText === "Cargando MiniKit...") {
-        statusText.innerText = "MiniKit inicializado (Modo desarrollo).";
-      }
-    }, 4000);
   </script>
 </body>
 </html>
-
-

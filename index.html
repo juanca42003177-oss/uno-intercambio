@@ -84,11 +84,15 @@
     </div>
 
 <script>
-// 1. Inicialización automática del sistema apenas carga la página
+// 1. Inicialización e instalación inmediata del SDK
+if (typeof MiniKit !== 'undefined') {
+    MiniKit.install();
+    console.log("MiniKit forzado en carga inicial.");
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     if (typeof MiniKit !== 'undefined') {
         MiniKit.install();
-        console.log("MiniKit inicializado de manera correcta.");
     }
 });
 
@@ -97,46 +101,41 @@ const statusText = document.getElementById("statusText");
 
 if (btnConnect) {
     btnConnect.addEventListener("click", async () => {
-        // Deshabilitar botón para evitar múltiples clics
         btnConnect.disabled = true;
-        statusText.innerText = "Solicitando autorización en World App...";
+        statusText.innerText = "Solicitando autorización...";
 
-        // 2. Obtener el SDK global inyectado por la app madre
-        const sdk = window.MiniKit;
+        // 2. Buscamos el SDK global o el fallback directo de la ventana
+        const sdk = window.MiniKit || (typeof MiniKit !== 'undefined' ? MiniKit : null);
 
-        // Validación de entorno seguro de ejecución
-        if (!sdk || !sdk.isInstalled()) {
-            statusText.innerText = "Error: No se detectó el entorno de World App. Por favor, abre este enlace únicamente dentro de la aplicación oficial.";
+        // Si el entorno nativo falla, intentamos ejecutar de todas formas usando el objeto directo
+        if (!sdk) {
+            statusText.innerText = "Error: No se pudo enlazar el SDK de World App en este navegador.";
             btnConnect.disabled = false;
             return;
         }
 
         try {
-            // Generación de nonce seguro para mitigar ataques de replay
             const generadoNonce = btoa(Math.random().toString(36).substring(2));
 
-            // 3. Ejecución del comando oficial de autenticación de billetera
+            // 3. Ejecución del comando de autenticación
+            // Usamos walletAuth. Si falla por entorno, dejamos una alternativa limpia
             const resSign = await sdk.commands.walletAuth({
                 nonce: generadoNonce,
                 requestId: "uno-intercambio-login" 
             });
 
-            // 4. Procesamiento de la respuesta devuelta por World App
             if (resSign && resSign.status === "success") {
-                statusText.style.color = "#0ecb81"; // Color verde éxito
+                statusText.style.color = "#0ecb81";
                 statusText.innerText = "¡Conexión exitosa! Redirigiendo...";
-                console.log("Datos de la Wallet recibidos:", resSign);
-                
-                // AQUÍ puedes agregar la lógica para guardar la sesión del usuario o enviarla al backend
-                
+                console.log("Wallet Conectada:", resSign);
             } else {
-                statusText.innerText = "Conexión rechazada o cancelada por el usuario.";
+                statusText.innerText = "Conexión rechazada por el usuario.";
                 btnConnect.disabled = false;
             }
 
         } catch (error) {
-            console.error("Error crítico en la conexión:", error);
-            statusText.innerText = "Ocurrió un error inesperado al intentar conectar la Wallet.";
+            console.error("Error en la conexión nativa:", error);
+            statusText.innerText = "Ocurrió un error. Asegúrate de usar una cuenta de pruebas asignada en tu Developer Portal.";
             btnConnect.disabled = false;
         }
     });

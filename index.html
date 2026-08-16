@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Uno Intercambio</title>
+    <!-- Cargamos la librería oficial del MiniKit de Worldcoin -->
+    <script src="https://unpkg.com"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -52,3 +54,136 @@
         .subtitle {
             color: #9ca3af;
             font-size: 15px;
+            margin-bottom: 32px;
+        }
+        .card {
+            background-color: #1e2329;
+            border: 1px solid #2b3139;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: left;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .card-title {
+            font-size: 14px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        .balance {
+            font-size: 32px;
+            font-weight: 700;
+            color: #fcd535;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .currency {
+            font-size: 16px;
+            color: #9ca3af;
+            font-weight: normal;
+        }
+        .btn-wallet {
+            background-color: #ffffff;
+            color: #000000;
+            border: none;
+            border-radius: 50px;
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(255,255,255,0.1);
+        }
+        .btn-wallet:active {
+            transform: scale(0.98);
+            background-color: #e5e7eb;
+        }
+        .footer-text {
+            color: #6b7280;
+            font-size: 12px;
+            margin-top: 16px;
+        }
+        .status-msg {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #fcd535;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="logo-area">
+            <div class="logo-circle">U</div>
+            <h1>Uno Intercambio</h1>
+            <p class="subtitle">Gestión de operaciones seguras</p>
+        </div>
+
+        <div class="card">
+            <p class="card-title">Balance de Operación</p>
+            <div class="balance">
+                130 <span class="currency">WLD</span>
+            </div>
+        </div>
+
+        <!-- Botón que ejecuta la transacción real -->
+        <button class="btn-wallet" id="payBtn">
+            Pagar 1 WLD con World App
+        </button>
+        
+        <div id="status" class="status-msg"></div>
+        
+        <p class="footer-text">Conexión encriptada mediante World ID</p>
+    </div>
+
+    <script>
+        // 1. Inicializamos el MiniKit con tu ID de aplicación de Worldcoin
+        window.MiniKit.init({
+            appId: 'app_d0a270229b8199adb79b64d5c7aa7c0f', 
+        });
+
+        // 2. Programamos la función de cobro al presionar el botón
+        document.getElementById('payBtn').addEventListener('click', async () => {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = "Procesando pago...";
+
+            try {
+                // Generamos la orden de cobro en criptomonedas (WLD)
+                const payload = {
+                    reference: "pago_uno_intercambio_" + Date.now(), 
+                    to: "0x49bcFe3c2ba24f90d2E07917fA4504793f5C9B22", 
+                    tokens: [
+                        {
+                            amount: "1.0", 
+                            token: "WLD"
+                        }
+                    ],
+                    description: "Intercambio de saldos en Uno Intercambio"
+                };
+
+                // Solicitamos el pago a la billetera móvil del usuario
+                const response = await window.MiniKit.exec('pay', payload);
+
+                if (response.status === 'success') {
+                    statusDiv.style.color = "#10b981"; 
+                    statusDiv.innerText = "¡Pago procesado con éxito en la Blockchain!";
+                    alert("Transacción completada correctamente.");
+                } else {
+                    statusDiv.style.color = "#ef4444"; 
+                    statusDiv.innerText = "Pago cancelado o fallido.";
+                }
+            } catch (error) {
+                console.error(error);
+                statusDiv.style.color = "#ef4444";
+                statusDiv.innerText = "Error de conexión con la wallet.";
+            }
+        });
+    </script>
+
+</body>
+</html>
+

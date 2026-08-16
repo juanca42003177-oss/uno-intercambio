@@ -21,60 +21,70 @@
     <p id="sub">Conecta tu World App</p>
     <button class="btn" id="login">Conectar con World App</button>
     <button class="btn btn-pay" id="pay">Pagar 1 WLD</button>
-    <div id="status">Iniciando MiniKit...</div>
+    <div id="status">Buscando World App...</div>
   </div>
 
-<script type="module">
-  import { MiniKit } from "https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@0.7.6/+esm";
-
+<script>
   const APP_ID = "app_d0a270229b8199adb79b64d5c7aa7c0f";
   const WALLET = "0x49bcFe3c2ba24f90d2E07917fA4504793f5C9B22";
   const statusEl = document.getElementById('status');
+  const subEl = document.getElementById('sub');
   const log = m => statusEl.textContent = m;
 
-  // Instalar
-  MiniKit.install(APP_ID);
-  log("✅ MiniKit Listo! Instalado: " + MiniKit.isInstalled() + "\nListo para conectar.");
+  function start() {
+    const kit = window.MiniKit;
+    if (!kit) {
+      log("Esperando World App... Si estás en Chrome es normal.\nAbre esto DENTRO de World App.");
+      setTimeout(start, 800);
+      return;
+    }
 
-  // Compatibilidad: funciona con commandsAsync y con commands
-  const getCmds = () => MiniKit.commandsAsync || MiniKit.commands;
+    try { kit.install(APP_ID); } catch(e){ try{ kit.install(); }catch{} }
 
-  document.getElementById('login').onclick = async () => {
-    try {
-      log("Pidiendo permiso...");
-      const cmds = getCmds();
-      const res = await cmds.walletAuth({
-        nonce: Math.random().toString(36).substring(2),
-        statement: "Login Uno Intercambio"
-      });
-      const finalPayload = res.finalPayload || res;
-      log("Respuesta:\n" + JSON.stringify(finalPayload, null, 2));
-      if (finalPayload.status === "success") {
-        document.getElementById('login').style.display = "none";
-        document.getElementById('pay').style.display = "block";
-        document.getElementById('sub').textContent = "¡Conectado!";
+    log("✅ Conectado a World App!\nInstalado: " + kit.isInstalled() + "\nDale a Conectar.");
+    subEl.textContent = "World App detectada";
+
+    const getCmds = () => kit.commandsAsync || kit.commands;
+
+    document.getElementById('login').onclick = async () => {
+      try {
+        log("Pidiendo permiso...");
+        const cmds = getCmds();
+        const r = await cmds.walletAuth({
+          nonce: Math.random().toString(36).substring(2),
+          statement: "Login Uno Intercambio"
+        });
+        const p = r.finalPayload || r;
+        log(JSON.stringify(p, null, 2));
+        if (p.status === "success") {
+          document.getElementById('login').style.display = "none";
+          document.getElementById('pay').style.display = "block";
+          subEl.textContent = "¡Conectado!";
+        }
+      } catch (err) {
+        log("Error login: " + err.message);
       }
-    } catch (err) {
-      log("Error login: " + err.message);
-    }
-  };
+    };
 
-  document.getElementById('pay').onclick = async () => {
-    try {
-      log("Abriendo pago...");
-      const cmds = getCmds();
-      const res = await cmds.pay({
-        reference: "uno_" + Date.now(),
-        to: WALLET,
-        tokens: [{ symbol: "WLD", token_amount: "1.0" }],
-        description: "Uno Intercambio 1 WLD"
-      });
-      const finalPayload = res.finalPayload || res;
-      log("Pago:\n" + JSON.stringify(finalPayload, null, 2));
-    } catch (err) {
-      log("Error pago: " + err.message);
-    }
-  };
+    document.getElementById('pay').onclick = async () => {
+      try {
+        log("Abriendo pago...");
+        const cmds = getCmds();
+        const r = await cmds.pay({
+          reference: "uno_" + Date.now(),
+          to: WALLET,
+          tokens: [{ symbol: "WLD", token_amount: "1.0" }],
+          description: "Pago Uno Intercambio"
+        });
+        const p = r.finalPayload || r;
+        log(JSON.stringify(p, null, 2));
+      } catch (err) {
+        log("Error pago: " + err.message);
+      }
+    };
+  }
+
+  start();
 </script>
 </body>
 </html>

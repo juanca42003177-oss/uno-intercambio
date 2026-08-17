@@ -1,90 +1,59 @@
 <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uno Intercambio P2P REAL</title><style>
-*{box-sizing:border-box}body{margin:0;background:#0a1e3c;color:#fff;font-family:system-ui;padding:12px;padding-bottom:90px}
-.badge{background:#f3ba2f;color:#000;padding:5px 12px;border-radius:8px;font-weight:900;font-size:12px;display:inline-block}
-.card{background:#132c54;border-radius:18px;padding:16px;margin-top:12px}
-.row{display:flex;justify-content:space-between;align-items:center;margin:6px 0}
-.btn{width:100%;padding:13px;border-radius:12px;border:0;font-weight:900;cursor:pointer}
-.btn-y{background:#f3ba2f;color:#000}.btn-w{background:#fff;color:#000;margin-top:8px}.btn-g{background:#00ff88;color:#000}
-input,select{width:100%;padding:11px;border-radius:10px;border:1px solid #2a4a7a;margin:6px 0;background:#0a1e3c;color:#fff}
-.small{font-size:11px;opacity:.7}.green{color:#00ff88}.price{font-size:18px;font-weight:900}
-.tab{display:flex;gap:8px;margin-top:12px}.tab div{flex:1;text-align:center;padding:10px;background:#0a1e3c;border-radius:10px;cursor:pointer}
-.tab .on{background:#f3ba2f;color:#000;font-weight:900}
-.order{border:1px solid #2a4a7a;border-radius:12px;padding:12px;margin-top:10px;background:#0e2447}
+<title>Uno - Swap Real</title><style>
+*{box-sizing:border-box}body{margin:0;background:#0a0e1a;color:#fff;font-family:system-ui;padding:12px}
+.top{display:flex;justify-content:space-between;align-items:center}
+.badge{background:#f3ba2f;color:#000;padding:6px 12px;border-radius:10px;font-weight:900;font-size:11px}
+.card{background:#1a2235;border:1px solid #2a3550;border-radius:20px;padding:16px;margin-top:12px}
+.token{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #2a3550}
+.token:last-child{border:0}
+.swapBox{background:#0f1525;border-radius:16px;padding:14px;margin:10px 0}
+input{width:100%;background:transparent;border:0;color:#fff;font-size:28px;font-weight:900;outline:none}
+select{background:#1a2235;color:#fff;border:1px solid #3a4a6a;border-radius:10px;padding:8px 12px;font-weight:700}
+.btn{width:100%;padding:16px;border-radius:14px;border:0;background:#f3ba2f;color:#000;font-weight:900;font-size:16px;margin-top:12px;cursor:pointer}
+.priceRow{font-size:11px;opacity:.6;margin-top:6px}
+.green{color:#00ff88}.big{font-size:32px;font-weight:900}
 </style></head><body>
-<div class="row"><span class="badge">◆ UNO P2P - REAL</span><span id="wMini" style="font-size:12px">0x0190...438c</span></div>
+<div class="top"><span class="badge">◆ UNO SWAP - REAL</span><span id="addrMini" style="font-size:11px;opacity:.7">0x0190...438c</span></div>
 
-<div class="card">
-<div class="row"><b>Wallet conectada</b><span class="green">● Activa</span></div>
-<div class="small" id="wFull" style="word-break:break-all"></div>
-<div class="row" style="margin-top:10px"><span>WLD Disponible (tu saldo real en World App)</span><input id="myWld" value="0" style="width:70px;text-align:right;margin:0"></div>
-<div class="small">Revisa tu saldo en World App > Billetera y escríbelo aquí</div>
+<div class="card"><div style="display:flex;justify-content:space-between"><b>Tu Portafolio - Saldo Real</b><span id="refresh" onclick="loadAll()" style="cursor:pointer">🔄</span></div>
+<div id="balances"><div class="small">Cargando saldos reales de World Chain...</div></div>
+<div class="priceRow" id="prices">Precios: cargando...</div>
 </div>
 
-<div class="tab"><div id="tBuy" class="on" onclick="setTab('buy')">Comprar</div><div id="tSell" onclick="setTab('sell')">Vender</div></div>
-
 <div class="card">
-<h3 style="margin:0 0 8px 0" id="createTitle">Crear Orden de Venta</h3>
-<select id="asset"><option>WLD</option><option>USDC</option></select>
-<input id="amount" type="number" placeholder="Cantidad ej: 2.5">
-<input id="price" type="number" placeholder="Precio por moneda en Q. ej: 8.5">
-<input id="payMethod" placeholder="Pago: Banrural, Bi, Tigo Money">
-<input id="contact" placeholder="WhatsApp: 502...">
-<button class="btn btn-y" onclick="createOrder()">Publicar Orden P2P</button>
-</div>
+<h3 style="margin:0 0 10px 0">Intercambiar</h3>
+<div class="swapBox"><div style="display:flex;justify-content:space-between"><span style="opacity:.6;font-size:12px">Vendes</span><span id="balFrom" style="font-size:11px;opacity:.6"></span></div>
+<div style="display:flex;gap:10px;align-items:center"><input id="fromAmt" type="number" placeholder="0.0" oninput="calc()"><select id="fromToken" onchange="calc()"><option value="WLD">WLD</option><option value="USDC">USDC</option><option value="WETH">WETH</option></select></div>
+<div id="fromUsd" class="priceRow"></div></div>
 
-<div class="card"><h3 style="margin:0">Órdenes Activas - Cambio Real</h3><div id="orders"></div></div>
+<div style="text-align:center;margin:-5px 0">⬇️</div>
+
+<div class="swapBox"><div style="font-size:12px;opacity:.6">Recibes (estimado)</div>
+<div style="display:flex;gap:10px;align-items:center"><input id="toAmt" type="number" placeholder="0.0" readonly><select id="toToken" onchange="calc()"><option value="USDC">USDC</option><option value="WLD">WLD</option><option value="WETH">WETH</option></select></div>
+<div id="toUsd" class="priceRow"></div></div>
+
+<div class="priceRow" id="rate">1 WLD = ... USDC</div>
+<button class="btn" onclick="doSwap()">Intercambiar Ahora - Real</button>
+<div class="priceRow" style="margin-top:8px;text-align:center">Swap real en World Chain vía Uniswap • Tu wallet: <span id="addrFull" style="word-break:break-all"></span></div>
+</div>
 
 <script type="module">
 import {MiniKit} from 'https://esm.sh/@worldcoin/minikit-js@1.0.6?bundle';
+import {createPublicClient, http, formatUnits} from 'https://esm.sh/viem@2.21.0';
 MiniKit.install('app_d0a270229b8199adb79b64d5c7aa7c0f');
-const addr=localStorage.getItem('wld_addr')||'0x019001d46cd3155ef045a41f4c359c040595438c';
-document.getElementById('wFull').innerText=addr;
-document.getElementById('wMini').innerText=addr.slice(0,6)+'...'+addr.slice(-4);
-let tab='buy';
-window.setTab=(t)=>{tab=t;document.getElementById('tBuy').className=t=='buy'?'on':'';document.getElementById('tSell').className=t=='sell'?'on':'';document.getElementById('createTitle').innerText=t=='sell'?'Crear Orden de Venta':'Crear Orden de Compra';render();}
-window.createOrder=()=>{
- const a=document.getElementById('asset').value, am=parseFloat(document.getElementById('amount').value), pr=parseFloat(document.getElementById('price').value), pm=document.getElementById('payMethod').value, ct=document.getElementById('contact').value;
- if(!am||!pr){alert('Pon cantidad y precio');return;}
- let orders=JSON.parse(localStorage.getItem('uno_orders')||'[]');
- orders.unshift({id:Date.now(),type:tab,asset:a,amount:am,price:pr,pay:pm,contact:ct,wallet:addr,date:new Date().toLocaleString()});
- localStorage.setItem('uno_orders',JSON.stringify(orders));
- document.getElementById('amount').value='';document.getElementById('price').value='';render();alert('¡Orden publicada con dinero real!');
-}
-window.render=()=>{
- let orders=JSON.parse(localStorage.getItem('uno_orders')||'[]');
- let html=orders.length==0?'<div class="small" style="margin-top:10px">No hay órdenes. ¡Crea la primera!</div>':'';
- orders.forEach(o=>{
-  const total=(o.amount*o.price).toFixed(2);
-  const esMio=o.wallet.toLowerCase()==addr.toLowerCase();
-  html+=`<div class="order">
-   <div class="row"><b style="color:${o.type=='sell'?'#ff6b6b':'#00ff88'}">${o.type=='sell'?'VENDE':'COMPRA'} ${o.amount} ${o.asset}</b><span class="small">${esMio?'Tuya':''}</span></div>
-   <div class="price">Q${total} (${o.amount} ${o.asset} x Q${o.price})</div>
-   <div class="small">Pago: ${o.pay} | Wallet: ${o.wallet.slice(0,10)}...</div>
-   ${!esMio?`<button class="btn btn-g" style="margin-top:8px" onclick="comprarReal('${o.wallet}',${o.amount},'${o.asset}')">Comprar Ahora - Pago Real</button>`:''}
-   <button class="btn btn-w" style="padding:8px;margin-top:6px" onclick="shareOrder(${o.id})">WhatsApp</button>
-  </div>`;
- });
- document.getElementById('orders').innerHTML=html;
-}
-window.comprarReal=async(to,amount,asset)=>{
+const ADDR=localStorage.getItem('wld_addr')||'0x019001d46cd3155ef045a41f4c359c040595438c';
+document.getElementById('addrFull').innerText=ADDR;
+document.getElementById('addrMini').innerText=ADDR.slice(0,6)+'...'+ADDR.slice(-4);
+
+const TOKENS={WLD:{addr:'0x2cFc044F96D5C3963737f6cE6eCA8F8c7A4c6a6e',dec:18,coingecko:'worldcoin-wld'},USDC:{addr:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d',dec:6,coingecko:'usd-coin'},WETH:{addr:'0x4200000000000000000000000000000000000042',dec:18,coingecko:'weth'}};
+const client=createPublicClient({chain:{id:480,rpcUrls:{default:{http:['https://worldchain-mainnet.g.alchemy.com/public']}}},transport:http()});
+let prices={WLD:1,USDC:1,WETH:3000}, balances={WLD:0,USDC:0,WETH:0};
+
+async function loadPrices(){
  try{
-  if(!MiniKit.isInstalled()){alert('Abre esto dentro de World App para transacción real');return;}
-  if(!confirm(`¿Enviar ${amount} ${asset} a ${to.slice(0,10)}... por World Chain REAL?`))return;
-  // Transacción REAL en World Chain
-  const WLD_ADDR='0x2cFc044F96D5C3963737f6cE6eCA8F8c7A4c6a6e'; // WLD World Chain
-  const USDC_ADDR='0x79A02482A880bCE3F13e09Da970dC34db4CD24d';
-  const tokenAddr=asset=='WLD'?WLD_ADDR:USDC_ADDR;
-  const result=await MiniKit.commandsAsync.sendTransaction({
-   transaction:[{address:tokenAddr,abi:[{inputs:[{name:'to',type:'address'},{name:'value',type:'uint256'}],name:'transfer',outputs:[{name:'',type:'bool'}],stateMutability:'nonpayable',type:'function'}],functionName:'transfer',args:[to, (amount*1e18).toString()]}]
-  });
-  alert('Transacción enviada: '+JSON.stringify(result.finalPayload).slice(0,200));
- }catch(e){alert('Error transacción real: '+e.message+' - Asegúrate tener saldo en World App');}
-}
-window.shareOrder=(id)=>{
- let orders=JSON.parse(localStorage.getItem('uno_orders')||'[]');let o=orders.find(x=>x.id==id);
- let txt=`*Uno P2P REAL*%0A${o.type.toUpperCase()} ${o.amount} ${o.asset} = Q${(o.amount*o.price).toFixed(2)}%0APrecio: Q${o.price}%0APago: ${o.pay}%0AWallet: ${o.wallet}`;
- window.open('https://wa.me/?text='+txt,'_blank');
-}
-render();
-</script></body></html>
+  const res=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=worldcoin-wld,usd-coin,weth&vs_currencies=usd');
+  const j=await res.json();
+  prices.WLD=j['worldcoin-wld']?.usd||0.9; prices.USDC=j['usd-coin']?.usd||1; prices.WETH=j['weth']?.usd||3000;
+  document.getElementById('prices').innerText=`WLD $${prices.WLD.toFixed(3)} | USDC $${prices.USDC.toFixed(2)} | WETH $${prices.WETH.toFixed(0)}`;
+  calc();
+ }catch(e){document.getElementById('prices').innerText='Precios:

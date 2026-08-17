@@ -1,25 +1,76 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uno Intercambio P2P</title>
-<style>body{margin:0;background:#0a1e3c;color:#fff;font-family:system-ui;padding:16px}
-.header{display:flex;justify-content:space-between;align-items:center}
-.binance{background:#f3ba2f;color:#000;padding:6px 12px;border-radius:8px;font-weight:900;font-size:12px}
-.card{background:#132c54;border-radius:20px;padding:18px;margin-top:14px}
-.addr{font-size:11px;opacity:.7;word-break:break-all}
-.btn{width:100%;padding:14px;border-radius:12px;border:0;background:#f3ba2f;font-weight:900;margin-top:10px}
-.row{display:flex;justify-content:space-between;margin:10px 0}
-.green{color:#00ff88}</style></head><body>
-<div class="header"><div class="binance">⬥ BINANCE P2P</div><div id="walletMini" style="font-size:12px">0x0190...438c</div></div>
-<div class="card"><div class="row"><span>Wallet conectada</span><span class="green">● Activa</span></div>
-<div class="addr" id="fullAddr">0x019001d46cd3155ef045a41f4c359c040595438c</div>
-<div class="row"><span>WLD</span><span>0.00</span></div>
-<div class="row"><span>USDC</span><span>0.00</span></div>
-<button class="btn" onclick="alert('¡Próximamente! Aquí irá tu lógica de intercambio P2P - tu wallet ya está lista: '+localStorage.getItem('wld_addr'))">Crear Orden P2P</button>
-<button class="btn" style="background:#fff;color:#000;margin-top:8px" onclick="navigator.clipboard.writeText(localStorage.getItem('wld_addr'));alert('Dirección copiada')">Copiar mi dirección</button>
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Uno Intercambio P2P</title><style>
+*{box-sizing:border-box}body{margin:0;background:#0a1e3c;color:#fff;font-family:system-ui;padding:12px;padding-bottom:90px}
+.badge{background:#f3ba2f;color:#000;padding:5px 12px;border-radius:8px;font-weight:900;font-size:12px;display:inline-block}
+.card{background:#132c54;border-radius:18px;padding:16px;margin-top:12px}
+.row{display:flex;justify-content:space-between;align-items:center;margin:6px 0}
+.btn{width:100%;padding:13px;border-radius:12px;border:0;font-weight:900;cursor:pointer}
+.btn-y{background:#f3ba2f;color:#000}.btn-w{background:#fff;color:#000;margin-top:8px}
+.btn-g{background:#00ff88;color:#000}
+input,select{width:100%;padding:11px;border-radius:10px;border:0;margin:6px 0;background:#0a1e3c;color:#fff;border:1px solid #2a4a7a}
+.small{font-size:11px;opacity:.7}.green{color:#00ff88}.price{font-size:22px;font-weight:900}
+.tab{display:flex;gap:8px;margin-top:12px}.tab div{flex:1;text-align:center;padding:10px;background:#0a1e3c;border-radius:10px;cursor:pointer}
+.tab .on{background:#f3ba2f;color:#000;font-weight:900}
+.order{border:1px solid #2a4a7a;border-radius:12px;padding:12px;margin-top:10px;background:#0e2447}
+</style></head><body>
+<div class="row"><span class="badge">◆ BINANCE P2P - UNO</span><span id="wMini" style="font-size:12px">0x0190...438c</span></div>
+
+<div class="card">
+<div class="row"><b>Wallet conectada</b><span class="green">● Activa</span></div>
+<div class="small" id="wFull" style="word-break:break-all">0x019001d46cd3155ef045a41f4c359c040595438c</div>
+<div class="row" style="margin-top:10px"><span>WLD Disponible</span><input id="myWld" value="10" style="width:80px;text-align:right;margin:0"></div>
 </div>
-<div class="card"><h3 style="margin:0 0 10px 0">Intercambio Uno</h3>
-<div style="font-size:12px;opacity:.8">1. Tu wallet ya está conectada<br>2. Crea una orden de venta/compra<br>3. Comparte con tu contraparte<br>4. Intercambio seguro en World Chain</div></div>
+
+<div class="tab"><div id="tBuy" class="on" onclick="setTab('buy')">Comprar</div><div id="tSell" onclick="setTab('sell')">Vender</div></div>
+
+<div class="card" id="createCard">
+<h3 style="margin:0 0 8px 0" id="createTitle">Crear Orden de Venta</h3>
+<select id="asset"><option>WLD</option><option>USDC</option></select>
+<input id="amount" type="number" placeholder="Cantidad ej: 5">
+<input id="price" type="number" placeholder="Precio por moneda en Q. ej: 8.5">
+<input id="payMethod" placeholder="Método pago ej: Banrural, Bi, Tigo Money">
+<input id="contact" placeholder="Tu WhatsApp ej: 50212345678">
+<button class="btn btn-y" onclick="createOrder()">Publicar Orden P2P</button>
+<div class="small">Tu orden se guarda y se puede compartir por WhatsApp</div>
+</div>
+
+<div class="card"><h3 style="margin:0">Órdenes Activas</h3><div id="orders"></div></div>
+
 <script>
-const a=localStorage.getItem('wld_addr')||'0x019001d46cd3155ef045a41f4c359c040595438c';
-document.getElementById('fullAddr').innerText=a;
-document.getElementById('walletMini').innerText=a.slice(0,6)+'...'+a.slice(-4);
+let tab='sell';
+const addr=localStorage.getItem('wld_addr')||'0x019001d46cd3155ef045a41f4c359c040595438c';
+document.getElementById('wFull').innerText=addr;
+document.getElementById('wMini').innerText=addr.slice(0,6)+'...'+addr.slice(-4);
+function setTab(t){tab=t;document.getElementById('tBuy').className=t=='buy'?'on':'';document.getElementById('tSell').className=t=='sell'?'on':'';document.getElementById('createTitle').innerText=t=='sell'?'Crear Orden de Venta':'Crear Orden de Compra';render();}
+function createOrder(){
+ const a=document.getElementById('asset').value, am=parseFloat(document.getElementById('amount').value), pr=parseFloat(document.getElementById('price').value), pm=document.getElementById('payMethod').value, ct=document.getElementById('contact').value;
+ if(!am||!pr){alert('Pon cantidad y precio');return;}
+ let orders=JSON.parse(localStorage.getItem('uno_orders')||'[]');
+ orders.unshift({id:Date.now(),type:tab,asset:a,amount:am,price:pr,pay:pm,contact:ct,wallet:addr,date:new Date().toLocaleString()});
+ localStorage.setItem('uno_orders',JSON.stringify(orders));
+ document.getElementById('amount').value='';document.getElementById('price').value='';
+ render();alert('¡Orden publicada!');
+}
+function render(){
+ let orders=JSON.parse(localStorage.getItem('uno_orders')||'[]');
+ let html='';if(orders.length==0)html='<div class="small" style="margin-top:10px">No hay órdenes aún. ¡Crea la primera!</div>';
+ orders.forEach(o=>{
+  const total=(o.amount*o.price).toFixed(2);
+  html+=`<div class="order">
+   <div class="row"><b style="color:${o.type=='sell'?'#ff6b6b':'#00ff88'}">${o.type=='sell'?'VENTA':'COMPRA'} ${o.asset}</b><span class="small">${o.date}</span></div>
+   <div class="price">${o.amount} ${o.asset} = Q${total}</div>
+   <div class="small">Precio: Q${o.price} x 1 ${o.asset} | Pago: ${o.pay}</div>
+   <div class="small" style="word-break:break-all">Wallet: ${o.wallet.slice(0,10)}...${o.wallet.slice(-4)}</div>
+   <button class="btn btn-g" style="margin-top:8px;padding:8px" onclick="shareOrder(${o.id})">Compartir por WhatsApp</button>
+  </div>`;
+ });
+ document.getElementById('orders').innerHTML=html;
+}
+function shareOrder(id){
+ let orders=JSON.parse(localStorage.getItem('uno_orders')||'[]');
+ let o=orders.find(x=>x.id==id);
+ let txt=`*Uno Intercambio P2P*%0A${o.type.toUpperCase()} ${o.amount} ${o.asset}%0APrecio: Q${o.price} c/u = Total Q${(o.amount*o.price).toFixed(2)}%0APago: ${o.pay}%0AWallet: ${o.wallet}%0AContacto: ${o.contact}`;
+ window.open('https://wa.me/?text='+txt,'_blank');
+}
+render();
 </script></body></html>

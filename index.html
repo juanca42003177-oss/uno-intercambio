@@ -1,69 +1,39 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Uno Intercambio</title>
-<style>
-  body{margin:0;font-family:system-ui;background:#0a1e3c;min-height:100vh;display:flex;align-items:center;justify-content:center;color:white;padding:16px}
-  .card{background:rgba(255,255,255,.12);border-radius:24px;padding:28px;width:100%;max-width:380px;text-align:center;border:1px solid rgba(255,255,255,.2)}
-  .binance{background:#f3ba2f;color:#000;padding:8px 16px;border-radius:12px;font-weight:900;display:inline-block}
-  .btn{width:100%;padding:16px;border-radius:14px;border:0;font-weight:800;font-size:16px;background:#f3ba2f;color:#000;cursor:pointer}
-  .status{font-size:11px;background:rgba(0,0,0,.4);padding:10px;border-radius:10px;margin:12px 0;text-align:left;word-break:break-all}
-</style>
-</head>
-<body>
-<div class="card">
-  <div class="binance">⬥ BINANCE</div>
-  <h1>Uno Intercambio</h1>
-  <div id="sub" style="opacity:.7;font-size:12px">Cargando MiniKit desde CDN...</div>
-  <div id="status" class="status">⏳ Cargando librería...</div>
-  <button class="btn" id="btn" onclick="conectar()">Conectar Wallet</button>
-</div>
-
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Uno</title><style>body{margin:0;background:#0a1e3c;color:#fff;font-family:system-ui;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px}
+.card{background:rgba(255,255,255,.12);border-radius:24px;padding:24px;width:100%;max-width:360px;text-align:center}
+.btn{width:100%;padding:16px;border-radius:14px;border:0;background:#f3ba2f;font-weight:900;font-size:16px}
+.st{font-size:11px;background:#0006;padding:10px;border-radius:10px;margin:10px 0;text-align:left;word-break:break-all}</style></head><body>
+<div class="card"><h2>Uno Intercambio</h2><div id="st" class="st">Cargando...</div><button id="btn" class="btn" onclick="go()">Conectar Wallet</button>
+<div id="addr" style="margin-top:10px;font-size:12px;opacity:.8"></div></div>
 <script type="module">
-import { MiniKit } from 'https://esm.sh/@worldcoin/minikit-js@1.7.0?bundle';
+import {MiniKit} from 'https://esm.sh/@worldcoin/minikit-js@1.7.0?bundle';
+const APP_ID='app_d0a270229b8199adb79b64d5c7aa7c0f';
+MiniKit.install(APP_ID);
+const st=document.getElementById('st');
+st.innerHTML='✅ MiniKit OK<br>isInstalled:'+MiniKit.isInstalled();
 
-const APP_ID = "app_d0a270229b8199adb79b64d5c7aa7c0f";
-window.MiniKit = MiniKit;
-
-function setStatus(t,ok){
-  const e=document.getElementById('status');
-  e.innerHTML=t;
-  e.style.border='1px solid '+(ok===true?'#0f0':ok===false?'#f55':'#555');
-}
-
-try{
-  MiniKit.install(APP_ID);
-  setStatus('✅ MiniKit cargado desde CDN<br>App ID: '+APP_ID+'<br>isInstalled: '+MiniKit.isInstalled()+'<br>Listo para conectar', true);
-  document.getElementById('sub').innerText='¡Listo! Pulsa Conectar Wallet';
-}catch(e){
-  setStatus('❌ Error install: '+e.message, false);
-}
-
-window.conectar = async function(){
+window.go=async()=>{
+  const btn=document.getElementById('btn');
   try{
-    const btn=document.getElementById('btn');
-    btn.innerText='Conectando...';
-    setStatus('⏳ Abriendo World App...', null);
-    const res = await MiniKit.commandsAsync.walletAuth({
-      nonce: Date.now().toString(),
-      requestId: '0',
-      statement: 'Conectar a Uno Intercambio',
-      expirationTime: new Date(Date.now()+7*24*60*60*1000),
-      notBefore: new Date(Date.now()-24*60*60*1000),
+    btn.innerText='Firmando...';
+    st.innerHTML='⏳ Revisa World App arriba...';
+    const {commandPayload, finalPayload} = await MiniKit.commandsAsync.walletAuth({
+      nonce: '123-'+Date.now(),
+      statement: 'Conectar a Uno Intercambio'
     });
-    setStatus('Respuesta:<br>'+JSON.stringify(res, null, 2).slice(0,800), true);
-    if(res?.finalPayload?.status==='success'){
-      btn.innerText=res.finalPayload.address.slice(0,12)+'...';
+    console.log(finalPayload);
+    if(finalPayload.status==='success'){
+      st.innerHTML='✅ CONECTADO<br>'+JSON.stringify(finalPayload,null,2).slice(0,500);
+      document.getElementById('addr').innerText='Wallet: '+finalPayload.address;
+      btn.innerText='¡Conectado! '+finalPayload.address.slice(0,6)+'...';
+      btn.style.background='#00ff88';
     }else{
-      btn.innerText='Conectar Wallet';
+      st.innerHTML='❌ Cancelado: '+JSON.stringify(finalPayload);
+      btn.innerText='Reintentar';
     }
   }catch(e){
-    setStatus('❌ Error: '+e.message, false);
-    document.getElementById('btn').innerText='Conectar Wallet';
+    st.innerHTML='❌ Error: '+e.message;
+    btn.innerText='Reintentar';
   }
-}
-</script>
-</body>
-</html>
+};
+</script></body></html>

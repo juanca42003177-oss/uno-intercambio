@@ -1,67 +1,70 @@
 <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uno Intercambio - $ Final</title><style>
-*{box-sizing:border-box}body{margin:0;background:#eef4ff;color:#0a1e3c;font-family:system-ui;padding-bottom:70px}
-.header{background:#0a1e3c;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center}
-.badge{background:#fff;padding:5px 12px;border-radius:20px;font-weight:900;font-size:12px;color:#0a1e3c;display:flex;gap:6px;align-items:center}
-.totalCard{background:linear-gradient(135deg,#0a1e3c,#3a5cff);color:#fff;padding:16px;text-align:center;border-radius:0 0 22px 22px}
-.total{font-size:36px;font-weight:900}.card{background:#fff;border-radius:16px;margin:10px 12px;padding:12px}
-.token{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #eef4ff}
-.tIcon{width:40px;height:40px;border-radius:50%;background:#f3ba2f;display:flex;align-items:center;justify-content:center;font-weight:900}
-.swapMain{background:#fff;border-radius:20px;margin:12px;padding:14px;min-height:60vh;display:flex;flex-direction:column;justify-content:center}
-.swapBox{background:#eef4ff;border-radius:14px;padding:14px;margin:8px 0;border:1px solid #dbe6ff}
-input{width:100%;background:transparent;border:0;font-size:30px;font-weight:900;outline:none;color:#0a1e3c}
-select{border:0;background:#0a1e3c;color:#fff;padding:10px 14px;border-radius:20px;font-weight:900}
-.small{font-size:11px;opacity:.6}.btn{width:100%;padding:14px;border-radius:12px;border:0;background:#f3ba2f;color:#000;font-weight:900;margin-top:8px}
-.nav{position:fixed;bottom:0;left:0;right:0;background:#0a1e3c;display:flex;justify-content:space-around;padding:6px 0}
-.nav div{color:#fff;opacity:.5;text-align:center;font-size:10px;padding:4px 8px}.nav div.active{opacity:1;color:#f3ba2f;background:#132c54;border-radius:10px}
-.calcBox{background:#0a1e3c;color:#fff;border-radius:12px;padding:10px;margin-top:8px;text-align:center;font-size:12px}
+<title>Uno - Diseño Final Binance</title><style>
+*{box-sizing:border-box}body{margin:0;background:#fff;color:#111;font-family:system-ui;padding-bottom:80px}
+.top{display:flex;justify-content:space-between;align-items:center;padding:12px 16px}
+.profile{display:flex;gap:10px;align-items:center}
+.avatar{width:54px;height:54px;border-radius:50%;background:#f3ba2f;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;color:#000;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.balance{padding:10px 16px;display:flex;justify-content:space-between;align-items:center}
+.big{font-size:42px;font-weight:900}.small{font-size:13px;opacity:.6}.green{color:#00b15c}
+.btns{display:flex;gap:10px;padding:0 16px;overflow-x:auto}
+.btn{flex:0 0 110px;background:#ffe6f4;color:#ff3ab2;border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px;font-weight:700}
+.apy{margin:16px;border:1px solid #eee;border-radius:18px;padding:14px;display:flex;justify-content:space-between;align-items:center}
+.tokens{padding:0 16px}.tok{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #f2f2f2}
+.tIcon{width:44px;height:44px;border-radius:50%;background:#f3ba2f;display:flex;align-items:center;justify-content:center;font-weight:900}
+.nav{position:fixed;bottom:10px;left:16px;right:16px;background:#fff;border:1px solid #eee;border-radius:30px;display:flex;justify-content:space-around;padding:8px;box-shadow:0 4px 20px rgba(0,0,0,.1)}
+.nav div{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center}.nav div.active{background:#111;color:#fff}
+.swapMain{background:#fff;border-radius:20px;margin:12px;padding:14px;border:2px solid #ffe6f4;min-height:60vh;display:flex;flex-direction:column;justify-content:center}
+.swapBox{background:#f8ff;border-radius:16px;padding:14px;margin:8px 0}
+input{width:100%;background:transparent;border:0;font-size:28px;font-weight:900;outline:none}select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;font-weight:900}
+.btnYellow{width:100%;padding:14px;border-radius:12px;border:0;background:#f3ba2f;color:#000;font-weight:900;margin-top:8px}
 </style></head><body>
-<div class="header"><div class="badge"><div style="width:18px;height:18px;background:#f3ba2f;border-radius:5px;display:flex;align-items:center;justify-content:center">⬥</div> Uno</div><div style="font-size:10px">World + Polygon</div></div>
 
-<div id="vBilletera">
-<div class="totalCard"><div style="font-size:11px;opacity:.8">Tu Portafolio Total</div><div class="total">$0.23 USD</div><div class="small" style="color:#fff">Tus monedas reales</div></div>
-<div class="card"><div id="list"></div></div>
+<div id="viewHome">
+<div class="top"><div class="profile"><div class="avatar"><img src="https://upload.wikimedia.org/wikipedia/commons/1/e3/BNB_Logo.png" alt="Binance"></div><div><b>Uno intercambio</b><div class="small">0x61c3...7d8A 📋 Binance</div></div></div><div style="display:flex;gap:12px;font-size:20px">⛶ ⚙️</div></div>
+<div class="balance"><div><div class="big">$0.23</div><div class="small"><span class="green">▲ $0.01 (5.97%)</span> hoy ></div></div><div style="width:110px;height:50px"><svg width="100%" height="100%"><polyline points="0,40 10,38 20,35 30,33 40,30 50,28 60,25 70,20 80,15 90,10 100,2 105,18" fill="none" stroke="#00b15c" stroke-width="2"/></svg></div></div>
+<div class="btns"><div class="btn" onclick="go('intercambio')">⇆<br>Swap</div><div class="btn" onclick="go('comprar')">+<br>Comprar</div><div class="btn" onclick="go('enviar')">↗<br>Enviar</div><div class="btn">↓<br>Recibir</div></div>
+<div class="apy"><div>Gana hasta un <span style="color:#ff3ab2;font-weight:900">4.19% APY</span></div><div>ⓢⓉ♦</div></div>
+<div class="tokens">
+<div style="font-weight:900;margin:10px 0">Tokens <span style="opacity:.4">NFT</span></div>
+<div class="tok"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon" style="background:#7b3cff;color:#fff">⬡</div><div><b>Polygon</b><div class="small">2.71 POL</div></div></div><div style="text-align:right"><b>$0.22</b><div class="small green">▲ 6.39%</div></div></div>
+<div class="tok"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon" style="background:#8bb8ff">♦</div><div><b>Ethereum</b><div class="small">&lt;0.001 ETH</div></div></div><div style="text-align:right"><b>$0.02</b><div class="small green">▲ 1.20%</div></div></div>
+<div class="tok"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon" style="background:#00d395;color:#fff">₮</div><div><b>USDT0</b><div class="small">&lt;0.001 USDT0</div></div></div><div style="text-align:right"><b>&lt;$0.01</b><div class="small" style="color:red">▼ 0.01%</div></div></div>
+<div class="tok"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">D</div><div><b>DNA</b><div class="small">615.74 DNA • world</div></div></div><div style="text-align:right"><b>$0.03</b></div></div>
+<div class="tok"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">O</div><div><b>ORO</b><div class="small">0.65 ORO</div></div></div><div style="text-align:right"><b>$0.01</b></div></div>
+<div class="tok"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">D</div><div><b>DIAMANTE</b><div class="small">125.5 DIAMANTE</div></div></div><div style="text-align:right"><b>$0.02</b></div></div>
+<div class="tok"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">P</div><div><b>POL</b><div class="small">2.71 POL</div></div></div><div style="text-align:right"><b>$1.21</b></div></div>
+<div class="tok"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">U</div><div><b>USDT</b><div class="small">0.80 USDT</div></div></div><div style="text-align:right"><b>$0.80</b></div></div>
+</div>
 </div>
 
-<div id="vInter" style="display:none">
+<div id="viewInter" style="display:none">
 <div class="swapMain"><h3 style="margin:0;text-align:center">Intercambio</h3><div class="small" style="text-align:center">Calcula cuánto recibes aprox.</div>
-<div class="swapBox"><div style="display:flex;justify-content:space-between"><span class="small">Vendes</span><span class="small" id="bF" style="font-weight:900">Saldo: $0.80 USDT</span></div><div style="display:flex;gap:8px;align-items:center;margin-top:6px"><input id="fAmt" type="number" placeholder="0.0" value="0.10" oninput="calc()"><select id="fSel" onchange="calc()"><option value="USDT">USDT $0.80</option><option value="POL">POL $2.71</option><option value="DNA">DNA $615.74</option><option value="ORO">ORO $0.65</option><option value="DIAMANTE">DIAMANTE $125.5</option><option value="WLD">WLD $0.01</option></select></div><div class="small" id="usdFrom">≈ $0.10 USD</div></div>
+<div class="swapBox"><div style="display:flex;justify-content:space-between"><span class="small">Vendes</span><span class="small" id="bF">Saldo: $0.80 USDT</span></div><div style="display:flex;gap:8px;align-items:center"><input id="fAmt" type="number" value="0.10" oninput="calc()"><select id="fSel" onchange="calc()"><option value="USDT">USDT $0.80</option><option value="POL">POL $2.71</option><option value="DNA">DNA $615.74</option><option value="WLD">WLD $0.01</option></select></div><div class="small" id="usdFrom">≈ $0.10 USD</div></div>
 <div style="text-align:center;cursor:pointer" onclick="swapPos()">↕️</div>
-<div class="swapBox"><div style="display:flex;justify-content:space-between"><span class="small">Recibes</span><span class="small" id="bT" style="font-weight:900">Saldo: $0.01 WLD</span></div><div style="display:flex;gap:8px;align-items:center;margin-top:6px"><input id="tAmt" readonly placeholder="0.0"><select id="tSel" onchange="calc()"><option value="WLD">WLD $0.01</option><option value="USDT">USDT $0.80</option><option value="POL">POL $2.71</option><option value="DNA">DNA $615.74</option><option value="ORO">ORO $0.65</option><option value="DIAMANTE">DIAMANTE $125.5</option></select></div><div class="small" id="usdTo">≈ $0.10 USD</div></div>
-<div class="calcBox" id="result">Recibes aprox: 0.28 WLD<br><span class="small" style="color:#fff">1 USDT = 2.85 WLD • Fee Uno 0.3%</span></div>
-<button class="btn" onclick="doSwap()">Intercambiar Ahora</button></div>
+<div class="swapBox"><div style="display:flex;justify-content:space-between"><span class="small">Recibes</span><span class="small" id="bT">Saldo: $0.01 WLD</span></div><div style="display:flex;gap:8px;align-items:center"><input id="tAmt" readonly><select id="tSel" onchange="calc()"><option value="WLD">WLD $0.01</option><option value="USDT">USDT $0.80</option><option value="POL">POL $2.71</option></select></div><div class="small" id="usdTo">≈ $0.10 USD</div></div>
+<div style="background:#111;color:#fff;border-radius:12px;padding:10px;text-align:center;font-size:12px" id="result">Recibes aprox: 0.28 WLD ($0.10)</div>
+<button class="btnYellow" onclick="doSwap()">Intercambiar Ahora</button>
+<button class="small" onclick="go('home')" style="border:0;background:transparent;margin-top:8px;width:100%">← Volver</button>
+</div>
 </div>
 
-<div id="vEnviar" style="display:none">
-<div class="swapMain"><h3 style="margin:0;text-align:center">Enviar</h3>
-<div class="swapBox"><div style="display:flex;justify-content:space-between"><span class="small">Cantidad</span><span class="small" id="bS" style="font-weight:900">Saldo: $0.80 USDT</span></div><div style="display:flex;gap:8px;align-items:center"><input id="sAmt" type="number" placeholder="0.0" value="0.10"><select id="sSel"><option>USDT $0.80</option><option>POL $2.71</option><option>DNA $615.74</option></select></div></div>
-<input id="sAddr" placeholder="0x... destinatario" style="background:#eef4ff;border-radius:12px;padding:14px;width:100%;border:1px solid #dbe6ff;margin:8px 0;font-size:12px">
-<button class="btn" onclick="doSend()">Enviar ↗️</button></div>
-</div>
+<div id="viewEnviar" style="display:none"><div class="swapMain"><h3 style="text-align:center">Enviar</h3><div class="swapBox"><div class="small" id="bS">Saldo: $0.80 USDT</div><div style="display:flex;gap:8px"><input id="sAmt" type="number" placeholder="0.0"><select id="sSel"><option>USDT $0.80</option><option>POL $2.71</option></select></div></div><input id="sAddr" placeholder="0x..." style="background:#f0f0f0;border-radius:12px;padding:14px;width:100%;border:0;margin:8px 0"><button class="btnYellow" onclick="doSend()">Enviar ↗️</button><button class="small" onclick="go('home')" style="border:0;background:transparent;width:100%">← Volver</button></div></div>
 
-<div id="vGanar" style="display:none"><div class="card" style="background:#0a1e3c;color:#fff"><div>My Deposits</div><div style="font-size:32px;font-weight:900">$0.23</div><div class="small" style="color:#fff">14.5% WLD • 13.2% USDC • 16% POL</div></div></div>
-
-<div class="nav"><div class="active" id="nb" onclick="go('billetera')">🏠<br>Billetera</div><div id="ni" onclick="go('intercambio')">🔄<br>Intercambio</div><div id="ns" onclick="go('enviar')">↗️<br>Enviar</div><div id="ng" onclick="go('ganar')">💲<br>Ganar</div></div>
+<div class="nav"><div class="active" onclick="go('home')">🏠</div><div onclick="go('intercambio')">🔍</div><div onclick="go('enviar')">🕒</div><div style="background:#ff3ab2;color:#fff" onclick="go('intercambio')">⇆</div></div>
 
 <script type="module">
-import {MiniKit} from 'https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@0.0.68/+esm';
-const PRICES={USDT:1,POL:0.45,DNA:0.000052,ORO:0.0015,WLD:0.35,DIAMANTE:0.02};
-const BALS={USDT:0.80,POL:2.71,DNA:615.74,ORO:0.65,DIAMANTE:125.5,WLD:0.01};
-
-function load(){
- let html='';
- const list=[{s:'DNA',b:'615.74',usd:'$0.03'},{s:'ORO',b:'0.65',usd:'$0.01'},{s:'ORB',b:'9.3',usd:'$0.01'},{s:'HUB',b:'3518.8',usd:'$0.01'},{s:'WLD',b:'0.01',usd:'$0.01'},{s:'DIAMANTE',b:'125.5',usd:'$0.02'},{s:'POL',b:'2.71',usd:'$1.21'},{s:'USDT',b:'0.80',usd:'$0.80'}];
- list.forEach(t=>{html+=`<div class="token"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">${t.s[0]}</div><div><b>${t.s}</b><div class="small">${t.b} ${t.s} • world</div></div></div><div style="text-align:right"><div>${t.usd}</div></div></div>`;});
- document.getElementById('list').innerHTML=html; calc();
-}
+const PRICES={USDT:1,POL:0.45,DNA:0.000052,WLD:0.35}; const BALS={USDT:0.80,POL:2.71,DNA:615.74,WLD:0.01};
 window.calc=()=>{
- const f=document.getElementById('fSel').value, t=document.getElementById('tSel').value;
- const amt=parseFloat(document.getElementById('fAmt').value)||0;
- const fp=PRICES[f]||1, tp=PRICES[t]||1;
- const out=(amt*0.997)*fp/tp;
+ const f=document.getElementById('fSel').value, t=document.getElementById('tSel').value, amt=parseFloat(document.getElementById('fAmt').value)||0;
+ const out=(amt*0.997)*(PRICES[f]/PRICES[t]);
  document.getElementById('tAmt').value=out?out.toFixed(2):'0.00';
  document.getElementById('bF').innerText=`Saldo: $${BALS[f]||0} ${f}`;
  document.getElementById('bT').innerText=`Saldo: $${BALS[t]||0} ${t}`;
- document.getElementById('usdFrom').innerText=`≈ $${(amt*fp).toFixed(2)} USD`;
- document.getElementById('usdTo').innerText=`≈ $${(out*tp).toFixed(2)} USD`;
- document.getElementById('result').innerHTML=`Recibes aprox: ${out?out.toFixed(2):'0.00'} ${t} ($${(out*tp).toFixed(2)})<br><span class="small" style="color:#fff">1 ${f} = ${(fp/tp).toFixed
+ document.getElementById('usdFrom').innerText=`≈ $${(amt*PRICES[f]).toFixed(2)} USD`;
+ document.getElementById('usdTo').innerText=`≈ $${(out*PRICES[t]).toFixed(2)} USD`;
+ document.getElementById('result').innerText=`Recibes aprox: ${out?out.toFixed(2):'0.00'} ${t} ($${(out*PRICES[t]).toFixed(2)}) - 1 ${f} = ${(PRICES[f]/PRICES[t]).toFixed(2)} ${t}`;
+};
+window.swapPos=()=>{const f=document.getElementById('fSel').value, t=document.getElementById('tSel').value; document.getElementById('fSel').value=t; document.getElementById('tSel').value=f; calc();};
+window.go=(v)=>{
+ document.getElementById('viewHome').style.display=v=='home'?'block':'none

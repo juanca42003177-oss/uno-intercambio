@@ -1,94 +1,152 @@
 <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uno Intercambio</title><style>
-*{box-sizing:border-box}body{margin:0;background:#eef4ff;color:#0a1e3c;font-family:system-ui;padding:0;padding-bottom:80px}
-.header{background:#0a1e3c;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
-.badge{display:flex;align-items:center;gap:8px;background:#fff;color:#0a1e3c;padding:6px 14px;border-radius:20px;font-weight:900;font-size:13px}
-.binance-icon{width:22px;height:22px;background:#f3ba2f;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:900}
-.totalCard{background:linear-gradient(135deg,#0a1e3c,#1e3cff);color:#fff;padding:20px;border-radius:0 0 24px 24px;text-align:center}
-.total{font-size:42px;font-weight:900;margin:8px 0}
-.card{background:#fff;border-radius:16px;padding:12px;margin:10px 12px;box-shadow:0 2px 10px rgba(0,0,0,.08);border:1px solid #dbe6ff}
-.token{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #eef4ff}
+<title>Uno Intercambio - DNA Style</title><style>
+*{box-sizing:border-box}body{margin:0;background:#eef4ff;color:#0a1e3c;font-family:system-ui;padding-bottom:70px}
+.header{background:#0a1e3c;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+.badge{background:#fff;padding:5px 12px;border-radius:20px;display:flex;align-items:center;gap:6px;font-weight:900;font-size:12px;color:#0a1e3c}
+.iconB{width:20px;height:20px;background:#f3ba2f;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.totalCard{background:linear-gradient(135deg,#0a1e3c,#2a4bff);color:#fff;padding:18px;text-align:center;border-radius:0 0 24px 24px}
+.total{font-size:38px;font-weight:900}
+.card{background:#fff;border-radius:16px;margin:10px 12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.token{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #eef4ff;cursor:pointer}
 .token:last-child{border:0}
-.icon{width:40px;height:40px;border-radius:50%;background:#f3ba2f;display:flex;align-items:center;justify-content:center;font-weight:900;color:#000}
-.swapBox{background:#eef4ff;border-radius:12px;padding:12px;margin:8px 0}
-input{width:100%;background:transparent;border:0;color:#0a1e3c;font-size:26px;font-weight:900;outline:none}
-select{background:#fff;border:1px solid #cbd8f5;border-radius:8px;padding:6px 10px;font-weight:700}
-.btn{width:100%;padding:14px;border-radius:12px;border:0;background:#f3ba2f;color:#000;font-weight:900;font-size:15px}
-.nav{position:fixed;bottom:0;left:0;right:0;background:#0a1e3c;display:flex;justify-content:space-around;padding:8px 0;color:#fff}
-.nav div{text-align:center;font-size:10px;opacity:.6}.nav.on{opacity:1;color:#f3ba2f}
-.small{font-size:10px;opacity:.6}.green{color:#00b050}.red{color:#ff3b30}
-.chainTab{display:flex;gap:6px;margin:10px 12px}.chainTab div{flex:1;padding:8px;text-align:center;background:#fff;border-radius:20px;font-size:11px;border:1px solid #cbd8f5;cursor:pointer}
-.chainTab.on{background:#0a1e3c;color:#fff}
+.tIcon{width:42px;height:42px;border-radius:50%;background:#f3ba2f;display:flex;align-items:center;justify-content:center;font-weight:900}
+.tabTop{display:flex;gap:20px;justify-content:center;margin:10px 0;border-bottom:1px solid #dbe6ff;padding-bottom:8px}
+.tabTop div{cursor:pointer;opacity:.5;font-weight:700}.tabTop.on{opacity:1;border-bottom:2px solid #0a1e3c}
+.swapBox{background:#eef4ff;border-radius:14px;padding:14px;margin:8px 0}
+input{width:100%;background:transparent;border:0;font-size:26px;font-weight:900;outline:none;color:#0a1e3c}
+.small{font-size:10px;opacity:.6}.green{color:#00a854}.red{color:#e53935}
+.btn{width:100%;padding:13px;border-radius:12px;border:0;background:#f3ba2f;color:#000;font-weight:900}
+.btn2{width:48%;padding:12px;border-radius:12px;border:0;font-weight:900}
+.pct{display:flex;gap:6px;margin:8px 0}.pct div{flex:1;text-align:center;padding:6px;background:#fff;border:1px solid #cbd8f5;border-radius:20px;font-size:11px;cursor:pointer}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#0a1e3c;display:flex;justify-content:space-around;padding:6px 0;z-index:20}
+.nav div{color:#fff;opacity:.5;text-align:center;font-size:10px;cursor:pointer;padding:4px 10px}.nav div.active{opacity:1;color:#f3ba2f;background:#132c54;border-radius:10px}
+.chart{height:120px;background:#f8faff;border-radius:12px;margin:10px 0;position:relative;overflow:hidden}
 </style></head><body>
-<div class="header"><div style="display:flex;align-items:center;gap:8px"><div class="binance-icon">⬥</div><b>Uno</b></div><div style="font-size:11px">Multi-Chain • World + Polygon</div></div>
+<div class="header"><div class="badge"><div class="iconB">⬥</div> Uno</div><div style="font-size:10px">0x0190...438c • World + Polygon</div></div>
 
-<div class="totalCard"><div style="font-size:12px;opacity:.8">Tu Portafolio Total</div><div class="total" id="totalUsd">$0.00 USD</div><div class="small" style="color:#fff;opacity:.7">World: 0x0190...438c | Poly: 0xaa3a...1aa2</div></div>
+<div id="viewBilletera">
+<div class="totalCard"><div style="font-size:11px;opacity:.8">Tu Portafolio Total</div><div class="total" id="totalUsd">$0.00 USD</div><div class="small" style="color:#fff">Misma wallet para World Chain y Polygon</div></div>
+<div class="tabTop"><div class="on" id="tTok" onclick="showTab('tok')">Tokens</div><div id="tNft" onclick="showTab('nft')">NFTs</div></div>
+<div class="card"><div id="tokenList"><div class="small">Cargando saldos reales...</div></div></div>
+</div>
 
-<div class="chainTab"><div id="cW" class="on" onclick="setChain('world')">World Chain</div><div id="cP" onclick="setChain('polygon')">Polygon</div><div id="cB" onclick="setChain('both')">Cross-Chain</div></div>
+<div id="viewIntercambio" style="display:none">
+<div class="card"><h3 style="margin:0">Intercambio</h3>
+<div class="swapBox"><div style="display:flex;justify-content:space-between"><b>Vender</b><select id="fromSel" onchange="calc()"></select></div><input id="fromAmt" type="number" placeholder="0.0" oninput="calc()"><div class="small" id="fromInfo">Saldo: 0 • $0</div><div class="pct"><div onclick="setPct(25)">25%</div><div onclick="setPct(50)">50%</div><div onclick="setPct(75)">75%</div><div onclick="setPct(100)">100%</div></div></div>
+<div style="text-align:center">↕️</div>
+<div class="swapBox"><div style="display:flex;justify-content:space-between"><b>Comprar</b><select id="toSel" onchange="calc()"></select></div><input id="toAmt" readonly placeholder="0.0"><div class="small" id="toInfo"></div></div>
+<div class="small" id="rateInfo" style="text-align:center;margin:6px"></div>
+<button class="btn" onclick="doSwap()">Intercambiar</button></div>
+</div>
 
-<div class="card"><div style="display:flex;justify-content:space-between"><b>Tokens</b><span style="font-size:11px;color:#1e3cff">NFTs</span></div><div id="list"></div></div>
+<div id="viewEnviar" style="display:none">
+<div class="card"><h3 style="margin:0">Enviar a billetera externa</h3><div class="small">Binance, Uniswap, etc.</div>
+<div class="swapBox"><div class="small">Cantidad</div><div style="display:flex;gap:8px"><input id="sendAmt" type="number" placeholder="0.0"><select id="sendTok"></select></div><div class="small" id="sendBal"></div><div class="pct"><div onclick="setSendPct(25)">25%</div><div onclick="setSendPct(50)">50%</div><div onclick="setSendPct(75)">75%</div><div onclick="setSendPct(100)">100%</div></div></div>
+<div class="small">Enviar a</div><input id="toAddr" placeholder="Recipient Address / Binance 0xaa3a... / Uniswap" style="background:#eef4ff;border-radius:10px;padding:12px;font-size:13px;margin:6px 0">
+<button class="btn" onclick="sendTo()">Enviar ↗️</button>
+<div class="small" style="margin-top:6px">Si envías Polygon a 0x0190...438c caerá en tu Uno Intercambio, no en Binance. Para Binance usa 0xaa3a...1aa2</div></div>
+</div>
 
-<div class="card"><h3 style="margin:0 0 8px 0">Intercambio</h3>
-<div class="swapBox"><div class="small">Vendes</div><div style="display:flex;gap:6px"><input id="fAmt" type="number" placeholder="0.0" oninput="calc()"><select id="fTok" onchange="calc()"></select></div><div id="fUsd" class="small"></div></div>
-<div style="text-align:center;font-size:11px">⬇️ <span id="bridge">Misma red</span> ⬇️</div>
-<div class="swapBox"><div class="small">Recibes</div><div style="display:flex;gap:6px"><input id="tAmt" readonly placeholder="0.0"><select id="tTok" onchange="calc()"></select></div><div id="tUsd" class="small"></div></div>
-<div id="rate" class="small"></div><button class="btn" onclick="doSwap()">Intercambiar Ahora</button></div>
+<div id="viewToken" style="display:none" class="card"></div>
 
-<div class="nav"><div class="on">🏠<br>Billetera</div><div>🖼️<br>NFT</div><div>🔄<br>Intercambio</div><div>💲<br>Ganar</div><div>☰<br>Menú</div></div>
+<div class="nav"><div class="active" id="nB" onclick="nav('billetera')">🏠<br>Billetera</div><div id="nN" onclick="nav('nft')">🖼️<br>NFT</div><div id="nI" onclick="nav('intercambio')">🔄<br>Intercambio</div><div id="nG" onclick="nav('ganar')">💲<br>Ganar</div><div id="nM" onclick="nav('menu')">☰<br>Menú</div></div>
 
 <script type="module">
 import {createPublicClient, http, formatUnits} from 'https://esm.sh/viem@2.21.0';
-const WLD='0x019001d46cd3155ef045a41f4c359c040595438c';
-const POLY='0xaa3a4dbfceb16c45bcc73091735b0696a59e1aa2';
+const WALLET='0x019001d46cd3155ef045a41f4c359c040595438c';
+const BINANCE_POLY='0xaa3a4dbfceb16c45bcc73091735b0696a59e1aa2';
 const CHAINS={
- world:{id:480,rpc:['https://worldchain-mainnet.g.alchemy.com/public','https://480.rpc.thirdweb.com'],wallet:WLD,tokens:[
-  {s:'WLD',a:'0x2cFc044F96D5C3963737f6cE6eCA8F8c7A4c6a6e',d:18,cg:'worldcoin-wld',icon:'W'},
-  {s:'USDC',a:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d',d:6,cg:'usd-coin',icon:'$'},
-  {s:'WETH',a:'0x4200000000000000000000000000000000000042',d:18,cg:'weth',icon:'E'},
+ world:{id:480,rpcs:['https://worldchain-mainnet.g.alchemy.com/public','https://worldchain.drpc.org'],tokens:[
+  {s:'WLD',a:'0x2cFc044F96D5C3963737f6cE6eCA8F8c7A4c6a6e',d:18,cg:'worldcoin-wld'},
+  {s:'USDC',a:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d',d:6,cg:'usd-coin'},
+  {s:'WETH',a:'0x4200000000000000000000000000000000000042',d:18,cg:'weth'},
  ]},
- polygon:{id:137,rpc:['https://polygon-rpc.com','https://137.rpc.thirdweb.com'],wallet:POLY,tokens:[
-  {s:'POL',a:'native',d:18,cg:'matic-network',icon:'P'},
-  {s:'USDT',a:'0xc2132D05D31c914a87C6611C10748AEb04B58e8F',d:6,cg:'tether',icon:'T'},
-  {s:'USDC',a:'0x3c499c542cEF5E3811e1192ce70dC03d5c3352',d:6,cg:'usd-coin',icon:'$'},
-  {s:'DIAMANTE',a:'0x0000000000000000000000000000000000000000',d:18,cg:'tether',icon:'D'},
+ polygon:{id:137,rpcs:['https://polygon-rpc.com','https://137.rpc.thirdweb.com'],tokens:[
+  {s:'POL',a:'native',d:18,cg:'matic-network'},
+  {s:'USDT',a:'0xc2132D05D31c914a87C6611C10748AEb04B58e8F',d:6,cg:'tether'},
+  {s:'USDC',a:'0x3c499c542cEF5E3811e1192ce70dC03d5c3352',d:6,cg:'usd-coin'},
+  {s:'WLD',a:'0x0000000000000000000000000000000000000000',d:18,cg:'worldcoin-wld'},
  ]}
 };
-let prices={}, mode='world', bals={};
-async function fetchPrices(){
- try{const ids=[...new Set([...CHAINS.world.tokens,...CHAINS.polygon.tokens].map(t=>t.cg))].join(',');const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd,usd_24h_change`);const j=await r.json();Object.keys(CHAINS).forEach(n=>CHAINS[n].tokens.forEach(t=>{prices[t.s]={price:j[t.cg]?.usd||1,change:j[t.cg]?.usd_24h_change||0}}));}catch(e){prices={WLD:{price:0.9,change:-2.35},USDC:{price:1,change:0},USDT:{price:1,change:0},POL:{price:0.45,change:1.02},DIAMANTE:{price:0.02,change:5},WETH:{price:2800,change:-1}};}
-}
-async function getBal(client, token, wallet){
+let prices={}, balances={}, currentTab='billetera';
+
+async function loadPrices(){
  try{
-  if(token.a=='native'||token.a=='0x0000000000000000000000000000000000000000'){const b=await client.getBalance({address:wallet});return parseFloat(formatUnits(b,18));}
-  const b=await client.readContract({address:token.a,abi:[{inputs:[{name:'o',type:'address'}],name:'balanceOf',outputs:[{name:'',type:'uint256'}],type:'function'}],functionName:'balanceOf',args:[wallet]});return parseFloat(formatUnits(b,token.d));
- }catch(e){return 0;}
+  const ids=[...new Set([...CHAINS.world.tokens,...CHAINS.polygon.tokens].map(t=>t.cg))].join(',');
+  const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd,usd_24h_change,usd_market_cap,usd_24h_vol`);
+  const j=await r.json();
+  CHAINS.world.tokens.forEach(t=>{const d=j[t.cg]||{};prices[t.s]={price:d.usd||1,change:d.usd_24h_change||0,mcap:d.usd_market_cap||0,vol:d.usd_24h_vol||0}});
+  CHAINS.polygon.tokens.forEach(t=>{if(!prices[t.s]){const d=j[t.cg]||{};prices[t.s]={price:d.usd||1,change:d.usd_24h_change||0,mcap:d.usd_market_cap||0,vol:d.usd_24h_vol||0}}});
+ }catch(e){prices={WLD:{price:0.352,change:-2.29,mcap:1268300000,vol:266080},USDC:{price:1,change:0.01,mcap:0,vol:0},USDT:{price:1,change:0,mcap:0,vol:0},POL:{price:0.45,change:1.02,mcap:0,vol:0},WETH:{price:2850,change:-1.5,mcap:0,vol:0}};}
 }
-async function load(){
- await fetchPrices();
+
+async function fetchBal(chain, token){
+ for(let rpc of CHAINS[chain].rpcs){
+  try{
+   const client=createPublicClient({chain:{id:CHAINS[chain].id,rpcUrls:{default:{http:[rpc]}}},transport:http()});
+   if(token.a==='native'||token.a==='0x0000000000000000000000000000000000000000'){
+    const b=await client.getBalance({address:WALLET}); return parseFloat(formatUnits(b,18));
+   } else {
+    const b=await client.readContract({address:token.a,abi:[{inputs:[{name:'o',type:'address'}],name:'balanceOf',outputs:[{name:'',type:'uint256'}],type:'function'}],functionName:'balanceOf',args:[WALLET]}); return parseFloat(formatUnits(b,token.d));
+   }
+  }catch(e){continue;}
+ }
+ return 0;
+}
+
+async function loadAll(){
+ await loadPrices();
  let html='', total=0;
- for(let net of (mode=='both'?['world','polygon']:[mode])){
-  const rpc=CHAINS[net].rpc[0];
-  const client=createPublicClient({chain:{id:CHAINS[net].id,rpcUrls:{default:{http:[rpc]}}},transport:http()});
+ for(let net of ['world','polygon']){
+  html+=`<div style="font-size:11px;color:#2a4bff;font-weight:900;margin-top:8px">${net.toUpperCase()} - ${WALLET.slice(0,6)}...</div>`;
   for(let t of CHAINS[net].tokens){
-   const bal=await getBal(client,t,CHAINS[net].wallet);
-   const p=prices[t.s]?.price||1; const ch=prices[t.s]?.change||0; total+=bal*p;
-   const usd=(bal*p).toFixed(4);
-   html+=`<div class="token"><div style="display:flex;gap:10px;align-items:center"><div class="icon">${t.icon}</div><div><b>${t.s}</b><div class="small">${bal.toFixed(4)} ${t.s} • ${net}</div></div></div><div style="text-align:right"><div>$ ${usd}</div><div class="small ${ch>=0?'green':'red'}">${ch>=0?'↑':'↓'} ${Math.abs(ch).toFixed(2)}%</div></div></div>`;
-   bals[`${net}_${t.s}`]=bal;
+   const bal=await fetchBal(net,t); balances[`${net}_${t.s}`]=bal;
+   const p=prices[t.s]||{price:1,change:0}; total+=bal*p.price;
+   html+=`<div class="token" onclick="openToken('${net}','${t.s}')"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">${t.s[0]}</div><div><b>${t.s}</b><div class="small">${bal.toFixed(4)} ${t.s} • ${net}</div></div></div><div style="text-align:right"><div>$${(bal*p.price).toFixed(4)}</div><div class="small ${p.change>=0?'green':'red'}">${p.change>=0?'↑':'↓'} ${Math.abs(p.change).toFixed(2)}%</div></div></div>`;
   }
  }
  document.getElementById('totalUsd').innerText=`$${total.toFixed(2)} USD`;
- document.getElementById('list').innerHTML=html||'<div class="small">Sin saldo - 0.0000</div>';
- fill(); calc();
+ document.getElementById('tokenList').innerHTML=html;
+ const opts=Object.keys(balances).map(k=>`<option value="${k}">${k.replace('_',' ')}</option>`).join('');
+ document.getElementById('fromSel').innerHTML=opts; document.getElementById('toSel').innerHTML=opts; document.getElementById('sendTok').innerHTML=opts;
+ if(Object.keys(balances).length>0){document.getElementById('fromSel').selectedIndex=0; document.getElementById('toSel').selectedIndex=Math.min(1,Object.keys(balances).length-1); document.getElementById('sendTok').selectedIndex=0;}
+ calc();
 }
-function fill(){
- const f=document.getElementById('fTok'), t=document.getElementById('tTok');let o='';
- const nets=mode=='both'?['world','polygon']:[mode];
- nets.forEach(n=>CHAINS[n].tokens.forEach(x=>o+=`<option value="${n}_${x.s}">${x.s} - ${n}</option>`));
- f.innerHTML=o; t.innerHTML=o; if(f.options.length>0){f.selectedIndex=0; if(t.options.length>1) t.selectedIndex=1;}
+
+window.calc=()=>{
+ const f=document.getElementById('fromSel').value, t=document.getElementById('toSel').value; if(!f||!t)return;
+ const fs=f.split('_')[1], ts=t.split('_')[1]; const fp=prices[fs]?.price||1, tp=prices[ts]?.price||1;
+ const amt=parseFloat(document.getElementById('fromAmt').value)||0; const out=fp/tp*amt;
+ document.getElementById('toAmt').value=out?out.toFixed(6):''; document.getElementById('fromInfo').innerText=`Saldo: ${balances[f]?.toFixed(4)||0} • $${(amt*fp).toFixed(2)}`; document.getElementById('rateInfo').innerText=amt?`1 ${fs} = ${(fp/tp).toFixed(6)} ${ts} • Volatilidad 24h: ${prices[fs]?.change?.toFixed(2)}%`:'';
 }
-window.setChain=(m)=>{mode=m;document.getElementById('cW').className=m=='world'?'on':'';document.getElementById('cP').className=m=='polygon'?'on':'';document.getElementById('cB').className=m=='both'?'on':'';document.getElementById('bridge').innerText=m=='both'?'BRIDGE World ↔ Polygon':'Misma red';load();}
-window.calc=()=>{const f=document.getElementById('fTok').value,t=document.getElementById('tTok').value,amt=parseFloat(document.getElementById('fAmt').value)||0;if(!f||!t)return;const fs=f.split('_')[1],ts=t.split('_')[1];const fp=prices[fs]?.price||1,tp=prices[ts]?.price||1;const out=fp/tp*amt;document.getElementById('tAmt').value=out?out.toFixed(6):'';document.getElementById('fUsd').innerText=amt?`≈ $${(amt*fp).toFixed(2)}`:'';document.getElementById('tUsd').innerText=out?`≈ $${(out*tp).toFixed(2)}`:'';document.getElementById('rate').innerText=amt?`1 ${fs} = ${(fp/tp).toFixed(6)} ${ts}`:'';}
-window.doSwap=()=>{const f=document.getElementById('fTok').value,a=document.getElementById('fAmt').value;if(!a)return alert('Pon cantidad');const [fn][fs]=f.split('_'),[tn][ts]=document.getElementById('tTok').value.split('_');if(fn!=tn){window.open(`https://li.fi/?fromChain=${CHAINS[fn].id}&toChain=${CHAINS[tn].id}&fromToken=${fs}&toToken=${ts}&fromAmount=${a}`,'_blank');}else alert(`Intercambio ${a} ${fs} → ${ts} en ${fn}`);};
-load();
+window.setPct=(p)=>{const f=document.getElementById('fromSel').value; const bal=balances[f]||0; document.getElementById('fromAmt').value=(bal*p/100).toFixed(6); calc();};
+window.setSendPct=(p)=>{const k=document.getElementById('sendTok').value; const bal=balances[k]||0; document.getElementById('sendAmt').value=(bal*p/100).toFixed(6);};
+window.nav=(v)=>{
+ document.getElementById('viewBilletera').style.display=v=='billetera'?'block':'none';
+ document.getElementById('viewIntercambio').style.display=v=='intercambio'?'block':'none';
+ document.getElementById('viewEnviar').style.display=v=='enviar'||v=='ganar'||v=='menu'?'block':'none';
+ document.getElementById('viewToken').style.display='none';
+ document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));
+ if(v=='billetera')document.getElementById('nB').classList.add('active');
+ if(v=='intercambio')document.getElementById('nI').classList.add('active');
+ if(v=='nft')alert('NFTs próximamente');
+ if(v=='enviar'||v=='ganar'||v=='menu')document.getElementById('viewEnviar').style.display='block';
+ if(v=='intercambio')calc();
+};
+window.showTab=(t)=>{document.getElementById('tTok').className=t=='tok'?'on':'';document.getElementById('tNft').className=t=='nft'?'on':'';};
+window.openToken=(net,sym)=>{
+ const p=prices[sym]||{price:0.352,change:-2.29,vol:266080,mcap:1268300000}; const bal=balances[`${net}_${sym}`]||0;
+ document.getElementById('viewBilletera').style.display='none'; document.getElementById('viewIntercambio').style.display='none'; document.getElementById('viewEnviar').style.display='none';
+ const v=document.getElementById('viewToken'); v.style.display='block';
+ v.innerHTML=`<h2>Token Details</h2><div class="token"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">${sym[0]}</div><div><b>${sym}</b><div class="small">${net}</div></div></div><div style="text-align:right"><b>$${p.price}</b><div class="small ${p.change>=0?'green':'red'}">↓ ${p.change}%</div></div></div>
+ <div class="chart"><svg width="100%" height="100%"><polyline points="0,80 50,70 100,75 150,60 200,65 250,20 270,10 290,30 310,40 330,35 350,45 380,70 400,65 420,55 440,60 460,30 480,25 500,30 520,20 540,35 560,45" fill="none" stroke="#2a4bff" stroke-width="2"/></svg></div>
+ <div style="display:flex;justify-content:space-around;font-size:11px"><span>24H</span><span>7D</span><span>1M</span><span>MAX</span></div>
+ <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:11px"><div>Volumen 24h<br><b>$${(p.vol/1000).toFixed(1)}K</b></div><div>Capitalización<br><b>$${(p.mcap/1e9).toFixed(3)}B</b></div><div>Liquidez<br><b>$${(p.mcap*0.0006).toFixed(1)}K</b></div></div>
+ <div class="card" style="margin:10px 0">Tu saldo<br><b>${bal.toFixed(4)} ${sym} $ ${(bal*p.price).toFixed(3)}</b></div>
+ <div style="display:flex;gap:8px"><button class="btn2" style="background:#f3ba2f" onclick="nav('intercambio')">Comprar +</button><button class="btn2" style="background:#0a1e3c;color:#fff" onclick="nav('enviar')">Enviar ↗️</button></div>
+ <div style="text-align:center;margin-top:10px" class="small" onclick="nav('billetera')">← Volver</div>`;
+};
+window.doSwap=()=>{const f=document.getElementById('fromSel').value,a=document.getElementById('fromAmt').value;if(!a)return alert('Pon cantidad');alert(`Swap ${a} ${f} - Si es cross-chain World ↔ Polygon usa Li.Fi, caerá a tu wallet Uno ${WALLET}`);};
+window.sendTo=()=>{const addr=document.getElementById('toAddr').value, amt=document.getElementById('sendAmt').value, tok=document.getElementById('sendTok').value; if(!addr||!amt)return alert('Pon dirección y cantidad'); alert(`Enviar ${amt} ${tok} a ${addr}\nSi es ${WALLET} cae en Uno Intercambio.\nSi es ${BINANCE_POLY} cae en Binance.`);};
+loadAll();
 </script></body></html>

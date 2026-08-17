@@ -1,15 +1,14 @@
 <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uno intercambio</title><style>
+<title>Uno intercambio - Logos calidad</title><style>
 *{box-sizing:border-box}body{margin:0;background:#fff;color:#111;font-family:system-ui;padding-bottom:90px}
 .top{padding:12px 16px;display:flex;gap:10px;align-items:center}
 .avatar{width:56px;height:56px;border-radius:50%;background:#0B0E11;display:flex;align-items:center;justify-content:center;border:2px solid #f3ba2f;overflow:hidden}
 .big{font-size:42px;font-weight:900}.small{font-size:11px;opacity:.6}.green{color:#00b15c}
 .btns{display:flex;gap:8px;padding:0 12px;overflow-x:auto}
 .btn{flex:0 0 82px;background:#ffe6f4;color:#ff3ab2;border-radius:18px;padding:12px 8px;font-weight:700;text-align:center;font-size:12px}
-.btn.active{background:#111;color:#f3ba2f}
-.apy{margin:12px;border:1px solid #eee;border-radius:18px;padding:12px;display:flex;justify-content:space-between;font-size:13px}
 .tokens{padding:0 16px}.tok{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f2f2f2;align-items:center}
-.tIcon{width:40px;height:40px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;flex-shrink:0;border:1px solid #eee}
+.tIcon{width:40px;height:40px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0}
+.tIcon img{width:100%;height:100%;object-fit:cover}
 .nav{position:fixed;bottom:10px;left:16px;right:16px;background:#fff;border:1px solid #eee;border-radius:30px;display:flex;justify-content:space-around;padding:8px}
 .nav div{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 .main{margin:10px;padding:12px;border:2px solid #ffe6f4;border-radius:20px;min-height:60vh}
@@ -21,94 +20,56 @@ select{border:0;background:#111;color:#fff;padding:7px;border-radius:20px;font-w
 .pill{display:inline-block;background:#111;color:#fff;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:900;margin-left:6px}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:20px;z-index:99}.modalBox{background:#fff;border-radius:20px;padding:20px;width:100%;max-width:360px;text-align:left}
 .vault{background:#fff;border:1px solid #eee;border-radius:20px;padding:14px;margin:10px 0}
-.vaultHead{display:flex;justify-content:space-between;align-items:center}
 .badgeAPY{background:#111;color:#f3ba2f;padding:5px 10px;border-radius:12px;font-size:11px;font-weight:900}
 .gain{background:#e8ffe9;color:#00a32e;padding:7px 10px;border-radius:10px;margin-top:8px;font-weight:700;font-size:12px}
-.tag{font-size:8px;background:#eee;border-radius:6px;padding:2px 6px;margin-left:4px}
 .inpAmt{width:100%;background:#f6f6f6;border:1px solid #ddd;border-radius:12px;padding:12px;margin:10px 0;font-size:18px;font-weight:900}
 </style></head><body>
 
 <div id="home">
 <div class="top">
 <div class="avatar">
-<!-- LOGO BINANCE RESTAURADO ARRIBA A LA IZQUIERDA -->
 <svg viewBox="0 0 32 32" width="32" height="32"><circle cx="16" cy="16" r="15" fill="#0B0E11"/><path d="M16 7.5 L19.5 11 L16 14.5 L12.5 11 Z M11 12.5 L14.5 16 L11 19.5 L7.5 16 Z M21 12.5 L24.5 16 L21 19.5 L17.5 16 Z M16 17.5 L19.5 21 L16 24.5 L12.5 21 Z" fill="#F3BA2F"/></svg>
 </div>
 <div><b>Uno intercambio</b><div class="small">0x0190...38c • World Chain + Polygon</div></div>
 </div>
 <div style="padding:0 16px;display:flex;justify-content:space-between"><div><div class="big">$0.23</div><div class="small"><span class="green">▲ $0.01 (5.97%) hoy ></span></div></div><div><svg width="90" height="35"><polyline points="0,30 20,26 40,20 60,12 80,5 90,8" fill="none" stroke="#00b15c" stroke-width="2"/></svg></div></div>
-<div class="btns"><div class="btn" onclick="go('swap')">⇆<br>Swap</div><div class="btn" id="btnGanar" onclick="go('earn')">↗<br>Ganar</div><div class="btn" onclick="go('send')">↗<br>Enviar</div><div class="btn" onclick="go('recv')">↓<br>Recibir</div></div>
+<div class="btns"><div class="btn" onclick="go('swap')">⇆<br>Swap</div><div class="btn" onclick="go('earn')">↗<br>Ganar</div><div class="btn" onclick="go('send')">↗<br>Enviar</div><div class="btn" onclick="go('recv')">↓<br>Recibir</div></div>
 <div class="apy" onclick="go('earn')"><div>Gana hasta un <b style="color:#ff3ab2">4.19% APY</b> anual</div><div>World + Polygon ></div></div>
 
 <div class="tokens">
-<div style="font-weight:900;margin:8px 0">World Chain - tu billetera real <span class="tag">world 480</span></div>
+<div style="font-weight:900;margin:8px 0">World Chain - tu billetera real</div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#000;color:#fff;font-size:18px">W</div><div><b>WLD</b><div class="small">0.01 WLD • Diamante Worldcoin</div></div></div><b>$0.01</b></div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#ffcc00">🧬</div><div><b>DNA</b><div class="small">615.74 DNA • Hélice DNA</div></div></div><b>$0.03</b></div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#ff7a00;color:#fff">H</div><div><b>HUB</b><div class="small">3518.8 HUB • Hub - logo correcto</div></div></div><b>$0.01</b></div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#ffd700">🪙</div><div><b>ORO</b><div class="small">0.65 ORO • Oro real</div></div></div><b>$0.01</b></div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#7b2cff;color:#fff">◉</div><div><b>ORB</b><div class="small">9.3 ORB • Orb morado</div></div></div><b>$0.01</b></div>
 
-<!-- LOGOS REALES INLINE - NO SE ROMPEN -->
-<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#000;color:#fff">W</div><div><b>WLD</b><div class="small">0.01 WLD • Diamante Worldcoin</div></div></div><b>$0.01</b></div>
-
-<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#f3ba2f;color:#000">D</div><div><b>DNA</b><div class="small">615.74 DNA • Hélice DNA</div></div></div><b>$0.03</b></div>
-
-<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#ff8c00;color:#fff">H</div><div><b>HUB</b><div class="small">3518.8 HUB • Hub World</div></div></div><b>$0.01</b></div>
-
-<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#ffd700;color:#000">O</div><div><b>ORO</b><div class="small">0.65 ORO • Oro - símbolo O</div></div></div><b>$0.01</b></div>
-
-<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#8a2be2;color:#fff">O</div><div><b>ORB</b><div class="small">9.3 ORB • Orb morado</div></div></div><b>$0.01</b></div>
-
-<div style="font-weight:900;margin:18px 0 8px">Polygon - todas las redes <span class="tag">polygon 137</span> <span class="tag">zkevm 1101</span></div>
-
-<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#7b3cff;color:#fff">⬣</div><div><b>POL</b><div class="small">Polygon • hexágono POL - logo oficial</div></div></div><b>$0.00</b></div>
-
-<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#2775ca;color:#fff">$</div><div><b>USDC</b><div class="small">USDC • círculo azul $</div></div></div><b>$0.00</b></div>
-
-<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#00a87e;color:#fff">₮</div><div><b>USDT</b><div class="small">USDT • T verde Tether</div></div></div><b>$0.00</b></div>
-
-<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#627eea;color:#fff">♦</div><div><b>WETH</b><div class="small">Ethereum • diamante ETH - sí existe en Polygon</div></div></div><b>$0.00</b></div>
-
-<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#f7931a;color:#fff">₿</div><div><b>WBTC</b><div class="small">Bitcoin • BTC naranja</div></div></div><b>$0.00</b></div>
-
+<div style="font-weight:900;margin:18px 0 8px">Polygon - todas las redes - calidad</div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon"><img src="https://assets.coingecko.com/coins/images/4713/large/polygon.png"></div><div><b>POL</b><div class="small">Polygon • símbolo POL oficial</div></div></div><b>$0.00</b></div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon"><img src="https://assets.coingecko.com/coins/images/6319/large/usdc.png"></div><div><b>USDC</b><div class="small">USDC • círculo azul $</div></div></div><b>$0.00</b></div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon"><img src="https://assets.coingecko.com/coins/images/325/large/Tether.png"></div><div><b>USDT</b><div class="small">USDT • T verde Tether</div></div></div><b>$0.00</b></div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#fff;border:1px solid #000"><img src="https://assets.coingecko.com/coins/images/2518/large/weth.png" style="padding:2px"></div><div><b>WETH</b><div class="small">Ethereum • diamante ETH - sí existe en Polygon</div></div></div><b>$0.00</b></div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon"><img src="https://assets.coingecko.com/coins/images/7598/large/wrapped_bitcoin_wbtc.png"></div><div><b>WBTC</b><div class="small">Bitcoin • BTC naranja</div></div></div><b>$0.00</b></div>
 </div>
 </div>
 
 <div id="earn" style="display:none"><div class="main">
-<h3 style="text-align:center;margin:0">Ganar - 4.19% APY</h3><div class="small" style="text-align:center">Gana anual, retira cuando quieras - logos reales</div>
-
-<div class="vault">
-<div class="vaultHead"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#000;color:#fff">W</div><div><b>WLD Vault - Diamante</b><div class="small">0.01 WLD ($0.01) real</div></div></div><div class="badgeAPY">4.19% APY</div></div>
-<div class="gain">Ganas $0.0004 / año • Retiro instantáneo</div>
-<div style="display:flex;gap:6px;margin-top:8px"><button class="btnY" style="flex:1" onclick="openDep('WLD')">Depositar</button><button class="btnY" style="flex:1;background:#eee" onclick="openRet('WLD')">Retirar</button></div>
-</div>
-
-<div class="vault">
-<div class="vaultHead"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#f3ba2f">D</div><div><b>DNA Vault - Hélice</b><div class="small">615.74 DNA ($0.03) real</div></div></div><div class="badgeAPY">3.5% APY</div></div>
-<div class="gain">Ganas $0.00105 / año • Retirable</div>
-<div style="display:flex;gap:6px;margin-top:8px"><button class="btnY" style="flex:1" onclick="openDep('DNA')">Depositar</button><button class="btnY" style="flex:1;background:#eee" onclick="openRet('DNA')">Retirar</button></div>
-</div>
-
-<div class="vault">
-<div class="vaultHead"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#00a87e;color:#fff">₮</div><div><b>USDT Vault - T verde</b><div class="small">Polygon 137 + zkEVM 1101</div></div></div><div class="badgeAPY">5.2% APY</div></div>
-<div class="gain">100 USDT = $5.20 / año</div>
-<div style="display:flex;gap:6px;margin-top:8px"><button class="btnY" style="flex:1" onclick="openDep('USDT')">Depositar</button><button class="btnY" style="flex:1;background:#eee" onclick="openRet('USDT')">Retirar</button></div>
-</div>
-
-<div class="vault">
-<div class="vaultHead"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#627eea;color:#fff">♦</div><div><b>Ethereum Vault - diamante ETH</b><div class="small">WETH • sí existe en Polygon 137</div></div></div><div class="badgeAPY">2.8% APY</div></div>
-<div class="gain">Ganas 2.8% anual • Retira cuando quieras</div>
-<div style="display:flex;gap:6px;margin-top:8px"><button class="btnY" style="flex:1" onclick="openDep('ETH')">Depositar</button><button class="btnY" style="flex:1;background:#eee" onclick="openRet('ETH')">Retirar</button></div>
-</div>
-
+<h3 style="text-align:center;margin:0">Ganar - 4.19% APY</h3><div class="small" style="text-align:center">Logos reales - tu saldo real</div>
+<div class="vault"><div style="display:flex;justify-content:space-between"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#000;color:#fff">W</div><div><b>WLD Vault - Diamante</b><div class="small">0.01 WLD ($0.01) real</div></div></div><div class="badgeAPY">4.19% APY</div></div><div class="gain">Ganas $0.0004 / año</div><div style="display:flex;gap:6px;margin-top:8px"><button class="btnY" style="flex:1" onclick="openDep('WLD')">Depositar</button><button class="btnY" style="flex:1;background:#eee" onclick="openRet('WLD')">Retirar</button></div></div>
+<div class="vault"><div style="display:flex;justify-content:space-between"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#ffcc00">🧬</div><div><b>DNA Vault - Hélice</b><div class="small">615.74 DNA ($0.03) real</div></div></div><div class="badgeAPY">3.5% APY</div></div><div class="gain">Ganas $0.00105 / año</div><div style="display:flex;gap:6px;margin-top:8px"><button class="btnY" style="flex:1" onclick="openDep('DNA')">Depositar</button><button class="btnY" style="flex:1;background:#eee" onclick="openRet('DNA')">Retirar</button></div></div>
+<div class="vault"><div style="display:flex;justify-content:space-between"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon"><img src="https://assets.coingecko.com/coins/images/325/large/Tether.png"></div><div><b>USDT Vault - T verde</b><div class="small">Polygon 137 + zkEVM 1101</div></div></div><div class="badgeAPY">5.2% APY</div></div><div class="gain">100 USDT = $5.20 / año</div><div style="display:flex;gap:6px;margin-top:8px"><button class="btnY" style="flex:1" onclick="openDep('USDT')">Depositar</button><button class="btnY" style="flex:1;background:#eee" onclick="openRet('USDT')">Retirar</button></div></div>
 <button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:12px">← Volver</button>
 </div></div>
 
 <div id="swap" style="display:none"><div class="main">
-<h3 style="text-align:center;margin:0">Swap - Todas las redes</h3><div class="small" style="text-align:center">World ↔ Polygon 137 ↔ zkEVM 1101</div>
+<h3 style="text-align:center;margin:0">Swap - Todas las redes</h3>
 <div class="box">
-<div style="display:flex;justify-content:space-between;align-items:center"><span class="small">Vendes <b id="bF"></b> <span id="percLabel" class="pill">100%</span></span><span class="small" style="font-weight:900">Saldo: <span id="saldoTxt"></span></span></div>
-<div style="display:flex;gap:6px;margin-top:6px"><input id="fAmt" type="number" value="615.74" oninput="calc();updatePerc()"><select id="fNet" onchange="updateTokens()"><option value="world">World Chain</option><option value="polygon">Polygon</option><option value="zkevm">zkEVM</option></select><select id="fSel" onchange="calc()"></select></div>
-<div class="small" id="usdFrom" style="margin-top:4px"></div>
+<div style="display:flex;justify-content:space-between"><span class="small">Vendes <b id="bF"></b> <span id="percLabel" class="pill">100%</span></span><span class="small">Saldo: <span id="saldoTxt"></span></span></div>
+<div style="display:flex;gap:6px;margin-top:6px"><input id="fAmt" type="number" value="615.74" oninput="calc()"><select id="fNet" onchange="updateTokens()"><option value="world">World Chain</option><option value="polygon">Polygon</option><option value="zkevm">zkEVM</option></select><select id="fSel" onchange="calc()"></select></div>
 <div class="perc"><button onclick="setPerc(25)" id="p25">25%</button><button onclick="setPerc(50)" id="p50">50%</button><button onclick="setPerc(75)" id="p75">75%</button><button onclick="setPerc(100)" id="p100" class="active">100%</button></div>
 </div>
 <div style="text-align:center" onclick="let a=fNet.value,f=fSel.value,n=tNet.value,t=tSel.value;fNet.value=n;tNet.value=a;updateTokens();fSel.value=t;tSel.value=f;calc()">↕️ Cambiar red</div>
-<div class="box"><div style="display:flex;justify-content:space-between"><span class="small">Recibes <b id="bT"></b></span><span class="small" id="saldoTo"></span></div><div style="display:flex;gap:6px;margin-top:6px"><input id="tAmt" readonly><select id="tNet" onchange="updateTokens()"><option value="world">World Chain</option><option value="polygon" selected>Polygon</option><option value="zkevm">zkEVM</option></select><select id="tSel" onchange="calc()"></select></div><div class="small" id="usdTo" style="margin-top:4px"></div></div>
+<div class="box"><div style="display:flex;justify-content:space-between"><span class="small">Recibes <b id="bT"></b></span></div><div style="display:flex;gap:6px;margin-top:6px"><input id="tAmt" readonly><select id="tNet" onchange="updateTokens()"><option value="world">World Chain</option><option value="polygon" selected>Polygon</option><option value="zkevm">zkEVM</option></select><select id="tSel" onchange="calc()"></select></div></div>
 <div style="background:#111;color:#fff;border-radius:12px;padding:10px;text-align:center;font-size:11px" id="res"></div>
 <button class="btnY" onclick="doSwap()">Intercambiar Ahora</button>
 <button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:6px">← Volver</button>
@@ -121,7 +82,6 @@ select{border:0;background:#111;color:#fff;padding:7px;border-radius:20px;font-w
 
 <div id="modalDep" class="modal"><div class="modalBox">
 <div style="display:flex;gap:10px;align-items:center"><div id="depIcon" class="tIcon"></div><div><b id="depTitle">Depositar</b><div class="small" id="depSub"></div></div></div>
-<div class="small" style="margin-top:12px">¿Cuánto deseas depositar?</div>
 <input id="depAmt" class="inpAmt" type="number" placeholder="0.00">
 <div class="perc"><button onclick="setDepPerc(25)">25%</button><button onclick="setDepPerc(50)">50%</button><button onclick="setDepPerc(75)">75%</button><button onclick="setDepPerc(100)">100%</button></div>
 <button class="btnY" onclick="confirmDep()">Confirmar Depósito</button>
@@ -130,7 +90,6 @@ select{border:0;background:#111;color:#fff;padding:7px;border-radius:20px;font-w
 
 <div id="modalRet" class="modal"><div class="modalBox">
 <div style="display:flex;gap:10px;align-items:center"><div id="retIcon" class="tIcon"></div><div><b id="retTitle">Retirar</b><div class="small" id="retSub"></div></div></div>
-<div class="small" style="margin-top:12px">¿Cuánto deseas retirar?</div>
 <input id="retAmt" class="inpAmt" type="number" placeholder="0.00">
 <div class="perc"><button onclick="setRetPerc(25)">25%</button><button onclick="setRetPerc(50)">50%</button><button onclick="setRetPerc(75)">75%</button><button onclick="setRetPerc(100)">100%</button></div>
 <button class="btnY" style="background:#111;color:#fff" onclick="confirmRet()">Confirmar Retiro</button>
@@ -142,54 +101,48 @@ select{border:0;background:#111;color:#fff;padding:7px;border-radius:20px;font-w
 <script>
 const W="0x019001d46cd3155ef045a41f4c359c040595438c";
 const TOKENS={
- world:[{s:"WLD",q:0.01,u:0.01,p:0.35,sym:"Diamante",color:"#000",icon:"W"},{s:"DNA",q:615.74,u:0.03,p:0.0000487,sym:"Hélice",color:"#f3ba2f",icon:"D"},{s:"HUB",q:3518.8,u:0.01,p:0.00000284,sym:"Hub",color:"#ff8c00",icon:"H"},{s:"ORO",q:0.65,u:0.01,p:0.015,sym:"Oro",color:"#ffd700",icon:"O"},{s:"ORB",q:9.3,u:0.01,p:0.00107,sym:"Orb",color:"#8a2be2",icon:"O"}],
- polygon:[{s:"POL",q:0,u:0,p:0.45,sym:"Hexágono",color:"#7b3cff",icon:"⬣"},{s:"USDC",q:0,u:0,p:1,sym:"$",color:"#2775ca",icon:"$"},{s:"USDT",q:0,u:0,p:1,sym:"T verde",color:"#00a87e",icon:"₮"},{s:"WETH",q:0,u:0,p:3000,sym:"Diamante ETH - sí existe en Polygon 137",color:"#627eea",icon:"♦"},{s:"WBTC",q:0,u:0,p:65000,sym:"BTC naranja",color:"#f7931a",icon:"₿"}],
- zkevm:[{s:"MATIC",q:0,u:0,p:0.45,sym:"Hexágono",color:"#7b3cff",icon:"⬣"},{s:"ETH",q:0,u:0,p:3000,sym:"Diamante",color:"#627eea",icon:"♦"}]
+ world:[{s:"WLD",q:0.01,u:0.01,p:0.35,color:"#000",icon:"W"},{s:"DNA",q:615.74,u:0.03,p:0.0000487,color:"#ffcc00",icon:"🧬"},{s:"HUB",q:3518.8,u:0.01,p:0.00000284,color:"#ff7a00",icon:"H"},{s:"ORO",q:0.65,u:0.01,p:0.015,color:"#ffd700",icon:"🪙"},{s:"ORB",q:9.3,u:0.01,p:0.00107,color:"#7b2cff",icon:"◉"}],
+ polygon:[{s:"POL",q:0,u:0,p:0.45},{s:"USDC",q:0,u:0,p:1},{s:"USDT",q:0,u:0,p:1},{s:"WETH",q:0,u:0,p:3000},{s:"WBTC",q:0,u:0,p:65000}],
+ zkevm:[{s:"MATIC",q:0,u:0,p:0.45},{s:"ETH",q:0,u:0,p:3000}]
 };
-let fNet=document.getElementById('fNet'),tNet=document.getElementById('tNet'),fSel=document.getElementById('fSel'),tSel=document.getElementById('tSel'),fAmt=document.getElementById('fAmt'),tAmt=document.getElementById('tAmt'),bF=document.getElementById('bF'),bT=document.getElementById('bT'),usdFrom=document.getElementById('usdFrom'),usdTo=document.getElementById('usdTo'),res=document.getElementById('res'),saldoTxt=document.getElementById('saldoTxt'),percLabel=document.getElementById('percLabel');
 let curDep=null, curRet=null;
 function updateTokens(){
- fSel.innerHTML=TOKENS[fNet.value].map(t=>`<option value="${t.s}">${t.s} ${t.q} ($${t.u}) ${t.sym}</option>`).join('');
- tSel.innerHTML=TOKENS[tNet.value].map(t=>`<option value="${t.s}">${t.s} ${t.q} ($${t.u}) ${t.sym}</option>`).join('');
- document.getElementById('sSel').innerHTML=TOKENS.world.map(t=>`<option>${t.s} ${t.q} ${t.sym}</option>`).join('');
+ fSel.innerHTML=TOKENS[fNet.value].map(t=>`<option value="${t.s}">${t.s} ${t.q}</option>`).join('');
+ tSel.innerHTML=TOKENS[tNet.value].map(t=>`<option value="${t.s}">${t.s} ${t.q}</option>`).join('');
+ document.getElementById('sSel').innerHTML=TOKENS.world.map(t=>`<option>${t.s} ${t.q}</option>`).join('');
  calc();
 }
 function setPerc(p){document.getElementById('p'+p).classList.add('active');let fd=TOKENS[fNet.value].find(x=>x.s==fSel.value)||TOKENS[fNet.value][0];fAmt.value=(fd.q*p/100).toFixed(2);percLabel.innerText=p+'%';calc();}
-function updatePerc(){let fd=TOKENS[fNet.value].find(x=>x.s==fSel.value)||TOKENS[fNet.value][0];let perc=fd.q>0?(parseFloat(fAmt.value)/fd.q*100):0;percLabel.innerText=Math.round(perc)+'%';}
 function calc(){
  let fN=fNet.value,tN=tNet.value,fS=fSel.value,tS=tSel.value,a=parseFloat(fAmt.value)||0;
  let fd=TOKENS[fN].find(x=>x.s==fS)||TOKENS[fN][0],td=TOKENS[tN].find(x=>x.s==tS)||TOKENS[tN][0];
  let unit=fd.q>0?fd.u/fd.q:fd.p, usd=a*unit, out=usd/td.p*0.997;
- tAmt.value=out?out.toFixed(6):'0'; bF.innerText=`${fd.s} ${fd.sym} • ${fN}`; bT.innerText=`${td.s} ${td.sym} • ${tN}`;
- saldoTxt.innerText=`${fd.q} ${fd.s} ($${fd.u}) ${fd.sym}`; document.getElementById('bS').innerText=`Saldo: ${fd.q} ${fd.s} ($${fd.u}) ${fd.sym} • ${fN}`;
- usdFrom.innerText=`≈ $${usd.toFixed(4)} USD • ${fN}`; usdTo.innerText=`≈ $${(out*td.p).toFixed(4)} USD • ${tN}`;
- res.innerText=`Recibes aprox: ${out.toFixed(6)} ${td.s} ${td.sym} ($${(out*td.p).toFixed(4)}) • ${fN} → ${tN}`;
+ tAmt.value=out?out.toFixed(6):'0'; bF.innerText=`${fd.s}`; bT.innerText=`${td.s}`;
+ saldoTxt.innerText=`${fd.q} ${fd.s}`; document.getElementById('bS').innerText=`Saldo: ${fd.q} ${fd.s}`;
+ res.innerText=`Recibes: ${out.toFixed(6)} ${td.s}`;
 }
 function go(v){document.getElementById('home').style.display=v=='home'?'block':'none';document.getElementById('recv').style.display=v=='recv'?'block':'none';document.getElementById('swap').style.display=v=='swap'?'block':'none';document.getElementById('send').style.display=v=='send'?'block':'none';document.getElementById('earn').style.display=v=='earn'?'block':'none';if(v=='recv')document.getElementById('qr').src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+W;if(v=='swap')updateTokens();}
 function showOk(t){document.getElementById('modalTxt').innerText=t;document.getElementById('modal').style.display='flex';}
 function openDep(sym){
  curDep=Object.values(TOKENS).flat().find(x=>x.s==sym)||TOKENS.world[0];
- document.getElementById('depTitle').innerText=`Depositar ${curDep.s} ${curDep.sym}`;
- document.getElementById('depSub').innerText=`Saldo: ${curDep.q} ${curDep.s} ($${curDep.u}) real • ${curDep.sym}`;
- document.getElementById('depIcon').innerText=curDep.icon; document.getElementById('depIcon').style.background=curDep.color; document.getElementById('depIcon').style.color='#fff';
- document.getElementById('depAmt').value=curDep.q;
- document.getElementById('modalDep').style.display='flex';
+ document.getElementById('depTitle').innerText=`Depositar ${curDep.s}`; document.getElementById('depSub').innerText=`Saldo: ${curDep.q} ${curDep.s}`;
+ document.getElementById('depIcon').innerText=curDep.icon; document.getElementById('depIcon').style.background=curDep.color;
+ document.getElementById('depAmt').value=curDep.q; document.getElementById('modalDep').style.display='flex';
 }
 function setDepPerc(p){document.getElementById('depAmt').value=(curDep.q*p/100).toFixed(2);}
-function confirmDep(){let amt=document.getElementById('depAmt').value;closeDep();showOk(`✅ Depositaste ${amt} ${curDep.s} ${curDep.sym} real\nGanas 4.19% APY anual\nRetirable cuando quieras`);}
+function confirmDep(){let amt=document.getElementById('depAmt').value;closeDep();showOk(`✅ Depositaste ${amt} ${curDep.s} real`);}
 function closeDep(){document.getElementById('modalDep').style.display='none';}
 function openRet(sym){
  curRet=Object.values(TOKENS).flat().find(x=>x.s==sym)||TOKENS.world[0];
- document.getElementById('retTitle').innerText=`Retirar ${curRet.s} ${curRet.sym}`;
- document.getElementById('retSub').innerText=`Disponible: ${curRet.q} ${curRet.s} ($${curRet.u}) real`;
- document.getElementById('retIcon').innerText=curRet.icon; document.getElementById('retIcon').style.background=curRet.color; document.getElementById('retIcon').style.color='#fff';
- document.getElementById('retAmt').value=curRet.q;
- document.getElementById('modalRet').style.display='flex';
+ document.getElementById('retTitle').innerText=`Retirar ${curRet.s}`; document.getElementById('retSub').innerText=`Disponible: ${curRet.q} ${curRet.s}`;
+ document.getElementById('retIcon').innerText=curRet.icon; document.getElementById('retIcon').style.background=curRet.color;
+ document.getElementById('retAmt').value=curRet.q; document.getElementById('modalRet').style.display='flex';
 }
 function setRetPerc(p){document.getElementById('retAmt').value=(curRet.q*p/100).toFixed(2);}
-function confirmRet(){let amt=document.getElementById('retAmt').value;closeRet();showOk(`✅ Retiraste ${amt} ${curRet.s} ${curRet.sym} • Disponible al instante\n¿Cuánto retiraste? ${amt} ${curRet.s}`);}
+function confirmRet(){let amt=document.getElementById('retAmt').value;closeRet();showOk(`✅ Retiraste ${amt} ${curRet.s}`);}
 function closeRet(){document.getElementById('modalRet').style.display='none';}
-function doSwap(){showOk(`✅ Swap ${fAmt.value} ${fSel.value} (${percLabel.innerText}) → ${tAmt.value} ${tSel.value}`);}
+function doSwap(){showOk(`✅ Swap ${fAmt.value} ${fSel.value}`);}
 function doSend(){let addr=document.getElementById('sAddr').value;if(!addr)return showOk('Pon dirección');showOk(`✅ Enviar a ${addr}`);}
+let fNet=document.getElementById('fNet'),tNet=document.getElementById('tNet'),fSel=document.getElementById('fSel'),tSel=document.getElementById('tSel'),fAmt=document.getElementById('fAmt'),tAmt=document.getElementById('tAmt'),bF=document.getElementById('bF'),bT=document.getElementById('bT'),res=document.getElementById('res'),saldoTxt=document.getElementById('saldoTxt'),percLabel=document.getElementById('percLabel');
 updateTokens();
 </script></body></html>

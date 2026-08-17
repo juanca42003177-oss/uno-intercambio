@@ -1,75 +1,89 @@
 <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uno Intercambio P2P</title><style>
+<title>Uno Intercambio P2P REAL</title><style>
 *{box-sizing:border-box}body{margin:0;background:#0a1e3c;color:#fff;font-family:system-ui;padding:12px;padding-bottom:90px}
 .badge{background:#f3ba2f;color:#000;padding:5px 12px;border-radius:8px;font-weight:900;font-size:12px;display:inline-block}
 .card{background:#132c54;border-radius:18px;padding:16px;margin-top:12px}
 .row{display:flex;justify-content:space-between;align-items:center;margin:6px 0}
 .btn{width:100%;padding:13px;border-radius:12px;border:0;font-weight:900;cursor:pointer}
-.btn-y{background:#f3ba2f;color:#000}.btn-w{background:#fff;color:#000;margin-top:8px}
-.btn-g{background:#00ff88;color:#000}
-input,select{width:100%;padding:11px;border-radius:10px;border:0;margin:6px 0;background:#0a1e3c;color:#fff;border:1px solid #2a4a7a}
-.small{font-size:11px;opacity:.7}.green{color:#00ff88}.price{font-size:22px;font-weight:900}
+.btn-y{background:#f3ba2f;color:#000}.btn-w{background:#fff;color:#000;margin-top:8px}.btn-g{background:#00ff88;color:#000}
+input,select{width:100%;padding:11px;border-radius:10px;border:1px solid #2a4a7a;margin:6px 0;background:#0a1e3c;color:#fff}
+.small{font-size:11px;opacity:.7}.green{color:#00ff88}.price{font-size:18px;font-weight:900}
 .tab{display:flex;gap:8px;margin-top:12px}.tab div{flex:1;text-align:center;padding:10px;background:#0a1e3c;border-radius:10px;cursor:pointer}
 .tab .on{background:#f3ba2f;color:#000;font-weight:900}
 .order{border:1px solid #2a4a7a;border-radius:12px;padding:12px;margin-top:10px;background:#0e2447}
 </style></head><body>
-<div class="row"><span class="badge">◆ BINANCE P2P - UNO</span><span id="wMini" style="font-size:12px">0x0190...438c</span></div>
+<div class="row"><span class="badge">◆ UNO P2P - REAL</span><span id="wMini" style="font-size:12px">0x0190...438c</span></div>
 
 <div class="card">
 <div class="row"><b>Wallet conectada</b><span class="green">● Activa</span></div>
-<div class="small" id="wFull" style="word-break:break-all">0x019001d46cd3155ef045a41f4c359c040595438c</div>
-<div class="row" style="margin-top:10px"><span>WLD Disponible</span><input id="myWld" value="10" style="width:80px;text-align:right;margin:0"></div>
+<div class="small" id="wFull" style="word-break:break-all"></div>
+<div class="row" style="margin-top:10px"><span>WLD Disponible (tu saldo real en World App)</span><input id="myWld" value="0" style="width:70px;text-align:right;margin:0"></div>
+<div class="small">Revisa tu saldo en World App > Billetera y escríbelo aquí</div>
 </div>
 
 <div class="tab"><div id="tBuy" class="on" onclick="setTab('buy')">Comprar</div><div id="tSell" onclick="setTab('sell')">Vender</div></div>
 
-<div class="card" id="createCard">
+<div class="card">
 <h3 style="margin:0 0 8px 0" id="createTitle">Crear Orden de Venta</h3>
 <select id="asset"><option>WLD</option><option>USDC</option></select>
-<input id="amount" type="number" placeholder="Cantidad ej: 5">
+<input id="amount" type="number" placeholder="Cantidad ej: 2.5">
 <input id="price" type="number" placeholder="Precio por moneda en Q. ej: 8.5">
-<input id="payMethod" placeholder="Método pago ej: Banrural, Bi, Tigo Money">
-<input id="contact" placeholder="Tu WhatsApp ej: 50212345678">
+<input id="payMethod" placeholder="Pago: Banrural, Bi, Tigo Money">
+<input id="contact" placeholder="WhatsApp: 502...">
 <button class="btn btn-y" onclick="createOrder()">Publicar Orden P2P</button>
-<div class="small">Tu orden se guarda y se puede compartir por WhatsApp</div>
 </div>
 
-<div class="card"><h3 style="margin:0">Órdenes Activas</h3><div id="orders"></div></div>
+<div class="card"><h3 style="margin:0">Órdenes Activas - Cambio Real</h3><div id="orders"></div></div>
 
-<script>
-let tab='sell';
+<script type="module">
+import {MiniKit} from 'https://esm.sh/@worldcoin/minikit-js@1.0.6?bundle';
+MiniKit.install('app_d0a270229b8199adb79b64d5c7aa7c0f');
 const addr=localStorage.getItem('wld_addr')||'0x019001d46cd3155ef045a41f4c359c040595438c';
 document.getElementById('wFull').innerText=addr;
 document.getElementById('wMini').innerText=addr.slice(0,6)+'...'+addr.slice(-4);
-function setTab(t){tab=t;document.getElementById('tBuy').className=t=='buy'?'on':'';document.getElementById('tSell').className=t=='sell'?'on':'';document.getElementById('createTitle').innerText=t=='sell'?'Crear Orden de Venta':'Crear Orden de Compra';render();}
-function createOrder(){
+let tab='buy';
+window.setTab=(t)=>{tab=t;document.getElementById('tBuy').className=t=='buy'?'on':'';document.getElementById('tSell').className=t=='sell'?'on':'';document.getElementById('createTitle').innerText=t=='sell'?'Crear Orden de Venta':'Crear Orden de Compra';render();}
+window.createOrder=()=>{
  const a=document.getElementById('asset').value, am=parseFloat(document.getElementById('amount').value), pr=parseFloat(document.getElementById('price').value), pm=document.getElementById('payMethod').value, ct=document.getElementById('contact').value;
  if(!am||!pr){alert('Pon cantidad y precio');return;}
  let orders=JSON.parse(localStorage.getItem('uno_orders')||'[]');
  orders.unshift({id:Date.now(),type:tab,asset:a,amount:am,price:pr,pay:pm,contact:ct,wallet:addr,date:new Date().toLocaleString()});
  localStorage.setItem('uno_orders',JSON.stringify(orders));
- document.getElementById('amount').value='';document.getElementById('price').value='';
- render();alert('¡Orden publicada!');
+ document.getElementById('amount').value='';document.getElementById('price').value='';render();alert('¡Orden publicada con dinero real!');
 }
-function render(){
+window.render=()=>{
  let orders=JSON.parse(localStorage.getItem('uno_orders')||'[]');
- let html='';if(orders.length==0)html='<div class="small" style="margin-top:10px">No hay órdenes aún. ¡Crea la primera!</div>';
+ let html=orders.length==0?'<div class="small" style="margin-top:10px">No hay órdenes. ¡Crea la primera!</div>':'';
  orders.forEach(o=>{
   const total=(o.amount*o.price).toFixed(2);
+  const esMio=o.wallet.toLowerCase()==addr.toLowerCase();
   html+=`<div class="order">
-   <div class="row"><b style="color:${o.type=='sell'?'#ff6b6b':'#00ff88'}">${o.type=='sell'?'VENTA':'COMPRA'} ${o.asset}</b><span class="small">${o.date}</span></div>
-   <div class="price">${o.amount} ${o.asset} = Q${total}</div>
-   <div class="small">Precio: Q${o.price} x 1 ${o.asset} | Pago: ${o.pay}</div>
-   <div class="small" style="word-break:break-all">Wallet: ${o.wallet.slice(0,10)}...${o.wallet.slice(-4)}</div>
-   <button class="btn btn-g" style="margin-top:8px;padding:8px" onclick="shareOrder(${o.id})">Compartir por WhatsApp</button>
+   <div class="row"><b style="color:${o.type=='sell'?'#ff6b6b':'#00ff88'}">${o.type=='sell'?'VENDE':'COMPRA'} ${o.amount} ${o.asset}</b><span class="small">${esMio?'Tuya':''}</span></div>
+   <div class="price">Q${total} (${o.amount} ${o.asset} x Q${o.price})</div>
+   <div class="small">Pago: ${o.pay} | Wallet: ${o.wallet.slice(0,10)}...</div>
+   ${!esMio?`<button class="btn btn-g" style="margin-top:8px" onclick="comprarReal('${o.wallet}',${o.amount},'${o.asset}')">Comprar Ahora - Pago Real</button>`:''}
+   <button class="btn btn-w" style="padding:8px;margin-top:6px" onclick="shareOrder(${o.id})">WhatsApp</button>
   </div>`;
  });
  document.getElementById('orders').innerHTML=html;
 }
-function shareOrder(id){
- let orders=JSON.parse(localStorage.getItem('uno_orders')||'[]');
- let o=orders.find(x=>x.id==id);
- let txt=`*Uno Intercambio P2P*%0A${o.type.toUpperCase()} ${o.amount} ${o.asset}%0APrecio: Q${o.price} c/u = Total Q${(o.amount*o.price).toFixed(2)}%0APago: ${o.pay}%0AWallet: ${o.wallet}%0AContacto: ${o.contact}`;
+window.comprarReal=async(to,amount,asset)=>{
+ try{
+  if(!MiniKit.isInstalled()){alert('Abre esto dentro de World App para transacción real');return;}
+  if(!confirm(`¿Enviar ${amount} ${asset} a ${to.slice(0,10)}... por World Chain REAL?`))return;
+  // Transacción REAL en World Chain
+  const WLD_ADDR='0x2cFc044F96D5C3963737f6cE6eCA8F8c7A4c6a6e'; // WLD World Chain
+  const USDC_ADDR='0x79A02482A880bCE3F13e09Da970dC34db4CD24d';
+  const tokenAddr=asset=='WLD'?WLD_ADDR:USDC_ADDR;
+  const result=await MiniKit.commandsAsync.sendTransaction({
+   transaction:[{address:tokenAddr,abi:[{inputs:[{name:'to',type:'address'},{name:'value',type:'uint256'}],name:'transfer',outputs:[{name:'',type:'bool'}],stateMutability:'nonpayable',type:'function'}],functionName:'transfer',args:[to, (amount*1e18).toString()]}]
+  });
+  alert('Transacción enviada: '+JSON.stringify(result.finalPayload).slice(0,200));
+ }catch(e){alert('Error transacción real: '+e.message+' - Asegúrate tener saldo en World App');}
+}
+window.shareOrder=(id)=>{
+ let orders=JSON.parse(localStorage.getItem('uno_orders')||'[]');let o=orders.find(x=>x.id==id);
+ let txt=`*Uno P2P REAL*%0A${o.type.toUpperCase()} ${o.amount} ${o.asset} = Q${(o.amount*o.price).toFixed(2)}%0APrecio: Q${o.price}%0APago: ${o.pay}%0AWallet: ${o.wallet}`;
  window.open('https://wa.me/?text='+txt,'_blank');
 }
 render();

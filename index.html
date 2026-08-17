@@ -1,48 +1,94 @@
 <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Uno Intercambio</title><style>
-*{box-sizing:border-box}body{margin:0;background:#0a1e3c;color:#fff;font-family:system-ui;padding:10px;padding-bottom:80px}
-.top{display:flex;justify-content:space-between;align-items:center;background:#132c54;padding:10px 12px;border-radius:14px}
-.badge{display:flex;align-items:center;gap:6px;background:#f3ba2f;color:#000;padding:6px 12px;border-radius:10px;font-weight:900;font-size:12px}
-.logo{width:20px;height:20px;background:#000;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px}
-.card{background:#132c54;border-radius:16px;padding:12px;margin-top:10px;border:1px solid #1e3a6b}
-.chainTab{display:flex;gap:6px;margin:10px 0}.chainTab div{flex:1;padding:9px;text-align:center;background:#0f274f;border-radius:10px;font-size:11px;cursor:pointer;border:1px solid #1e3a6b}
-.chainTab.on{background:#f3ba2f;color:#000;font-weight:900}
-.swapBox{background:#0a1e3c;border-radius:14px;padding:12px;margin:8px 0;border:1px solid #1e3a6b}
-input{width:100%;background:transparent;border:0;color:#fff;font-size:26px;font-weight:900;outline:none}
-select{background:#0a1e3c;color:#fff;border:1px solid #2a4a7a;border-radius:8px;padding:6px;font-weight:700;font-size:11px}
-.btn{width:100%;padding:14px;border-radius:12px;border:0;background:#f3ba2f;color:#000;font-weight:900;margin-top:10px}
-.small{font-size:10px;opacity:.7}.tokenRow{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e3a6b;font-size:11px}
-.addr{font-size:8px;opacity:.5;word-break:break-all}
+*{box-sizing:border-box}body{margin:0;background:#eef4ff;color:#0a1e3c;font-family:system-ui;padding:0;padding-bottom:80px}
+.header{background:#0a1e3c;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.badge{display:flex;align-items:center;gap:8px;background:#fff;color:#0a1e3c;padding:6px 14px;border-radius:20px;font-weight:900;font-size:13px}
+.binance-icon{width:22px;height:22px;background:#f3ba2f;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:900}
+.totalCard{background:linear-gradient(135deg,#0a1e3c,#1e3cff);color:#fff;padding:20px;border-radius:0 0 24px 24px;text-align:center}
+.total{font-size:42px;font-weight:900;margin:8px 0}
+.card{background:#fff;border-radius:16px;padding:12px;margin:10px 12px;box-shadow:0 2px 10px rgba(0,0,0,.08);border:1px solid #dbe6ff}
+.token{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #eef4ff}
+.token:last-child{border:0}
+.icon{width:40px;height:40px;border-radius:50%;background:#f3ba2f;display:flex;align-items:center;justify-content:center;font-weight:900;color:#000}
+.swapBox{background:#eef4ff;border-radius:12px;padding:12px;margin:8px 0}
+input{width:100%;background:transparent;border:0;color:#0a1e3c;font-size:26px;font-weight:900;outline:none}
+select{background:#fff;border:1px solid #cbd8f5;border-radius:8px;padding:6px 10px;font-weight:700}
+.btn{width:100%;padding:14px;border-radius:12px;border:0;background:#f3ba2f;color:#000;font-weight:900;font-size:15px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#0a1e3c;display:flex;justify-content:space-around;padding:8px 0;color:#fff}
+.nav div{text-align:center;font-size:10px;opacity:.6}.nav.on{opacity:1;color:#f3ba2f}
+.small{font-size:10px;opacity:.6}.green{color:#00b050}.red{color:#ff3b30}
+.chainTab{display:flex;gap:6px;margin:10px 12px}.chainTab div{flex:1;padding:8px;text-align:center;background:#fff;border-radius:20px;font-size:11px;border:1px solid #cbd8f5;cursor:pointer}
+.chainTab.on{background:#0a1e3c;color:#fff}
 </style></head><body>
-<div class="top"><div class="badge"><div class="logo">⬥</div> UNO • BINANCE</div><div style="font-size:10px;opacity:.8">Multi-Chain 🔗</div></div>
+<div class="header"><div style="display:flex;align-items:center;gap:8px"><div class="binance-icon">⬥</div><b>Uno</b></div><div style="font-size:11px">Multi-Chain • World + Polygon</div></div>
 
-<div class="card" style="background:#0f274f"><div style="font-size:11px">World: <span style="color:#f3ba2f">0x0190...438c</span></div><div class="addr">0x019001d46cd3155ef045a41f4c359c040595438c</div><div style="font-size:11px;margin-top:6px">Polygon: <span style="color:#f3ba2f">0xaa3a...1aa2</span></div><div class="addr">0xaa3a4dbfceb16c45bcc73091735b0696a59e1aa2</div></div>
+<div class="totalCard"><div style="font-size:12px;opacity:.8">Tu Portafolio Total</div><div class="total" id="totalUsd">$0.00 USD</div><div class="small" style="color:#fff;opacity:.7">World: 0x0190...438c | Poly: 0xaa3a...1aa2</div></div>
 
-<div class="chainTab"><div id="cW" class="on" onclick="setChain('world')">World Chain</div><div id="cP" onclick="setChain('polygon')">Polygon</div><div id="cB" onclick="setChain('both')">World ↔ Polygon</div></div>
+<div class="chainTab"><div id="cW" class="on" onclick="setChain('world')">World Chain</div><div id="cP" onclick="setChain('polygon')">Polygon</div><div id="cB" onclick="setChain('both')">Cross-Chain</div></div>
 
-<div class="card"><b style="font-size:12px">Saldos Reales</b><div id="bals"><div class="small">Cargando saldos...</div></div></div>
+<div class="card"><div style="display:flex;justify-content:space-between"><b>Tokens</b><span style="font-size:11px;color:#1e3cff">NFTs</span></div><div id="list"></div></div>
 
-<div class="card"><h3 style="margin:0;font-size:14px">Intercambio</h3>
-<div class="swapBox"><div class="small">Vendes</div><div style="display:flex;gap:6px;align-items:center"><input id="fAmt" type="number" placeholder="0.0" oninput="calc()"><select id="fTok" onchange="calc()"></select></div><div id="fUsd" class="small"></div></div>
-<div style="text-align:center;font-size:10px;opacity:.6">⬇️ <span id="bridge">Misma red</span> ⬇️</div>
-<div class="swapBox"><div class="small">Recibes</div><div style="display:flex;gap:6px;align-items:center"><input id="tAmt" placeholder="0.0" readonly><select id="tTok" onchange="calc()"></select></div><div id="tUsd" class="small"></div></div>
-<div id="rate" class="small"></div><button class="btn" onclick="swapReal()">Intercambiar Ahora</button>
-<div class="small" style="text-align:center;margin-top:6px">WLD • USDC • USDT • POL • DIAMANTE • WETH</div></div>
+<div class="card"><h3 style="margin:0 0 8px 0">Intercambio</h3>
+<div class="swapBox"><div class="small">Vendes</div><div style="display:flex;gap:6px"><input id="fAmt" type="number" placeholder="0.0" oninput="calc()"><select id="fTok" onchange="calc()"></select></div><div id="fUsd" class="small"></div></div>
+<div style="text-align:center;font-size:11px">⬇️ <span id="bridge">Misma red</span> ⬇️</div>
+<div class="swapBox"><div class="small">Recibes</div><div style="display:flex;gap:6px"><input id="tAmt" readonly placeholder="0.0"><select id="tTok" onchange="calc()"></select></div><div id="tUsd" class="small"></div></div>
+<div id="rate" class="small"></div><button class="btn" onclick="doSwap()">Intercambiar Ahora</button></div>
+
+<div class="nav"><div class="on">🏠<br>Billetera</div><div>🖼️<br>NFT</div><div>🔄<br>Intercambio</div><div>💲<br>Ganar</div><div>☰<br>Menú</div></div>
 
 <script type="module">
 import {createPublicClient, http, formatUnits} from 'https://esm.sh/viem@2.21.0';
-const WLD_ADDR='0x019001d46cd3155ef045a41f4c359c040595438c';
-const POLY_ADDR='0xaa3a4dbfceb16c45bcc73091735b0696a59e1aa2';
+const WLD='0x019001d46cd3155ef045a41f4c359c040595438c';
+const POLY='0xaa3a4dbfceb16c45bcc73091735b0696a59e1aa2';
 const CHAINS={
- world:{id:480,rpc:'https://worldchain-mainnet.g.alchemy.com/public',wallet:WLD_ADDR,tokens:[{s:'WLD',a:'0x2cFc044F96D5C3963737f6cE6eCA8F8c7A4c6a6e',d:18,cg:'worldcoin-wld'},{s:'USDC',a:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d',d:6,cg:'usd-coin'},{s:'WETH',a:'0x4200000000000000000000000000000000000042',d:18,cg:'weth'}]},
- polygon:{id:137,rpc:'https://polygon-rpc.com',wallet:POLY_ADDR,tokens:[{s:'POL',a:'native',d:18,cg:'matic-network'},{s:'USDT',a:'0xc2132D05D31c914a87C6611C10748AEb04B58e8F',d:6,cg:'tether'},{s:'USDC',a:'0x3c499c542cEF5E3811e1192ce70dC03d5c3352',d:6,cg:'usd-coin'},{s:'DIAMANTE',a:'0xA8c87B7C0e5e6b4a0a6b6e6b6e6b6e6b',d:18,cg:'tether'},{s:'WLD',a:'0x6bB8a89035bEb7E0e2d5D3B7e2b2e2b2e2b2e2b2e2b2e2b2',d:18,cg:'worldcoin-wld'}]}
+ world:{id:480,rpc:['https://worldchain-mainnet.g.alchemy.com/public','https://480.rpc.thirdweb.com'],wallet:WLD,tokens:[
+  {s:'WLD',a:'0x2cFc044F96D5C3963737f6cE6eCA8F8c7A4c6a6e',d:18,cg:'worldcoin-wld',icon:'W'},
+  {s:'USDC',a:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d',d:6,cg:'usd-coin',icon:'$'},
+  {s:'WETH',a:'0x4200000000000000000000000000000000000042',d:18,cg:'weth',icon:'E'},
+ ]},
+ polygon:{id:137,rpc:['https://polygon-rpc.com','https://137.rpc.thirdweb.com'],wallet:POLY,tokens:[
+  {s:'POL',a:'native',d:18,cg:'matic-network',icon:'P'},
+  {s:'USDT',a:'0xc2132D05D31c914a87C6611C10748AEb04B58e8F',d:6,cg:'tether',icon:'T'},
+  {s:'USDC',a:'0x3c499c542cEF5E3811e1192ce70dC03d5c3352',d:6,cg:'usd-coin',icon:'$'},
+  {s:'DIAMANTE',a:'0x0000000000000000000000000000000000000000',d:18,cg:'tether',icon:'D'},
+ ]}
 };
-let prices={}, chainMode='world';
-function getClient(c){return createPublicClient({chain:{id:CHAINS[c].id,rpcUrls:{default:{http:[CHAINS[c].rpc]}}},transport:http()});}
+let prices={}, mode='world', bals={};
+async function fetchPrices(){
+ try{const ids=[...new Set([...CHAINS.world.tokens,...CHAINS.polygon.tokens].map(t=>t.cg))].join(',');const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd,usd_24h_change`);const j=await r.json();Object.keys(CHAINS).forEach(n=>CHAINS[n].tokens.forEach(t=>{prices[t.s]={price:j[t.cg]?.usd||1,change:j[t.cg]?.usd_24h_change||0}}));}catch(e){prices={WLD:{price:0.9,change:-2.35},USDC:{price:1,change:0},USDT:{price:1,change:0},POL:{price:0.45,change:1.02},DIAMANTE:{price:0.02,change:5},WETH:{price:2800,change:-1}};}
+}
+async function getBal(client, token, wallet){
+ try{
+  if(token.a=='native'||token.a=='0x0000000000000000000000000000000000000000'){const b=await client.getBalance({address:wallet});return parseFloat(formatUnits(b,18));}
+  const b=await client.readContract({address:token.a,abi:[{inputs:[{name:'o',type:'address'}],name:'balanceOf',outputs:[{name:'',type:'uint256'}],type:'function'}],functionName:'balanceOf',args:[wallet]});return parseFloat(formatUnits(b,token.d));
+ }catch(e){return 0;}
+}
 async function load(){
- const cg=[...new Set([...CHAINS.world.tokens,...CHAINS.polygon.tokens].map(t=>t.cg))].join(',');
- try{const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cg}&vs_currencies=usd`);const j=await r.json();CHAINS.world.tokens.forEach(t=>prices[t.s]=j[t.cg]?.usd||1);CHAINS.polygon.tokens.forEach(t=>prices[t.s]=j[t.cg]?.usd||(t.s=='DIAMANTE'?0.02:1));}catch(e){prices={WLD:0.9,USDC:1,USDT:1,POL:0.45,DIAMANTE:0.02,WETH:2800};}
- let html='';
- for(let net of ['world','polygon']){
-  const client=getClient(net); html+=`<div style="font-size:10px;color:#f3ba2f;margin-top:6px">${net.toUpperCase()}</div>`;
-  for(let t of CHAINS[net].
+ await fetchPrices();
+ let html='', total=0;
+ for(let net of (mode=='both'?['world','polygon']:[mode])){
+  const rpc=CHAINS[net].rpc[0];
+  const client=createPublicClient({chain:{id:CHAINS[net].id,rpcUrls:{default:{http:[rpc]}}},transport:http()});
+  for(let t of CHAINS[net].tokens){
+   const bal=await getBal(client,t,CHAINS[net].wallet);
+   const p=prices[t.s]?.price||1; const ch=prices[t.s]?.change||0; total+=bal*p;
+   const usd=(bal*p).toFixed(4);
+   html+=`<div class="token"><div style="display:flex;gap:10px;align-items:center"><div class="icon">${t.icon}</div><div><b>${t.s}</b><div class="small">${bal.toFixed(4)} ${t.s} • ${net}</div></div></div><div style="text-align:right"><div>$ ${usd}</div><div class="small ${ch>=0?'green':'red'}">${ch>=0?'↑':'↓'} ${Math.abs(ch).toFixed(2)}%</div></div></div>`;
+   bals[`${net}_${t.s}`]=bal;
+  }
+ }
+ document.getElementById('totalUsd').innerText=`$${total.toFixed(2)} USD`;
+ document.getElementById('list').innerHTML=html||'<div class="small">Sin saldo - 0.0000</div>';
+ fill(); calc();
+}
+function fill(){
+ const f=document.getElementById('fTok'), t=document.getElementById('tTok');let o='';
+ const nets=mode=='both'?['world','polygon']:[mode];
+ nets.forEach(n=>CHAINS[n].tokens.forEach(x=>o+=`<option value="${n}_${x.s}">${x.s} - ${n}</option>`));
+ f.innerHTML=o; t.innerHTML=o; if(f.options.length>0){f.selectedIndex=0; if(t.options.length>1) t.selectedIndex=1;}
+}
+window.setChain=(m)=>{mode=m;document.getElementById('cW').className=m=='world'?'on':'';document.getElementById('cP').className=m=='polygon'?'on':'';document.getElementById('cB').className=m=='both'?'on':'';document.getElementById('bridge').innerText=m=='both'?'BRIDGE World ↔ Polygon':'Misma red';load();}
+window.calc=()=>{const f=document.getElementById('fTok').value,t=document.getElementById('tTok').value,amt=parseFloat(document.getElementById('fAmt').value)||0;if(!f||!t)return;const fs=f.split('_')[1],ts=t.split('_')[1];const fp=prices[fs]?.price||1,tp=prices[ts]?.price||1;const out=fp/tp*amt;document.getElementById('tAmt').value=out?out.toFixed(6):'';document.getElementById('fUsd').innerText=amt?`≈ $${(amt*fp).toFixed(2)}`:'';document.getElementById('tUsd').innerText=out?`≈ $${(out*tp).toFixed(2)}`:'';document.getElementById('rate').innerText=amt?`1 ${fs} = ${(fp/tp).toFixed(6)} ${ts}`:'';}
+window.doSwap=()=>{const f=document.getElementById('fTok').value,a=document.getElementById('fAmt').value;if(!a)return alert('Pon cantidad');const [fn][fs]=f.split('_'),[tn][ts]=document.getElementById('tTok').value.split('_');if(fn!=tn){window.open(`https://li.fi/?fromChain=${CHAINS[fn].id}&toChain=${CHAINS[tn].id}&fromToken=${fs}&toToken=${ts}&fromAmount=${a}`,'_blank');}else alert(`Intercambio ${a} ${fs} → ${ts} en ${fn}`);};
+load();
+</script></body></html>

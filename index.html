@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uno intercambio</title><style>
+<title>Uno intercambio - Ganar</title><style>
 *{box-sizing:border-box}body{margin:0;background:#fff;color:#111;font-family:system-ui;padding-bottom:90px}
 .top{padding:12px 16px;display:flex;gap:10px;align-items:center}
 .avatar{width:56px;height:56px;border-radius:50%;background:#0B0E11;display:flex;align-items:center;justify-content:center;border:2px solid #f3ba2f}
@@ -13,59 +13,88 @@
 .nav div{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 .main{margin:10px;padding:12px;border:2px solid #ffe6f4;border-radius:20px;min-height:60vh}
 .box{background:#f6f6f6;border-radius:14px;padding:12px;margin:8px 0}
-input{width:100%;border:0;background:transparent;font-size:24px;font-weight:900;outline:none}
+input{width:100%;border:0;background:transparent;font-size:22px;font-weight:900;outline:none}
 select{border:0;background:#111;color:#fff;padding:7px;border-radius:20px;font-weight:900;font-size:10px;max-width:130px}
-.btnY{width:100%;padding:14px;border-radius:12px;border:0;background:#f3ba2f;font-weight:900;margin-top:8px}
-.perc{display:flex;gap:6px;margin-top:8px}
-.perc button{flex:1;padding:8px;border-radius:20px;border:1px solid #111;background:#fff;font-weight:900;font-size:11px}
-.perc button.active{background:#111;color:#fff}
+.btnY{width:100%;padding:13px;border-radius:12px;border:0;background:#f3ba2f;font-weight:900;margin-top:8px}
+.perc{display:flex;gap:6px;margin-top:8px}.perc button{flex:1;padding:8px;border-radius:20px;border:1px solid #111;background:#fff;font-weight:900;font-size:11px}.perc button.active{background:#111;color:#fff}
 .pill{display:inline-block;background:#111;color:#fff;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:900;margin-left:6px}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:20px;z-index:99}
-.modalBox{background:#fff;border-radius:20px;padding:20px;width:100%;max-width:340px;text-align:center}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:20px;z-index:99}.modalBox{background:#fff;border-radius:20px;padding:20px;width:100%;max-width:340px;text-align:center}
+.earnCard{background:#111;color:#fff;border-radius:20px;padding:14px;margin:10px 0}
+.earnRow{display:flex;justify-content:space-between;font-size:12px;opacity:.7}
+.earnMain{display:flex;gap:12px;align-items:center;margin:8px 0}
+.badge{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900}
 </style></head><body>
 
 <div id="home">
 <div class="top"><div class="avatar"><svg viewBox="0 0 32 32" fill="#F3BA2F" width="26" height="26"><path d="M16 3 L21 8 L16 13 L11 8 Z M8 10 L13 15 L8 20 L3 15 Z M24 10 L29 15 L24 20 L19 15 Z M16 14 L21 19 L16 24 L11 19 Z"/></svg></div><div><b>Uno intercambio</b><div class="small">0x0190...38c • World Chain + Polygon</div></div></div>
 <div style="padding:0 16px;display:flex;justify-content:space-between"><div><div class="big">$0.23</div><div class="small"><span class="green">▲ $0.01 (5.97%) hoy ></span></div></div><div><svg width="90" height="35"><polyline points="0,30 20,26 40,20 60,12 80,5 90,8" fill="none" stroke="#00b15c" stroke-width="2"/></svg></div></div>
-<div class="btns"><div class="btn" onclick="go('swap')">⇆ Swap</div><div class="btn" onclick="go('buy')">+ Comprar</div><div class="btn" onclick="go('send')">↗ Enviar</div><div class="btn" onclick="go('recv')">↓ Recibir</div></div>
+<div class="btns"><div class="btn" onclick="go('swap')">⇆ Swap</div><div class="btn" onclick="go('earn')" style="background:#111;color:#f3ba2f">↗ Ganar</div><div class="btn" onclick="go('send')">↗ Enviar</div><div class="btn" onclick="go('recv')">↓ Recibir</div></div>
 <div class="apy"><div>Gana hasta un <b style="color:#ff3ab2">4.19% APY</b></div><div>World + Polygon</div></div>
 <div class="tokens">
-<div style="font-weight:900;margin:8px 0">World Chain</div>
+<div style="font-weight:900;margin:8px 0">World Chain - tu billetera</div>
 <div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon">D</div><div><b>DNA</b><div class="small">615.74 DNA</div></div></div><b>$0.03</b></div>
 <div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#000;color:#fff">W</div><div><b>WLD</b><div class="small">0.01 WLD</div></div></div><b>$0.01</b></div>
 <div style="font-weight:900;margin:16px 0 8px">Polygon - todas las redes</div>
 <div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#7b3cff;color:#fff">P</div><div><b>POL</b><div class="small">Polygon • 137</div></div></div><b>$0.00</b></div>
-<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#00d395;color:#fff">U</div><div><b>USDT</b><div class="small">Polygon</div></div></div><b>$0.00</b></div>
 </div>
 </div>
+
+<div id="earn" style="display:none"><div class="main" style="background:#0a0a0a;border-color:#222;color:#fff">
+<h3 style="text-align:center;margin:0">Ganar - Worldcoin / USDT / Ethereum</h3><div class="small" style="text-align:center;color:#aaa">Como Morpho - aprovecha el espacio libre</div>
+
+<div style="margin-top:12px">
+<div class="small" style="color:#aaa">My Borrows <span style="float:right;background:#222;padding:4px 10px;border-radius:12px;color:#7eb8ff"><$0.01</span></div>
+<div style="font-size:36px;font-weight:900"><$0.01</div><div class="small" style="color:#aaa">-2.74% net borrow APY</div>
+</div>
+
+<h3 style="margin:16px 0 8px">Explore borrowing</h3><div class="small" style="color:#aaa;margin-bottom:10px">Provide collateral to borrow assets.</div>
+
+<div class="earnCard">
+<div class="earnRow"><span>Collateral</span><span>Loan</span><span>My Borrow</span></div>
+<div class="earnMain"><div style="display:flex;gap:6px;align-items:center"><div class="badge" style="background:#5a7cff">◊</div><b>WETH</b></div><div style="display:flex;gap:6px;align-items:center"><div class="badge" style="background:#2775ca">$</div><b>USDC</b></div><span style="margin-left:auto">-</span></div>
+<div style="font-size:14px">-3.41% APY ✨</div>
+</div>
+
+<div class="earnCard">
+<div class="earnRow"><span>Collateral</span><span>Loan</span><span>My Borrow</span></div>
+<div class="earnMain"><div style="display:flex;gap:6px;align-items:center"><div class="badge" style="background:#f7931a;color:#fff">₿</div><b>WBTC</b></div><div style="display:flex;gap:6px;align-items:center"><div class="badge" style="background:#5a7cff">◊</div><b>WETH</b></div><span style="margin-left:auto">-</span></div>
+<div style="font-size:14px">0.03% APY</div>
+</div>
+
+<div class="earnCard">
+<div class="earnRow"><span>Collateral</span><span>Loan</span><span>My Borrow</span></div>
+<div class="earnMain"><div style="display:flex;gap:6px;align-items:center"><div class="badge" style="background:#f7931a">₿</div><b>WBTC</b></div><div style="display:flex;gap:6px;align-items:center"><div class="badge" style="background:#000;border:1px solid #fff">W</div><b>WLD</b></div><span style="margin-left:auto">-</span></div>
+<div style="font-size:14px">1.85% APY</div>
+</div>
+
+<div class="earnCard">
+<div class="earnRow"><span>Collateral</span><span>Loan</span><span>My Borrow</span></div>
+<div class="earnMain"><div style="display:flex;gap:6px;align-items:center"><div class="badge" style="background:#5a7cff">◊</div><b>WETH</b></div><div style="display:flex;gap:6px;align-items:center"><div class="badge" style="background:#000;border:1px solid #fff">W</div><b>WLD</b></div><span style="margin-left:auto">-</span></div>
+<div style="font-size:14px">2.11% APY</div>
+</div>
+
+<div class="earnCard">
+<div class="earnRow"><span>Collateral</span><span>Loan</span><span>My Borrow</span></div>
+<div class="earnMain"><div style="display:flex;gap:6px;align-items:center"><div class="badge" style="background:#f7931a">₿</div><b>WBTC</b></div><div style="display:flex;gap:6px;align-items:center"><div class="badge" style="background:#2775ca">$</div><b>USDC</b></div><span style="margin-left:auto"><$0.01</span></div>
+<div style="font-size:14px">-2.74% APY ✨</div>
+<div style="margin-top:8px"><div style="height:4px;background:#333;border-radius:10px"><div style="width:6%;height:100%;background:#00d9a5;border-radius:10px"></div></div><div class="earnRow" style="margin-top:4px"><span>LTV / LLTV</span><span style="color:#00d9a5">5.99% / 86%</span></div></div>
+</div>
+
+<div style="display:flex;justify-content:space-around;margin-top:16px"><div style="text-align:center;opacity:.5">⌃<br>Earn</div><div style="text-align:center;color:#7eb8ff">◍<br>Borrow</div></div>
+
+<button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:12px;color:#fff">← Volver</button>
+</div></div>
 
 <div id="swap" style="display:none"><div class="main">
 <h3 style="text-align:center;margin:0">Swap - Todas las redes</h3><div class="small" style="text-align:center">World Chain ↔ Polygon ↔ zkEVM</div>
-
 <div class="box">
-<div style="display:flex;justify-content:space-between;align-items:center">
-<span class="small">Vendes <span id="bF" style="font-weight:900;color:#111"></span> <span id="percLabel" class="pill">0%</span></span>
-<span class="small" style="font-weight:900">Saldo: <span id="saldoTxt"></span></span>
-</div>
-<div style="display:flex;gap:6px;margin-top:6px">
-<input id="fAmt" type="number" value="615" oninput="calc();updatePerc()">
-<select id="fNet" onchange="updateTokens()"><option value="world">World Chain</option><option value="polygon">Polygon</option><option value="zkevm">Polygon zkEVM</option></select>
-<select id="fSel" onchange="calc()"></select>
-</div>
+<div style="display:flex;justify-content:space-between;align-items:center"><span class="small">Vendes <b id="bF"></b> <span id="percLabel" class="pill">100%</span></span><span class="small" style="font-weight:900">Saldo: <span id="saldoTxt"></span></span></div>
+<div style="display:flex;gap:6px;margin-top:6px"><input id="fAmt" type="number" value="615.74" oninput="calc();updatePerc()"><select id="fNet" onchange="updateTokens()"><option value="world">World Chain</option><option value="polygon">Polygon</option><option value="zkevm">zkEVM</option></select><select id="fSel" onchange="calc()"></select></div>
 <div class="small" id="usdFrom" style="margin-top:4px"></div>
-<!-- PORCENTAJES 25 50 75 100 -->
-<div class="perc">
-<button onclick="setPerc(25)" id="p25">25%</button>
-<button onclick="setPerc(50)" id="p50">50%</button>
-<button onclick="setPerc(75)" id="p75">75%</button>
-<button onclick="setPerc(100)" id="p100" class="active">100%</button>
+<div class="perc"><button onclick="setPerc(25)" id="p25">25%</button><button onclick="setPerc(50)" id="p50">50%</button><button onclick="setPerc(75)" id="p75">75%</button><button onclick="setPerc(100)" id="p100" class="active">100%</button></div>
 </div>
-</div>
-
 <div style="text-align:center" onclick="let a=fNet.value,f=fSel.value,n=tNet.value,t=tSel.value;fNet.value=n;tNet.value=a;updateTokens();fSel.value=t;tSel.value=f;calc()">↕️ Cambiar red</div>
-
-<div class="box"><div style="display:flex;justify-content:space-between"><span class="small">Recibes <span id="bT" style="font-weight:900"></span></span><span class="small" id="saldoTo"></span></div><div style="display:flex;gap:6px;margin-top:6px"><input id="tAmt" readonly><select id="tNet" onchange="updateTokens()"><option value="world">World Chain</option><option value="polygon" selected>Polygon</option><option value="zkevm">Polygon zkEVM</option></select><select id="tSel" onchange="calc()"></select></div><div class="small" id="usdTo" style="margin-top:4px"></div></div>
-
+<div class="box"><div style="display:flex;justify-content:space-between"><span class="small">Recibes <b id="bT"></b></span><span class="small" id="saldoTo"></span></div><div style="display:flex;gap:6px;margin-top:6px"><input id="tAmt" readonly><select id="tNet" onchange="updateTokens()"><option value="world">World Chain</option><option value="polygon" selected>Polygon</option><option value="zkevm">zkEVM</option></select><select id="tSel" onchange="calc()"></select></div><div class="small" id="usdTo" style="margin-top:4px"></div></div>
 <div style="background:#111;color:#fff;border-radius:12px;padding:10px;text-align:center;font-size:11px" id="res"></div>
 <button class="btnY" onclick="doSwap()">Intercambiar Ahora</button>
 <button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:6px">← Volver</button>
@@ -74,54 +103,46 @@ select{border:0;background:#111;color:#fff;padding:7px;border-radius:20px;font-w
 <div id="recv" style="display:none"><div class="main"><h3 style="text-align:center;margin:0">Recibir</h3><div style="text-align:center;margin-top:12px;border:1px solid #eee;border-radius:20px;padding:16px"><img id="qr" width="200" height="200"><div style="font-size:10px;font-weight:900;background:#f6f6f6;padding:10px;border-radius:10px;margin-top:10px;word-break:break-all">0x019001d46cd3155ef045a41f4c359c040595438c</div><button class="btnY" onclick="navigator.clipboard.writeText('0x019001d46cd3155ef045a41f4c359c040595438c');showOk('Dirección copiada')">📋 Copiar dirección</button></div><button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:10px">← Volver</button></div></div>
 <div id="send" style="display:none"><div class="main"><h3 style="text-align:center">Enviar</h3><div class="box"><div class="small" id="bS"></div><div style="display:flex;gap:6px"><input id="sAmt" type="number" value="10"><select id="sSel"></select></div></div><input id="sAddr" placeholder="0x... destino" style="background:#f0f0f0;border-radius:12px;padding:12px;width:100%;border:0;margin:8px 0"><button class="btnY" onclick="doSend()">Enviar</button><button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:6px">← Volver</button></div></div>
 
-<div class="nav"><div class="active" onclick="go('home')">🏠</div><div onclick="go('swap')">🔍</div><div onclick="go('send')">🕒</div><div style="background:#ff3ab2;color:#fff" onclick="go('recv')">↓</div></div>
+<div class="nav"><div class="active" onclick="go('home')">🏠</div><div onclick="go('swap')">🔍</div><div onclick="go('earn')">💰</div><div style="background:#ff3ab2;color:#fff" onclick="go('recv')">↓</div></div>
 
-<!-- MODAL BONITO EN VEZ DE ALERT FEO -->
 <div id="modal" class="modal" onclick="this.style.display='none'"><div class="modalBox"><div style="font-size:32px">✅</div><div id="modalTxt" style="font-weight:900;margin-top:8px"></div><button class="btnY" onclick="document.getElementById('modal').style.display='none'">Cerrar</button></div></div>
 
 <script>
 const W="0x019001d46cd3155ef045a41f4c359c040595438c";
 const TOKENS={
- world:[{s:"DNA",q:615.74,u:0.03,p:0.0000487},{s:"WLD",q:0.01,u:0.01,p:0.35},{s:"HUB",q:3518.8,u:0.01,p:0.00000284},{s:"ORO",q:0.65,u:0.01,p:0.015},{s:"ORB",q:9.3,u:0.01,p:0.00107},{s:"USDC",q:0.001,u:0.005,p:1}],
- polygon:[{s:"POL",q:0,u:0,p:0.45},{s:"USDT",q:0,u:0,p:1},{s:"USDC",q:0,u:0,p:1},{s:"WETH",q:0,u:0,p:3000}],
+ world:[{s:"DNA",q:615.74,u:0.03,p:0.0000487},{s:"WLD",q:0.01,u:0.01,p:0.35},{s:"HUB",q:3518.8,u:0.01,p:0.00000284},{s:"ORO",q:0.65,u:0.01,p:0.015},{s:"ORB",q:9.3,u:0.01,p:0.00107},{s:"USDC",q:0.001,u:0.005,p:1},{s:"WETH",q:0.00001,u:0.003,p:3000}],
+ polygon:[{s:"POL",q:0,u:0,p:0.45},{s:"USDT",q:0,u:0,p:1},{s:"USDC",q:0,u:0,p:1},{s:"WETH",q:0,u:0,p:3000},{s:"WBTC",q:0,u:0,p:65000}],
  zkevm:[{s:"MATIC",q:0,u:0,p:0.45},{s:"ETH",q:0,u:0,p:3000},{s:"USDT",q:0,u:0,p:1}]
 };
 let fNet=document.getElementById('fNet'),tNet=document.getElementById('tNet'),fSel=document.getElementById('fSel'),tSel=document.getElementById('tSel'),fAmt=document.getElementById('fAmt'),tAmt=document.getElementById('tAmt'),bF=document.getElementById('bF'),bT=document.getElementById('bT'),usdFrom=document.getElementById('usdFrom'),usdTo=document.getElementById('usdTo'),res=document.getElementById('res'),saldoTxt=document.getElementById('saldoTxt'),percLabel=document.getElementById('percLabel');
-
 function updateTokens(){
- let fN=fNet.value,tN=tNet.value;
- fSel.innerHTML=TOKENS[fN].map(t=>`<option value="${t.s}">${t.s} ${t.q} ($${t.u})</option>`).join('');
- tSel.innerHTML=TOKENS[tN].map(t=>`<option value="${t.s}">${t.s} ${t.q} ($${t.u})</option>`).join('');
+ fSel.innerHTML=TOKENS[fNet.value].map(t=>`<option value="${t.s}">${t.s} ${t.q} ($${t.u})</option>`).join('');
+ tSel.innerHTML=TOKENS[tNet.value].map(t=>`<option value="${t.s}">${t.s} ${t.q} ($${t.u})</option>`).join('');
  document.getElementById('sSel').innerHTML=TOKENS.world.map(t=>`<option>${t.s} ${t.q}</option>`).join('');
  calc();
 }
 function setPerc(p){
  document.querySelectorAll('.perc button').forEach(b=>b.classList.remove('active'));
  document.getElementById('p'+p).classList.add('active');
- let fN=fNet.value,fS=fSel.value,fd=TOKENS[fN].find(x=>x.s==fS)||TOKENS[fN][0];
- fAmt.value=(fd.q*p/100).toFixed(2);
- percLabel.innerText=p+'%';
- calc();
+ let fd=TOKENS[fNet.value].find(x=>x.s==fSel.value)||TOKENS[fNet.value][0];
+ fAmt.value=(fd.q*p/100).toFixed(2); percLabel.innerText=p+'%'; calc();
 }
 function updatePerc(){
- let fN=fNet.value,fS=fSel.value,fd=TOKENS[fN].find(x=>x.s==fS)||TOKENS[fN][0];
- let perc=fd.q>0?(parseFloat(fAmt.value)/fd.q*100):0;
- percLabel.innerText=Math.round(perc)+'%';
+ let fd=TOKENS[fNet.value].find(x=>x.s==fSel.value)||TOKENS[fNet.value][0];
+ let perc=fd.q>0?(parseFloat(fAmt.value)/fd.q*100):0; percLabel.innerText=Math.round(perc)+'%';
 }
 function calc(){
  let fN=fNet.value,tN=tNet.value,fS=fSel.value,tS=tSel.value,a=parseFloat(fAmt.value)||0;
  let fd=TOKENS[fN].find(x=>x.s==fS)||TOKENS[fN][0],td=TOKENS[tN].find(x=>x.s==tS)||TOKENS[tN][0];
  let unit=fd.q>0?fd.u/fd.q:fd.p, usd=a*unit, out=usd/td.p*0.997;
- tAmt.value=out?out.toFixed(6):'0';
- bF.innerText=`${fd.s} • ${fN}`; bT.innerText=`${td.s} • ${tN}`;
- saldoTxt.innerText=`${fd.q} ${fd.s} ($${fd.u})`;
- document.getElementById('bS').innerText=`Saldo: ${fd.q} ${fd.s} ($${fd.u}) • ${fN}`;
+ tAmt.value=out?out.toFixed(6):'0'; bF.innerText=`${fd.s} • ${fN}`; bT.innerText=`${td.s} • ${tN}`;
+ saldoTxt.innerText=`${fd.q} ${fd.s} ($${fd.u})`; document.getElementById('bS').innerText=`Saldo: ${fd.q} ${fd.s} ($${fd.u}) • ${fN}`;
  usdFrom.innerText=`≈ $${usd.toFixed(4)} USD • ${fN}`; usdTo.innerText=`≈ $${(out*td.p).toFixed(4)} USD • ${tN}`;
  res.innerText=`Recibes aprox: ${out.toFixed(6)} ${td.s} ($${(out*td.p).toFixed(4)}) • ${fN} → ${tN} • Fee 0.3%`;
 }
-function go(v){document.getElementById('home').style.display=v=='home'?'block':'none';document.getElementById('recv').style.display=v=='recv'?'block':'none';document.getElementById('swap').style.display=v=='swap'?'block':'none';document.getElementById('send').style.display=v=='send'?'block':'none';if(v=='recv')document.getElementById('qr').src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+W;if(v=='swap')updateTokens();}
+function go(v){document.getElementById('home').style.display=v=='home'?'block':'none';document.getElementById('recv').style.display=v=='recv'?'block':'none';document.getElementById('swap').style.display=v=='swap'?'block':'none';document.getElementById('send').style.display=v=='send'?'block':'none';document.getElementById('earn').style.display=v=='earn'?'block':'none';if(v=='recv')document.getElementById('qr').src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+W;if(v=='swap')updateTokens();}
 function showOk(t){document.getElementById('modalTxt').innerText=t;document.getElementById('modal').style.display='flex';}
-function doSwap(){showOk(`✅ Swap ${fAmt.value} ${fSel.value} (${percLabel.innerText}) (${fNet.value}) → ${tAmt.value} ${tSel.value} (${tNet.value})\nTodas las redes Polygon + World Chain\nDesde: 0x0190...38c`);}
-function doSend(){let addr=document.getElementById('sAddr').value;if(!addr)return showOk('Pon dirección');showOk(`✅ Enviar ${document.getElementById('sAmt').value} a ${addr}`);}
+function doSwap(){showOk(`✅ Swap ${fAmt.value} ${fSel.value} (${percLabel.innerText}) (${fNet.value}) → ${tAmt.value} ${tSel.value} (${tNet.value})\nDesde: 0x0190...38c`);}
+function doSend(){let addr=document.getElementById('sAddr').value;if(!addr)return showOk('Pon dirección 0x...');showOk(`✅ Enviar ${document.getElementById('sAmt').value} a ${addr}`);}
 updateTokens();
 </script></body></html>

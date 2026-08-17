@@ -4,72 +4,88 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Uno Intercambio</title>
+<script type="module">
+import { MiniKit } from 'https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@1/+esm'
+window.MiniKit = MiniKit;
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#0b0e11;color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:system-ui,sans-serif;padding:20px}
-.container{width:100%;max-width:380px;background:#15181e;border:1px solid #2a2e36;border-radius:20px;padding:24px;text-align:center}
-h1{font-size:22px;margin-bottom:6px}
-p{color:#9aa0a6;font-size:14px;margin-bottom:12px;line-height:1.4}
-.btn{background:#fff;color:#000;border:none;width:100%;padding:14px;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;margin-top:10px}
-.btn-pay{background:#10b981;color:#fff}
-#status{margin-top:14px;font-size:13px;padding:10px;border-radius:10px;display:none}
-.ok{display:block!important;background:#0a3d2a;color:#6effb0;border:1px solid #10b981}
-.warn{display:block!important;background:#3d2a0a;color:#ffcc66;border:1px solid #ffaa00}
-.small{font-size:11px;color:#666;margin-top:10px;word-break:break-all}
+body{background:#0b0e11;color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:system-ui;padding:20px}
+.card{width:100%;max-width:380px;background:#15181e;border:1px solid #2a2e36;border-radius:20px;padding:24px;text-align:center}
+h1{font-size:22px;margin-bottom:8px}
+p{color:#9aa0a6;font-size:14px;line-height:1.4}
+.btn{background:#fff;color:#000;border:none;width:100%;padding:14px;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;margin-top:14px}
+.status{margin-top:14px;font-size:13px;padding:10px;border-radius:10px}
+.ok{background:#0a3d2a;color:#6effb0;border:1px solid #10b981}
+.warn{background:#3d2a0a;color:#ffcc66;border:1px solid #ffaa00}
 </style>
 </head>
 <body>
-<div class="container">
+<div class="card">
 <h1>🔁 Uno Intercambio</h1>
-<p id="msg">Detectando entorno...</p>
-<div id="status"></div>
-<button class="btn" id="btnConnect">Conectar Wallet</button>
-<button class="btn btn-pay" id="btnPay" style="display:none">Pagar 1 WLD</button>
-<div class="small" id="url"></div>
+<p id="msg">Cargando...</p>
+<div id="status" class="status"></div>
+<button class="btn" id="btn">Conectar Wallet</button>
+<div style="font-size:11px;color:#555;margin-top:10px;word-break:break-all" id="url"></div>
 </div>
-<script>
+<script type="module">
 const statusEl = document.getElementById('status');
 const msgEl = document.getElementById('msg');
-const btnConnect = document.getElementById('btnConnect');
-const btnPay = document.getElementById('btnPay');
-document.getElementById('url').textContent = window.location.href;
+const btn = document.getElementById('btn');
+document.getElementById('url').textContent = location.href;
 
-function isWorldApp(){
-  const ua = navigator.userAgent || '';
-  return ua.includes('WorldApp') ||!!window.WorldApp ||!!window.worldApp || window.ethereum?.isWorldApp === true;
+async function init(){
+ const isWA = navigator.userAgent.includes('WorldApp') || window.MiniKit?.isInstalled();
+ if(isWA){
+   msgEl.textContent = 'Estás dentro de World App. Listo para conectar.';
+   statusEl.className='status ok';
+   statusEl.textContent='✅ World App detectada';
+ } else {
+   msgEl.textContent='Abre este link en World App > Browser';
+   statusEl.className='status warn';
+   statusEl.textContent='⚠️ Estás fuera (Chrome)';
+ }
 }
+setTimeout(init,1000);
+init();
 
-function setState(){
-  if(isWorldApp()){
-    msgEl.textContent = 'Estás dentro de World App. Listo para intercambiar.';
-    statusEl.className = 'ok';
-    statusEl.style.display='block';
-    statusEl.textContent = '✅ World App detectada correctamente';
-    btnConnect.style.display='block';
-  } else {
-    msgEl.textContent = 'Abre este link dentro de World App para usarlo. Si estás en Chrome es normal que diga esperando.';
-    statusEl.className = 'warn';
-    statusEl.style.display='block';
-    statusEl.textContent = '⚠️ Estás fuera de World App (Chrome). Pega este link en World App > Browser';
-    btnConnect.style.display='none';
-  }
-}
-setState();
-setTimeout(setState, 800);
-
-btnConnect.onclick = async () => {
-  try{
-    if(!window.ethereum){ alert('Abre en World App'); return; }
-    const acc = await window.ethereum.request({method:'eth_requestAccounts'});
-    statusEl.className='ok';
-    statusEl.textContent = 'Conectado: ' + acc[0].slice(0,6) + '...' + acc[0].slice(-4);
-    btnPay.style.display='block';
-    btnConnect.textContent='Conectado ✅';
-  }catch(e){ alert(e.message); }
-};
-
-btnPay.onclick = () => {
-  alert('Aquí iría tu lógica de pago con MiniKit / Pay. Wallet ya detectada!');
+btn.onclick = async () => {
+ try{
+   if(!window.MiniKit){
+     const {MiniKit} = await import('https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@1/+esm');
+     window.MiniKit = MiniKit;
+   }
+   if(!MiniKit.isInstalled()){
+     statusEl.textContent = 'Instalando MiniKit... abre en World App';
+     return;
+   }
+   statusEl.textContent = 'Conectando...';
+   const {commandPayload, finalPayload} = await MiniKit.commandsAsync.walletAuth({
+     nonce: Math.random().toString(36).substring(2),
+     expirationTime: new Date(Date.now()+ 7*24*60*60*1000),
+     statement: 'Conectar wallet para Uno Intercambio'
+   });
+   if(finalPayload.status === 'success'){
+     const addr = finalPayload.address || 'Conectado';
+     statusEl.className='status ok';
+     statusEl.textContent='Conectado: ' + addr.slice(0,6)+'...'+addr.slice(-4);
+     btn.textContent='✅ Conectado - Pagar 1 WLD';
+     btn.onclick = async ()=>{
+       const pay = await MiniKit.commandsAsync.pay({
+         reference: 'uno-'+Date.now(),
+         to: '0x0000000000000000000000000000000000000000',
+         tokens: [{symbol: 'WLD', token_amount: '1'}],
+         description: 'Pago Uno Intercambio'
+       });
+       console.log(pay);
+     };
+   } else {
+     statusEl.textContent = 'Cancelado: '+finalPayload.status;
+   }
+ }catch(e){
+   statusEl.className='status warn';
+   statusEl.textContent='Error: '+e.message;
+ }
 };
 </script>
 </body>

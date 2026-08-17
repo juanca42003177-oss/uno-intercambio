@@ -8,45 +8,61 @@
   body{margin:0;font-family:system-ui;background:#0a1e3c;min-height:100vh;display:flex;align-items:center;justify-content:center;color:white;padding:16px}
   .card{background:rgba(255,255,255,.12);border-radius:24px;padding:28px;width:100%;max-width:380px;text-align:center;border:1px solid rgba(255,255,255,.2)}
   .binance{background:#f3ba2f;color:#000;padding:8px 16px;border-radius:12px;font-weight:900;display:inline-block}
-  .btn{width:100%;padding:16px;border-radius:14px;border:0;font-weight:800;font-size:16px;background:white;color:#0a1e3c}
+  .btn{width:100%;padding:16px;border-radius:14px;border:0;font-weight:800;font-size:16px;background:#f3ba2f;color:#000;cursor:pointer}
   .status{font-size:11px;background:rgba(0,0,0,.4);padding:10px;border-radius:10px;margin:12px 0;text-align:left;word-break:break-all}
 </style>
 </head>
 <body>
 <div class="card">
   <div class="binance">⬥ BINANCE</div>
-  <h1 style="margin:16px 0 6px">Uno Intercambio</h1>
-  <div id="sub" style="opacity:.7;font-size:13px">Esperando World App...</div>
-  <div id="status" class="status">⏳ Iniciando...</div>
+  <h1>Uno Intercambio</h1>
+  <div id="sub" style="opacity:.7;font-size:12px">Cargando MiniKit desde CDN...</div>
+  <div id="status" class="status">⏳ Cargando librería...</div>
   <button class="btn" id="btn" onclick="conectar()">Conectar Wallet</button>
 </div>
-<script>
-const APP_ID="app_d0a270229b8199adb79b64d5c7aa7c0f";
-function setStatus(t,ok){const e=document.getElementById('status');e.innerHTML=t;e.style.border='1px solid '+(ok===true?'#0f0':ok===false?'#f55':'#555')}
-let i=0;
-function check(){
-  i++;
-  if(window.MiniKit){
-    setStatus('✅ MiniKit ENCONTRADO en intento '+i+'<br>Objeto: '+Object.keys(window.MiniKit).join(', ')+'<br>UA: '+navigator.userAgent.slice(0,80), true);
-    document.getElementById('sub').innerText='MiniKit encontrado - Pulsa Conectar';
-    document.getElementById('btn').style.background='#f3ba2f';
-    try{ window.MiniKit.install(APP_ID); setStatus(document.getElementById('status').innerHTML+'<br>install('+APP_ID+') ok', true);}catch(e){setStatus(document.getElementById('status').innerHTML+'<br>install error:'+e.message, false);}
-    return;
-  }
-  if(i<40){ setStatus('⏳ Buscando MiniKit... '+i+'/40<br>window.MiniKit='+(typeof window.MiniKit)+'<br>UA: '+navigator.userAgent.slice(0,100), null); setTimeout(check,500);}
-  else{ setStatus('❌ window.MiniKit nunca apareció.<br>SOLUCIÓN: No escanees el QR con la cámara del celular. ABRE World App > Arriba a la derecha > icono de QR/Scan > escanea el QR de developer.world.org desde ahí.', false);}
-}
-window.addEventListener('load', check);
 
-async function conectar(){
-  const mk=window.MiniKit;
-  if(!mk){ alert('MiniKit no existe. Abre desde World App Scan, no desde Chrome.'); return; }
+<script type="module">
+import { MiniKit } from 'https://esm.sh/@worldcoin/minikit-js@1.7.0?bundle';
+
+const APP_ID = "app_d0a270229b8199adb79b64d5c7aa7c0f";
+window.MiniKit = MiniKit;
+
+function setStatus(t,ok){
+  const e=document.getElementById('status');
+  e.innerHTML=t;
+  e.style.border='1px solid '+(ok===true?'#0f0':ok===false?'#f55':'#555');
+}
+
+try{
+  MiniKit.install(APP_ID);
+  setStatus('✅ MiniKit cargado desde CDN<br>App ID: '+APP_ID+'<br>isInstalled: '+MiniKit.isInstalled()+'<br>Listo para conectar', true);
+  document.getElementById('sub').innerText='¡Listo! Pulsa Conectar Wallet';
+}catch(e){
+  setStatus('❌ Error install: '+e.message, false);
+}
+
+window.conectar = async function(){
   try{
-    document.getElementById('btn').innerText='Conectando...';
-    const res = await mk.commandsAsync.walletAuth({ nonce: Date.now().toString(), requestId:'0', statement:'Uno Intercambio login' });
-    setStatus('Respuesta walletAuth:<br>'+JSON.stringify(res).slice(0,500), true);
-    if(res.finalPayload?.status==='success'){ document.getElementById('btn').innerText=res.finalPayload.address.slice(0,10)+'...'; }
-  }catch(e){ setStatus('Error walletAuth: '+e.message+'<br>'+e.stack?.slice(0,300), false); document.getElementById('btn').innerText='Conectar Wallet'; }
+    const btn=document.getElementById('btn');
+    btn.innerText='Conectando...';
+    setStatus('⏳ Abriendo World App...', null);
+    const res = await MiniKit.commandsAsync.walletAuth({
+      nonce: Date.now().toString(),
+      requestId: '0',
+      statement: 'Conectar a Uno Intercambio',
+      expirationTime: new Date(Date.now()+7*24*60*60*1000),
+      notBefore: new Date(Date.now()-24*60*60*1000),
+    });
+    setStatus('Respuesta:<br>'+JSON.stringify(res, null, 2).slice(0,800), true);
+    if(res?.finalPayload?.status==='success'){
+      btn.innerText=res.finalPayload.address.slice(0,12)+'...';
+    }else{
+      btn.innerText='Conectar Wallet';
+    }
+  }catch(e){
+    setStatus('❌ Error: '+e.message, false);
+    document.getElementById('btn').innerText='Conectar Wallet';
+  }
 }
 </script>
 </body>

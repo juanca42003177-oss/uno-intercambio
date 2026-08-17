@@ -2,86 +2,51 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Uno Intercambio</title>
 <style>
-  body{margin:0;font-family:system-ui;background:linear-gradient(135deg,#0a1e3c,#1e3c72);min-height:100vh;display:flex;align-items:center;justify-content:center;color:white;padding:16px}
-  .card{background:rgba(255,255,255,0.1);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.2);border-radius:24px;padding:28px;width:100%;max-width:380px;text-align:center}
-  .binance{background:#f3ba2f;color:#000;display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:12px;font-weight:900}
-  .logo{width:56px;height:56px;background:#f3ba2f;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:16px auto;font-size:28px}
-  h1{margin:10px 0 6px;font-size:30px} .sub{opacity:.7;font-size:13px;margin-bottom:12px;word-break:break-all}
-  .status{font-size:12px;background:rgba(0,0,0,.35);padding:10px;border-radius:10px;margin-bottom:14px;text-align:left;border:1px solid rgba(255,255,255,.2)}
-  .btn{width:100%;padding:16px;border-radius:14px;border:0;font-weight:800;font-size:16px;background:white;color:#0a1e3c;cursor:pointer}
-  .btn:disabled{opacity:.5} .foot{margin-top:12px;font-size:11px;opacity:.6}
+  body{margin:0;font-family:system-ui;background:#0a1e3c;min-height:100vh;display:flex;align-items:center;justify-content:center;color:white;padding:16px}
+  .card{background:rgba(255,255,255,.12);border-radius:24px;padding:28px;width:100%;max-width:380px;text-align:center;border:1px solid rgba(255,255,255,.2)}
+  .binance{background:#f3ba2f;color:#000;padding:8px 16px;border-radius:12px;font-weight:900;display:inline-block}
+  .btn{width:100%;padding:16px;border-radius:14px;border:0;font-weight:800;font-size:16px;background:white;color:#0a1e3c}
+  .status{font-size:11px;background:rgba(0,0,0,.4);padding:10px;border-radius:10px;margin:12px 0;text-align:left;word-break:break-all}
 </style>
 </head>
 <body>
 <div class="card">
   <div class="binance">⬥ BINANCE</div>
-  <div class="logo">🔄</div>
-  <h1>Uno Intercambio</h1>
-  <div class="sub" id="sub">Detectando World App...</div>
-  <div class="status" id="status">⏳ Esperando MiniKit...</div>
-  <button class="btn" id="btn" disabled onclick="conectar()">Conectar Wallet</button>
-  <div class="foot">Abre solo con QR de Vista Previa en developer.world.org</div>
+  <h1 style="margin:16px 0 6px">Uno Intercambio</h1>
+  <div id="sub" style="opacity:.7;font-size:13px">Esperando World App...</div>
+  <div id="status" class="status">⏳ Iniciando...</div>
+  <button class="btn" id="btn" onclick="conectar()">Conectar Wallet</button>
 </div>
 <script>
-const APP_ID = "app_d0a270229b8199adb79b64d5c7aa7c0f";
-let intentos = 0;
-function setStatus(html, ok){
-  const el=document.getElementById('status');
-  el.innerHTML=html;
-  el.style.background= ok===true ? 'rgba(0,255,120,.18)' : ok===false ? 'rgba(255,60,60,.18)' : 'rgba(0,0,0,.35)';
-  el.style.borderColor= ok===true ? '#00ff88' : ok===false ? '#ff5050' : 'rgba(255,255,255,.2)';
-}
-function detectar(){
-  intentos++;
-  const mk = window.MiniKit;
-  if(mk){
-    try{ mk.install(APP_ID); }catch(e){}
-    if(mk.isInstalled && mk.isInstalled()){
-      setStatus('✅ MiniKit detectado!<br>App ID: '+APP_ID+'<br>World App: '+ (mk.userAgent||'ok'), true);
-      document.getElementById('sub').innerText='¡Listo para conectar!';
-      document.getElementById('btn').disabled=false;
-      return;
-    } else {
-      setStatus('⚠️ MiniKit instalado pero no es World App.<br>Debes abrir este link CON EL QR de Vista Previa, no escribiendo vercel.app', false);
-    }
-  } else {
-    if(intentos < 20){
-      setStatus('⏳ Buscando MiniKit... intento '+intentos+'/20<br>UA: '+navigator.userAgent.slice(0,90), null);
-      setTimeout(detectar, 500);
-    } else {
-      setStatus('❌ No se encontró MiniKit después de 10s.<br>1) Cierra World App por completo<br>2) Ve a developer.world.org > Mini aplicación > Copia el link con los 2 cuadritos (NO el QR de vercel)<br>3) Pega ese link en World App', false);
-      document.getElementById('sub').innerText='No se encontró MiniKit';
-    }
+const APP_ID="app_d0a270229b8199adb79b64d5c7aa7c0f";
+function setStatus(t,ok){const e=document.getElementById('status');e.innerHTML=t;e.style.border='1px solid '+(ok===true?'#0f0':ok===false?'#f55':'#555')}
+let i=0;
+function check(){
+  i++;
+  if(window.MiniKit){
+    setStatus('✅ MiniKit ENCONTRADO en intento '+i+'<br>Objeto: '+Object.keys(window.MiniKit).join(', ')+'<br>UA: '+navigator.userAgent.slice(0,80), true);
+    document.getElementById('sub').innerText='MiniKit encontrado - Pulsa Conectar';
+    document.getElementById('btn').style.background='#f3ba2f';
+    try{ window.MiniKit.install(APP_ID); setStatus(document.getElementById('status').innerHTML+'<br>install('+APP_ID+') ok', true);}catch(e){setStatus(document.getElementById('status').innerHTML+'<br>install error:'+e.message, false);}
+    return;
   }
+  if(i<40){ setStatus('⏳ Buscando MiniKit... '+i+'/40<br>window.MiniKit='+(typeof window.MiniKit)+'<br>UA: '+navigator.userAgent.slice(0,100), null); setTimeout(check,500);}
+  else{ setStatus('❌ window.MiniKit nunca apareció.<br>SOLUCIÓN: No escanees el QR con la cámara del celular. ABRE World App > Arriba a la derecha > icono de QR/Scan > escanea el QR de developer.world.org desde ahí.', false);}
 }
-window.addEventListener('load', detectar);
+window.addEventListener('load', check);
 
 async function conectar(){
+  const mk=window.MiniKit;
+  if(!mk){ alert('MiniKit no existe. Abre desde World App Scan, no desde Chrome.'); return; }
   try{
-    const mk=window.MiniKit;
-    if(!mk || !mk.isInstalled()){ alert('MiniKit no detectado'); return; }
     document.getElementById('btn').innerText='Conectando...';
-    const res = await mk.commandsAsync.walletAuth({
-      nonce: 'nonce-'+Date.now(),
-      requestId: '0',
-      expirationTime: new Date(Date.now()+7*24*60*60*1000),
-      notBefore: new Date(Date.now()-24*60*60*1000),
-      statement: 'Conectar a Uno Intercambio',
-    });
-    if(res && res.finalPayload && res.finalPayload.status==='success'){
-      setStatus('✅ Conectado: '+res.finalPayload.address, true);
-      document.getElementById('btn').innerText='Conectado: '+res.finalPayload.address.slice(0,6)+'...'+res.finalPayload.address.slice(-4);
-    } else {
-      setStatus('❌ Cancelado o error: '+(res.finalPayload?res.finalPayload.status:'unknown'), false);
-      document.getElementById('btn').innerText='Conectar Wallet';
-    }
-  }catch(e){
-    setStatus('❌ Error: '+e.message, false);
-    document.getElementById('btn').innerText='Conectar Wallet';
-  }
+    const res = await mk.commandsAsync.walletAuth({ nonce: Date.now().toString(), requestId:'0', statement:'Uno Intercambio login' });
+    setStatus('Respuesta walletAuth:<br>'+JSON.stringify(res).slice(0,500), true);
+    if(res.finalPayload?.status==='success'){ document.getElementById('btn').innerText=res.finalPayload.address.slice(0,10)+'...'; }
+  }catch(e){ setStatus('Error walletAuth: '+e.message+'<br>'+e.stack?.slice(0,300), false); document.getElementById('btn').innerText='Conectar Wallet'; }
 }
 </script>
 </body>

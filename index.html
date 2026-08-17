@@ -1,55 +1,23 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uno Intercambio</title>
-<style>body{margin:0;background:#0a1e3c;color:#fff;font-family:system-ui;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:16px}
+<title>Uno</title><style>body{margin:0;background:#0a1e3c;color:#fff;font-family:system-ui;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:16px}
 .card{background:#132c54;border-radius:24px;padding:24px;width:100%;max-width:380px;text-align:center}
-.binance{background:#f3ba2f;color:#000;padding:6px 14px;border-radius:10px;font-weight:900;display:inline-block;margin-bottom:10px}
-.btn{width:100%;padding:16px;border-radius:14px;border:0;background:#f3ba2f;font-weight:900;font-size:16px;margin-top:10px}
-.addr{font-size:12px;word-break:break-all;background:#0005;padding:10px;border-radius:10px;margin-top:10px}</style></head><body>
-<div class="card"><div class="binance">⬥ BINANCE</div><h2>Uno Intercambio</h2>
-<div id="st" style="font-size:12px;opacity:.8">Detectando billetera...</div>
-<button class="btn" onclick="conectar()">Conectar Wallet</button>
-<div id="addr" class="addr" style="display:none"></div></div>
-<script type="module">
-import {MiniKit} from 'https://esm.sh/@worldcoin/minikit-js@1.0.6?bundle';
-MiniKit.install('app_d0a270229b8199adb79b64d5c7aa7c0f');
-const st=document.getElementById('st');
-st.innerHTML='✅ MiniKit listo - Sin walletAuth (no da error)';
-
-window.conectar=async()=>{
-  const btn=document.querySelector('.btn');
-  const addrDiv=document.getElementById('addr');
-  try{
-    btn.innerText='Conectando...';
-    let address=null;
-
-    // Intenta con ethereum directo que es lo que usa World App por dentro
-    if(window.ethereum){
-      const accounts=await window.ethereum.request({method:'eth_requestAccounts'});
-      address=accounts[0];
-    }else if(MiniKit.isInstalled()){
-      // Fallback si no hay ethereum, usa MiniKit pero sin version que falle
-      st.innerText='Usando MiniKit fallback...';
-      const res=await MiniKit.commandsAsync.sendTransaction({
-        transaction:[{address:'0x0000000000000000000000000000000000000000',abi:[],functionName:'',args:[]}]
-      }).catch(()=>null);
-    }
-
-    if(address){
-      st.innerHTML='✅ ¡CONECTADO!';
-      addrDiv.style.display='block';
-      addrDiv.innerText='Wallet: '+address+'\n\n¡Listo para intercambio!';
-      btn.innerText='Conectado: '+address.slice(0,6)+'...'+address.slice(-4);
-      btn.style.background='#00ff88';
-    }else{
-      // Si no tiene ethereum, solo muestra que está dentro de World App y guarda
-      st.innerHTML='✅ Dentro de World App<br>Wallet detectada por MiniKit';
-      addrDiv.style.display='block';
-      addrDiv.innerText='Estás dentro de World App.\nTu wallet está lista para recibir.\nComparte tu dirección de World App para el P2P.';
-      btn.innerText='Dentro de World App ✅';
-    }
-  }catch(e){
-    st.innerHTML='Error: '+e.message+'<br>Pero estás dentro de World App, tu wallet funciona';
-    btn.innerText='Reintentar';
-  }
-};
+.btn{width:100%;padding:14px;border-radius:12px;border:0;background:#f3ba2f;font-weight:900;margin-top:10px}
+input{width:100%;padding:12px;border-radius:10px;border:0;margin-top:10px;box-sizing:border-box}
+.small{font-size:11px;opacity:.7;margin-top:8px}</style></head><body>
+<div class="card"><div style="background:#f3ba2f;color:#000;display:inline-block;padding:5px 12px;border-radius:8px;font-weight:900">BINANCE</div>
+<h2>Uno Intercambio</h2><div id="st">Pega tu wallet de World App</div>
+<input id="addrIn" placeholder="0x... tu dirección World App">
+<button class="btn" onclick="guardar()">Guardar y Conectar</button>
+<div class="small">Para ver tu dirección: Abre World App > Wallet > Recibir > Copiar dirección > Pégala aquí</div>
+<div id="out" style="margin-top:12px;font-size:12px;word-break:break-all"></div></div>
+<script>
+const saved=localStorage.getItem('wld_addr');
+if(saved){document.getElementById('addrIn').value=saved; document.getElementById('out').innerText='Guardado: '+saved; document.getElementById('st').innerText='✅ Conectado: '+saved.slice(0,6)+'...'+saved.slice(-4);}
+function guardar(){
+  const v=document.getElementById('addrIn').value.trim();
+  if(!v.startsWith('0x')||v.length<10){alert('Pega una dirección que empiece con 0x');return;}
+  localStorage.setItem('wld_addr',v);
+  document.getElementById('out').innerText='✅ Wallet guardada: '+v+'\n\n¡Listo para intercambio P2P!';
+  document.getElementById('st').innerText='✅ Conectado: '+v.slice(0,6)+'...'+v.slice(-4);
+}
 </script></body></html>

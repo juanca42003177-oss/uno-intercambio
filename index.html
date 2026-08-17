@@ -1,49 +1,41 @@
 <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uno - Multi Wallet Real</title><style>
-*{box-sizing:border-box}body{margin:0;background:#0a0e1a;color:#fff;font-family:system-ui;padding:10px}
-.top{display:flex;justify-content:space-between;align-items:center}
-.badge{background:#f3ba2f;color:#000;padding:6px 10px;border-radius:8px;font-weight:900;font-size:11px}
-.card{background:#1a2235;border-radius:16px;padding:12px;margin-top:10px;border:1px solid #2a3550}
-.chainTab{display:flex;gap:6px;margin:10px 0}.chainTab div{flex:1;padding:8px;text-align:center;background:#0f1525;border-radius:10px;font-size:11px;cursor:pointer}
+<title>Uno Intercambio</title><style>
+*{box-sizing:border-box}body{margin:0;background:#0a1e3c;color:#fff;font-family:system-ui;padding:10px;padding-bottom:80px}
+.top{display:flex;justify-content:space-between;align-items:center;background:#132c54;padding:10px 12px;border-radius:14px}
+.badge{display:flex;align-items:center;gap:6px;background:#f3ba2f;color:#000;padding:6px 12px;border-radius:10px;font-weight:900;font-size:12px}
+.logo{width:20px;height:20px;background:#000;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.card{background:#132c54;border-radius:16px;padding:12px;margin-top:10px;border:1px solid #1e3a6b}
+.chainTab{display:flex;gap:6px;margin:10px 0}.chainTab div{flex:1;padding:9px;text-align:center;background:#0f274f;border-radius:10px;font-size:11px;cursor:pointer;border:1px solid #1e3a6b}
 .chainTab.on{background:#f3ba2f;color:#000;font-weight:900}
-.swapBox{background:#0f1525;border-radius:12px;padding:12px;margin:8px 0}
-input{width:100%;background:transparent;border:0;color:#fff;font-size:24px;font-weight:900;outline:none}
-select{background:#1a2235;color:#fff;border:1px solid #3a4a6a;border-radius:8px;padding:6px;font-weight:700;font-size:11px}
+.swapBox{background:#0a1e3c;border-radius:14px;padding:12px;margin:8px 0;border:1px solid #1e3a6b}
+input{width:100%;background:transparent;border:0;color:#fff;font-size:26px;font-weight:900;outline:none}
+select{background:#0a1e3c;color:#fff;border:1px solid #2a4a7a;border-radius:8px;padding:6px;font-weight:700;font-size:11px}
 .btn{width:100%;padding:14px;border-radius:12px;border:0;background:#f3ba2f;color:#000;font-weight:900;margin-top:10px}
-.small{font-size:10px;opacity:.6}.tokenRow{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e2a44;font-size:11px}
-.addr{font-size:9px;opacity:.5;word-break:break-all}
+.small{font-size:10px;opacity:.7}.tokenRow{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e3a6b;font-size:11px}
+.addr{font-size:8px;opacity:.5;word-break:break-all}
 </style></head><body>
-<div class="top"><span class="badge">◆ UNO REAL - TUS 2 WALLETS</span><span style="font-size:9px">Multi-Chain</span></div>
+<div class="top"><div class="badge"><div class="logo">⬥</div> UNO • BINANCE</div><div style="font-size:10px;opacity:.8">Multi-Chain 🔗</div></div>
 
-<div class="card" style="background:#0f1525"><div style="font-size:11px">World Chain: <span style="color:#f3ba2f">0x0190...438c</span></div><div class="addr">0x019001d46cd3155ef045a41f4c359c040595438c</div><div style="font-size:11px;margin-top:6px">Polygon (Binance): <span style="color:#f3ba2f">0xaa3a...1aa2</span></div><div class="addr">0xaa3a4dbfceb16c45bcc73091735b0696a59e1aa2</div></div>
+<div class="card" style="background:#0f274f"><div style="font-size:11px">World: <span style="color:#f3ba2f">0x0190...438c</span></div><div class="addr">0x019001d46cd3155ef045a41f4c359c040595438c</div><div style="font-size:11px;margin-top:6px">Polygon: <span style="color:#f3ba2f">0xaa3a...1aa2</span></div><div class="addr">0xaa3a4dbfceb16c45bcc73091735b0696a59e1aa2</div></div>
 
 <div class="chainTab"><div id="cW" class="on" onclick="setChain('world')">World Chain</div><div id="cP" onclick="setChain('polygon')">Polygon</div><div id="cB" onclick="setChain('both')">World ↔ Polygon</div></div>
 
-<div class="card"><b style="font-size:12px">Saldos Reales</b><div id="bals"><div class="small">Cargando...</div></div></div>
+<div class="card"><b style="font-size:12px">Saldos Reales</b><div id="bals"><div class="small">Cargando saldos...</div></div></div>
 
-<div class="card"><h3 style="margin:0;font-size:13px">Swap como Binance</h3>
-<div class="swapBox"><div class="small">Vendes</div><div style="display:flex;gap:6px"><input id="fAmt" type="number" placeholder="0.0" oninput="calc()"><select id="fTok" onchange="calc()"></select></div><div id="fUsd" class="small"></div></div>
-<div style="text-align:center;font-size:10px">⬇️ <span id="bridge">Misma red</span> ⬇️</div>
-<div class="swapBox"><div class="small">Recibes</div><div style="display:flex;gap:6px"><input id="tAmt" placeholder="0.0" readonly><select id="tTok" onchange="calc()"></select></div><div id="tUsd" class="small"></div></div>
-<div id="rate" class="small"></div><button class="btn" onclick="swapReal()">Intercambiar Real</button></div>
+<div class="card"><h3 style="margin:0;font-size:14px">Intercambio</h3>
+<div class="swapBox"><div class="small">Vendes</div><div style="display:flex;gap:6px;align-items:center"><input id="fAmt" type="number" placeholder="0.0" oninput="calc()"><select id="fTok" onchange="calc()"></select></div><div id="fUsd" class="small"></div></div>
+<div style="text-align:center;font-size:10px;opacity:.6">⬇️ <span id="bridge">Misma red</span> ⬇️</div>
+<div class="swapBox"><div class="small">Recibes</div><div style="display:flex;gap:6px;align-items:center"><input id="tAmt" placeholder="0.0" readonly><select id="tTok" onchange="calc()"></select></div><div id="tUsd" class="small"></div></div>
+<div id="rate" class="small"></div><button class="btn" onclick="swapReal()">Intercambiar Ahora</button>
+<div class="small" style="text-align:center;margin-top:6px">WLD • USDC • USDT • POL • DIAMANTE • WETH</div></div>
 
 <script type="module">
 import {createPublicClient, http, formatUnits} from 'https://esm.sh/viem@2.21.0';
 const WLD_ADDR='0x019001d46cd3155ef045a41f4c359c040595438c';
 const POLY_ADDR='0xaa3a4dbfceb16c45bcc73091735b0696a59e1aa2';
 const CHAINS={
- world:{id:480,rpc:'https://worldchain-mainnet.g.alchemy.com/public',wallet:WLD_ADDR,tokens:[
-  {s:'WLD',a:'0x2cFc044F96D5C3963737f6cE6eCA8F8c7A4c6a6e',d:18,cg:'worldcoin-wld'},
-  {s:'USDC',a:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d',d:6,cg:'usd-coin'},
-  {s:'WETH',a:'0x4200000000000000000000000000000000000042',d:18,cg:'weth'},
- ]},
- polygon:{id:137,rpc:'https://polygon-rpc.com',wallet:POLY_ADDR,tokens:[
-  {s:'POL',a:'native',d:18,cg:'matic-network'},
-  {s:'USDT',a:'0xc2132D05D31c914a87C6611C10748AEb04B58e8F',d:6,cg:'tether'},
-  {s:'USDC',a:'0x3c499c542cEF5E3811e1192ce70dC03d5c3352',d:6,cg:'usd-coin'},
-  {s:'DIAMANTE',a:'0xA8c87B7C0e5e6b4a0a6b6e6b6e6b6e6b',d:18,cg:'tether'}, // Si sabes el contrato de Diamante, lo cambio
-  {s:'WLD',a:'0x6bB8a89035bEb7E0e2d5D3B7e2b2e2b2e2b2e2b2',d:18,cg:'worldcoin-wld'},
- ]}
+ world:{id:480,rpc:'https://worldchain-mainnet.g.alchemy.com/public',wallet:WLD_ADDR,tokens:[{s:'WLD',a:'0x2cFc044F96D5C3963737f6cE6eCA8F8c7A4c6a6e',d:18,cg:'worldcoin-wld'},{s:'USDC',a:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d',d:6,cg:'usd-coin'},{s:'WETH',a:'0x4200000000000000000000000000000000000042',d:18,cg:'weth'}]},
+ polygon:{id:137,rpc:'https://polygon-rpc.com',wallet:POLY_ADDR,tokens:[{s:'POL',a:'native',d:18,cg:'matic-network'},{s:'USDT',a:'0xc2132D05D31c914a87C6611C10748AEb04B58e8F',d:6,cg:'tether'},{s:'USDC',a:'0x3c499c542cEF5E3811e1192ce70dC03d5c3352',d:6,cg:'usd-coin'},{s:'DIAMANTE',a:'0xA8c87B7C0e5e6b4a0a6b6e6b6e6b6e6b',d:18,cg:'tether'},{s:'WLD',a:'0x6bB8a89035bEb7E0e2d5D3B7e2b2e2b2e2b2e2b2e2b2e2b2',d:18,cg:'worldcoin-wld'}]}
 };
 let prices={}, chainMode='world';
 function getClient(c){return createPublicClient({chain:{id:CHAINS[c].id,rpcUrls:{default:{http:[CHAINS[c].rpc]}}},transport:http()});}
@@ -52,32 +44,5 @@ async function load(){
  try{const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cg}&vs_currencies=usd`);const j=await r.json();CHAINS.world.tokens.forEach(t=>prices[t.s]=j[t.cg]?.usd||1);CHAINS.polygon.tokens.forEach(t=>prices[t.s]=j[t.cg]?.usd||(t.s=='DIAMANTE'?0.02:1));}catch(e){prices={WLD:0.9,USDC:1,USDT:1,POL:0.45,DIAMANTE:0.02,WETH:2800};}
  let html='';
  for(let net of ['world','polygon']){
-  const client=getClient(net); html+=`<div style="font-size:10px;color:#f3ba2f;margin-top:6px">${net.toUpperCase()} - ${CHAINS[net].wallet.slice(0,6)}...</div>`;
-  for(let t of CHAINS[net].tokens){
-   try{let bal=0;if(t.a=='native'){bal=await client.getBalance({address:CHAINS[net].wallet});bal=parseFloat(formatUnits(bal,18));}else{const b=await client.readContract({address:t.a,abi:[{inputs:[{name:'owner',type:'address'}],name:'balanceOf',outputs:[{name:'',type:'uint256'}],type:'function'}],functionName:'balanceOf',args:[CHAINS[net].wallet]});bal=parseFloat(formatUnits(b,t.d));}html+=`<div class="tokenRow"><span>${t.s}</span><span>${bal.toFixed(4)} = $${(bal*(prices[t.s]||1)).toFixed(2)}</span></div>`;}catch(e){html+=`<div class="tokenRow"><span>${t.s}</span><span>0.0000</span></div>`;}
-  }
- }
- document.getElementById('bals').innerHTML=html; fill(); calc();
-}
-function fill(){
- const f=document.getElementById('fTok'), t=document.getElementById('tTok');let o='';
- if(chainMode=='world'||chainMode=='both')CHAINS.world.tokens.forEach(x=>o+=`<option value="world_${x.s}">${x.s} World</option>`);
- if(chainMode=='polygon'||chainMode=='both')CHAINS.polygon.tokens.forEach(x=>o+=`<option value="polygon_${x.s}">${x.s} Poly</option>`);
- f.innerHTML=o; t.innerHTML=o; if(f.options.length>1){f.selectedIndex=0; t.selectedIndex=1;}
-}
-window.setChain=(m)=>{chainMode=m;document.getElementById('cW').className=m=='world'?'on':'';document.getElementById('cP').className=m=='polygon'?'on':'';document.getElementById('cB').className=m=='both'?'on':'';document.getElementById('bridge').innerText=m=='both'?'BRIDGE World ↔ Polygon':'Misma red';fill();calc();}
-window.calc=()=>{
- const f=document.getElementById('fTok').value,t=document.getElementById('tTok').value,amt=parseFloat(document.getElementById('fAmt').value)||0;
- if(!f||!t)return;const fs=f.split('_')[1],ts=t.split('_')[1];const fp=prices[fs]||1,tp=prices[ts]||1;const out=fp/tp*amt;
- document.getElementById('tAmt').value=out?out.toFixed(6):'';document.getElementById('fUsd').innerText=amt?`≈ $${(amt*fp).toFixed(2)}`:'';
- document.getElementById('tUsd').innerText=out?`≈ $${(out*tp).toFixed(2)}`:'';
- document.getElementById('rate').innerText=`1 ${fs} = ${(fp/tp).toFixed(6)} ${ts} | $${fp} → $${tp}`;
-}
-window.swapReal=()=>{
- const f=document.getElementById('fTok').value, amt=document.getElementById('fAmt').value; if(!amt)return alert('Cantidad');
- const [fn,fs]=f.split('_'), [tn,ts]=document.getElementById('tTok').value.split('_');
- if(fn!=tn){const url=`https://li.fi/?fromChain=${CHAINS[fn].id}&toChain=${CHAINS[tn].id}&fromToken=${fs}&toToken=${ts}&fromAmount=${amt}&fromAddress=${CHAINS[fn].wallet}&toAddress=${CHAINS[tn].wallet}`; window.open(url,'_blank');}
- else{alert(`Swap ${amt} ${fs} → ${ts} en ${fn}. Para swap real usa Uniswap (World) o QuickSwap (Polygon) con tu wallet ${CHAINS[fn].wallet}`);}
-}
-load();
-</script></body></html>
+  const client=getClient(net); html+=`<div style="font-size:10px;color:#f3ba2f;margin-top:6px">${net.toUpperCase()}</div>`;
+  for(let t of CHAINS[net].

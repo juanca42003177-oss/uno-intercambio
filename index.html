@@ -1,96 +1,104 @@
 <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uno - Sin Traba</title><style>
+<title>Uno - Todas las redes</title><style>
 *{box-sizing:border-box}body{margin:0;background:#fff;color:#111;font-family:system-ui;padding-bottom:90px}
-.top{display:flex;justify-content:space-between;align-items:center;padding:12px 16px}
+.top{padding:12px 16px;display:flex;gap:10px;align-items:center}
 .avatar{width:56px;height:56px;border-radius:50%;background:#0B0E11;display:flex;align-items:center;justify-content:center;border:2px solid #f3ba2f}
-.big{font-size:42px;font-weight:900}.small{font-size:12px;opacity:.6}.green{color:#00b15c}
-.btns{display:flex;gap:10px;padding:0 16px;overflow-x:auto}
-.btn{flex:0 0 110px;background:#ffe6f4;color:#ff3ab2;border-radius:18px;padding:14px;font-weight:700}
-.apy{margin:16px;border:1px solid #eee;border-radius:18px;padding:14px;display:flex;justify-content:space-between}
-.tokens{padding:0 16px}.tok{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f2f2f2}
-.tIcon{width:42px;height:42px;border-radius:50%;background:#f3ba2f;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px}
+.big{font-size:42px;font-weight:900}.small{font-size:11px;opacity:.6}.green{color:#00b15c}
+.btns{display:flex;gap:8px;padding:0 12px;overflow-x:auto}
+.btn{flex:1;background:#ffe6f4;color:#ff3ab2;border-radius:16px;padding:12px;font-weight:700;text-align:center;font-size:12px;min-width:80px}
+.apy{margin:12px;border:1px solid #eee;border-radius:18px;padding:12px;display:flex;justify-content:space-between;font-size:13px}
+.tokens{padding:0 16px}.tok{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f2f2f2}
+.tIcon{width:40px;height:40px;border-radius:50%;background:#f3ba2f;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px}
 .nav{position:fixed;bottom:10px;left:16px;right:16px;background:#fff;border:1px solid #eee;border-radius:30px;display:flex;justify-content:space-around;padding:8px;box-shadow:0 4px 20px rgba(0,0,0,.1)}
-.nav div{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}.nav div.active{background:#111;color:#fff}
-.main{background:#fff;border-radius:20px;margin:12px;padding:14px;border:2px solid #ffe6f4;min-height:60vh}
-.box{background:#f6f6f6;border-radius:16px;padding:14px;margin:8px 0}
-input{width:100%;background:transparent;border:0;font-size:24px;font-weight:900;outline:none}select{border:0;background:#111;color:#fff;padding:8px 10px;border-radius:20px;font-weight:900;font-size:11px}
-.btnYellow{width:100%;padding:14px;border-radius:12px;border:0;background:#f3ba2f;color:#000;font-weight:900;margin-top:8px}
-.qrBox{background:#fff;border-radius:20px;padding:20px;text-align:center;border:1px solid #eee}
+.nav div{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.nav div.active{background:#111;color:#fff}
+.main{margin:10px;padding:12px;border:2px solid #ffe6f4;border-radius:20px;min-height:60vh}
+.box{background:#f6f6f6;border-radius:14px;padding:12px;margin:8px 0}
+input{width:100%;border:0;background:transparent;font-size:22px;font-weight:900;outline:none}
+select{border:0;background:#111;color:#fff;padding:7px;border-radius:20px;font-weight:900;font-size:10px;max-width:140px}
+.btnY{width:100%;padding:13px;border-radius:12px;border:0;background:#f3ba2f;font-weight:900;margin-top:8px}
+.netTag{font-size:8px;background:#eee;border-radius:6px;padding:2px 5px}
 </style></head><body>
 
-<div id="viewHome">
-<div class="top"><div style="display:flex;gap:10px;align-items:center"><div class="avatar"><svg viewBox="0 0 32 32" fill="#F3BA2F" width="28" height="28"><path d="M16 3 L21 8 L16 13 L11 8 Z M8 10 L13 15 L8 20 L3 15 Z M24 10 L29 15 L24 20 L19 15 Z M16 14 L21 19 L16 24 L11 19 Z M8 22 L13 27 L8 32 L3 27 Z M24 22 L29 27 L24 32 L19 27 Z"/></svg></div><div><b>Uno intercambio</b><div class="small">0x0190...38c • World Chain</div></div></div></div>
-<div style="padding:0 16px;display:flex;justify-content:space-between;align-items:center"><div><div class="big">$0.23</div><div class="small"><span class="green">▲ $0.01 (5.97%)</span> hoy ></div></div><div style="width:100px"><svg width="100%" height="40"><polyline points="0,35 20,30 40,25 60,15 80,5 100,10" fill="none" stroke="#00b15c" stroke-width="2"/></svg></div></div>
-<div class="btns"><div class="btn" onclick="go('intercambio')">⇆<br>Swap</div><div class="btn" onclick="go('comprar')">+<br>Comprar</div><div class="btn" onclick="go('enviar')">↗<br>Enviar</div><div class="btn" onclick="go('recibir')">↓<br>Recibir</div></div>
-<div class="apy"><div>Gana hasta un <span style="color:#ff3ab2;font-weight:900">4.19% APY</span></div><div>World Chain</div></div>
+<div id="home">
+<div class="top"><div class="avatar"><svg viewBox="0 0 32 32" fill="#F3BA2F" width="26" height="26"><path d="M16 3 L21 8 L16 13 L11 8 Z M8 10 L13 15 L8 20 L3 15 Z M24 10 L29 15 L24 20 L19 15 Z M16 14 L21 19 L16 24 L11 19 Z"/></svg></div><div><b>Uno intercambio</b><div class="small">0x0190...38c • World Chain + Polygon</div></div></div>
+<div style="padding:0 16px;display:flex;justify-content:space-between"><div><div class="big">$0.23</div><div class="small"><span class="green">▲ $0.01 (5.97%)</span> hoy ></div></div><div><svg width="90" height="35"><polyline points="0,30 20,26 40,20 60,12 80,5 90,8" fill="none" stroke="#00b15c" stroke-width="2"/></svg></div></div>
+<div class="btns"><div class="btn" onclick="go('swap')">⇆<br>Swap</div><div class="btn" onclick="go('buy')">+<br>Comprar</div><div class="btn" onclick="go('send')">↗<br>Enviar</div><div class="btn" onclick="go('recv')">↓<br>Recibir</div></div>
+<div class="apy"><div>Gana hasta un <b style="color:#ff3ab2">4.19% APY</b></div><div>World + Polygon</div></div>
+
 <div class="tokens">
-<div style="font-weight:900;margin:10px 0">World Chain - tu billetera real</div>
-<div class="tok"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon" style="background:#000;color:#fff">W</div><div><b>WLD</b><div class="small">0.01 WLD • world</div></div></div><div style="text-align:right"><b>$0.01</b></div></div>
-<div class="tok"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">D</div><div><b>DNA</b><div class="small">615.74 DNA • world</div></div></div><div style="text-align:right"><b>$0.03</b></div></div>
-<div class="tok"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">H</div><div><b>HUB</b><div class="small">3518.8 HUB • world</div></div></div><div style="text-align:right"><b>$0.01</b></div></div>
-<div class="tok"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">O</div><div><b>ORO</b><div class="small">0.65 ORO • world</div></div></div><div style="text-align:right"><b>$0.01</b></div></div>
-<div class="tok"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">O</div><div><b>ORB</b><div class="small">9.3 ORB • world</div></div></div><div style="text-align:right"><b>$0.01</b></div></div>
-<div class="tok"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">U</div><div><b>USDC</b><div class="small">0.001 USDC • world</div></div></div><div style="text-align:right"><b>&lt;$0.01</b></div></div>
+<div style="font-weight:900;margin:8px 0">World Chain - tu billetera <span class="netTag">world 480</span></div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#000;color:#fff">W</div><div><b>WLD</b><div class="small">0.01 WLD • world</div></div></div><b>$0.01</b></div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon">D</div><div><b>DNA</b><div class="small">615.74 DNA</div></div></div><b>$0.03</b></div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon">H</div><div><b>HUB</b><div class="small">3518.8 HUB</div></div></div><b>$0.01</b></div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon">O</div><div><b>ORO</b><div class="small">0.65 ORO</div></div></div><b>$0.01</b></div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon">O</div><div><b>ORB</b><div class="small">9.3 ORB</div></div></div><b>$0.01</b></div>
+
+<div style="font-weight:900;margin:16px 0 8px">Polygon - todas las redes <span class="netTag">polygon 137</span> <span class="netTag">zkevm 1101</span></div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#7b3cff;color:#fff">P</div><div><b>POL</b><div class="small">0 POL • polygon</div></div></div><b>$0.00</b></div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#00d395;color:#fff">U</div><div><b>USDT</b><div class="small">0 USDT • polygon</div></div></div><b>$0.00</b></div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#2775ca;color:#fff">C</div><div><b>USDC</b><div class="small">0 USDC • polygon</div></div></div><b>$0.00</b></div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#627eea;color:#fff">W</div><div><b>WETH</b><div class="small">0 WETH • polygon</div></div></div><b>$0.00</b></div>
+<div class="tok"><div style="display:flex;gap:8px;align-items:center"><div class="tIcon" style="background:#ff007a;color:#fff">M</div><div><b>MATIC</b><div class="small">0 MATIC • polygon zkEVM</div></div></div><b>$0.00</b></div>
 </div>
 </div>
 
-<div id="viewRecibir" style="display:none">
-<div class="main"><h3 style="text-align:center;margin:0">Recibir</h3><div class="small" style="text-align:center">Tu billetera World Chain</div>
-<div class="qrBox" style="margin-top:14px">
-<img id="qrImg" src="" style="width:200px;height:200px;border-radius:12px">
-<div style="margin-top:12px;font-weight:900;word-break:break-all;background:#f6f6f6;padding:10px;border-radius:10px;font-size:11px">0x019001d46cd3155ef045a41f4c359c040595438c</div>
-<div style="display:flex;gap:8px;margin-top:12px">
-<button class="btnYellow" style="flex:1" onclick="copyAddr()">📋 Copiar dirección</button>
-<button class="btnYellow" style="flex:1;background:#111;color:#fff" onclick="copyLink()">🔗 Copiar enlace</button>
-</div>
-<div class="small" style="margin-top:10px">Billetera real 0x0190...38c - comparte QR</div>
-</div>
-<button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:12px">← Volver</button>
-</div>
-</div>
+<div id="recv" style="display:none"><div class="main"><h3 style="text-align:center;margin:0">Recibir - Todas las redes</h3><div class="small" style="text-align:center">Misma dirección para World y Polygon (EVM)</div>
+<div style="text-align:center;margin-top:12px;border:1px solid #eee;border-radius:20px;padding:16px">
+<img id="qr" width="200" height="200" style="border-radius:12px">
+<div style="font-size:10px;font-weight:900;background:#f6f6f6;padding:10px;border-radius:10px;margin-top:10px;word-break:break-all">0x019001d46cd3155ef045a41f4c359c040595438c</div>
+<div class="small" style="margin-top:8px">Redes: World Chain (480) • Polygon (137) • zkEVM (1101) - misma dirección</div>
+<button class="btnY" onclick="navigator.clipboard.writeText('0x019001d46cd3155ef045a41f4c359c040595438c');alert('Dirección copiada - sirve para todas las redes')">📋 Copiar dirección</button>
+<button class="btnY" style="background:#111;color:#fff" onclick="navigator.clipboard.writeText('https://worldscan.org/address/0x019001d46cd3155ef045a41f4c359c040595438c');alert('Enlace copiado')">🔗 Copiar enlace</button>
+</div><button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:10px">← Volver</button></div></div>
 
-<div id="viewInter" style="display:none">
-<div class="main"><h3 style="text-align:center;margin:0">Intercambio</h3><div class="small" style="text-align:center">Billetera 0x0190...38c • World Chain</div>
-<div class="box"><div style="display:flex;justify-content:space-between"><span class="small">Vendes</span><span class="small" id="bF">Saldo: 615.74 DNA ($0.03)</span></div><div style="display:flex;gap:6px"><input id="fAmt" type="number" value="10" oninput="calc()"><select id="fSel" onchange="calc()"><option>DNA 615.74 ($0.03)</option><option>WLD 0.01 ($0.01)</option><option>ORO 0.65 ($0.01)</option><option>HUB 3518.8 ($0.01)</option><option>ORB 9.3 ($0.01)</option></select></div><div class="small" id="usdFrom"></div></div>
-<div style="text-align:center" onclick="swapPos()">↕️</div>
-<div class="box"><div style="display:flex;justify-content:space-between"><span class="small">Recibes</span><span class="small" id="bT">Saldo: 0.01 WLD</span></div><div style="display:flex;gap:6px"><input id="tAmt" readonly><select id="tSel" onchange="calc()"><option>WLD 0.01 ($0.01)</option><option>DNA 615.74 ($0.03)</option><option>ORO 0.65 ($0.01)</option></select></div><div class="small" id="usdTo"></div></div>
-<div style="background:#111;color:#fff;border-radius:12px;padding:10px;text-align:center;font-size:11px" id="result"></div>
-<button class="btnYellow" onclick="doSwap()">Intercambiar Ahora</button>
-<button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:6px">← Volver</button>
-</div>
-</div>
+<div id="swap" style="display:none"><div class="main"><h3 style="text-align:center;margin:0">Swap - Todas las redes</h3><div class="small" style="text-align:center">World Chain ↔ Polygon ↔ zkEVM</div>
+<div class="box"><div class="small">De: <span id="bF"></span></div><div style="display:flex;gap:6px"><input id="fAmt" type="number" value="10" oninput="calc()"><select id="fNet" onchange="updateTokens()"><option value="world">World Chain</option><option value="polygon">Polygon</option><option value="zkevm">Polygon zkEVM</option></select><select id="fSel" onchange="calc()"></select></div><div class="small" id="usdFrom"></div></div>
+<div style="text-align:center" onclick="let a=fNet.value,f=fSel.value,n=tNet.value,t=tSel.value;fNet.value=n;tNet.value=a;updateTokens();fSel.value=t;tSel.value=f;calc()">↕️ Cambiar red</div>
+<div class="box"><div class="small">A: <span id="bT"></span></div><div style="display:flex;gap:6px"><input id="tAmt" readonly><select id="tNet" onchange="updateTokens()"><option value="world">World Chain</option><option value="polygon" selected>Polygon</option><option value="zkevm">Polygon zkEVM</option></select><select id="tSel" onchange="calc()"></select></div><div class="small" id="usdTo"></div></div>
+<div style="background:#111;color:#fff;border-radius:12px;padding:10px;text-align:center;font-size:11px" id="res"></div>
+<button class="btnY" onclick="doSwap()">Intercambiar Ahora</button>
+<button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:6px">← Volver</button></div></div>
 
-<div id="viewEnviar" style="display:none"><div class="main"><h3 style="text-align:center">Enviar</h3><div class="box"><div class="small" id="bS">Saldo: 615.74 DNA ($0.03)</div><div style="display:flex;gap:6px"><input id="sAmt" type="number" value="10"><select id="sSel"><option>DNA 615.74 ($0.03)</option><option>WLD 0.01 ($0.01)</option><option>ORO 0.65 ($0.01)</option></select></div></div><input id="sAddr" placeholder="0x... billetera destino World Chain" style="background:#f0f0f0;border-radius:12px;padding:14px;width:100%;border:0;margin:8px 0;font-size:13px"><button class="btnYellow" onclick="doSend()">Enviar ↗️</button><button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:6px">← Volver</button></div></div>
+<div id="send" style="display:none"><div class="main"><h3 style="text-align:center">Enviar - Todas las redes</h3><div class="box"><div class="small" id="bS"></div><div style="display:flex;gap:6px"><input id="sAmt" type="number" value="10"><select id="sNet"><option>World Chain</option><option>Polygon</option><option>Polygon zkEVM</option></select><select id="sSel"></select></div></div><input id="sAddr" placeholder="0x... destino - misma dirección sirve en todas" style="background:#f0f0f0;border-radius:12px;padding:12px;width:100%;border:0;margin:8px 0;font-size:12px"><button class="btnY" onclick="doSend()">Enviar ↗️</button><button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:6px">← Volver</button></div></div>
 
-<div class="nav"><div class="active" onclick="go('home')">🏠</div><div onclick="go('intercambio')">🔍</div><div onclick="go('enviar')">🕒</div><div style="background:#ff3ab2;color:#fff" onclick="go('recibir')">↓</div></div>
+<div class="nav"><div class="active" onclick="go('home')">🏠</div><div onclick="go('swap')">🔍</div><div onclick="go('send')">🕒</div><div style="background:#ff3ab2;color:#fff" onclick="go('recv')">↓</div></div>
 
 <script>
-const WALLET="0x019001d46cd3155ef045a41f4c359c040595438c";
-const DATA={DNA:{qty:615.74,usd:0.03,price:0.0000487},WLD:{qty:0.01,usd:0.01,price:0.35},ORO:{qty:0.65,usd:0.01,price:0.015},HUB:{qty:3518.8,usd:0.01,price:0.00000284},ORB:{qty:9.3,usd:0.01,price:0.00107}};
-function makeQR(){document.getElementById('qrImg').src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="+WALLET;}
-function copyAddr(){navigator.clipboard.writeText(WALLET); alert('✅ Dirección copiada:\n'+WALLET);}
-function copyLink(){const l="https://worldscan.org/address/"+WALLET; navigator.clipboard.writeText(l); alert('✅ Enlace copiado:\n'+l);}
+const W="0x019001d46cd3155ef045a41f4c359c040595438c";
+const TOKENS={
+ world:[
+  {s:"WLD",q:0.01,u:0.01,p:0.35},{s:"DNA",q:615.74,u:0.03,p:0.0000487},{s:"HUB",q:3518.8,u:0.01,p:0.00000284},{s:"ORO",q:0.65,u:0.01,p:0.015},{s:"ORB",q:9.3,u:0.01,p:0.00107},{s:"USDC",q:0.001,u:0.005,p:1},{s:"WETH",q:0.00001,u:0.003,p:3000}
+ ],
+ polygon:[
+  {s:"POL",q:0,u:0,p:0.45},{s:"USDT",q:0,u:0,p:1},{s:"USDC",q:0,u:0,p:1},{s:"WETH",q:0,u:0,p:3000},{s:"DAI",q:0,u:0,p:1},{s:"WBTC",q:0,u:0,p:65000}
+ ],
+ zkevm:[
+  {s:"MATIC",q:0,u:0,p:0.45},{s:"ETH",q:0,u:0,p:3000},{s:"USDT",q:0,u:0,p:1},{s:"USDC",q:0,u:0,p:1}
+ ]
+};
+function updateTokens(){
+ let fN=fNet.value,tN=tNet.value;
+ fSel.innerHTML=TOKENS[fN].map(t=>`<option value="${t.s}">${t.s} ${t.q} ($${t.u})</option>`).join('');
+ tSel.innerHTML=TOKENS[tN].map(t=>`<option value="${t.s}">${t.s} ${t.q} ($${t.u})</option>`).join('');
+ sSel.innerHTML=TOKENS[sNet.value.toLowerCase().includes('zkevm')?'zkevm':sNet.value.toLowerCase().includes('polygon')?'polygon':'world'].map(t=>`<option>${t.s} ${t.q} ($${t.u})</option>`).join('');
+ calc();
+}
 function calc(){
- const f=document.getElementById('fSel').value.split(' ')[0], t=document.getElementById('tSel').value.split(' ')[0], amt=parseFloat(document.getElementById('fAmt').value)||0;
- const fd=DATA[f]||DATA.DNA, td=DATA[t]||DATA.WLD;
- const usd=amt*(fd.usd/fd.qty); const out=usd/td.price*0.997;
- document.getElementById('tAmt').value=out?out.toFixed(6):'0';
- document.getElementById('bF').innerText=`Saldo: ${fd.qty} ${f} ($${fd.usd})`;
- document.getElementById('bT').innerText=`Saldo: ${td.qty} ${t} ($${td.usd})`;
- document.getElementById('usdFrom').innerText=`≈ $${usd.toFixed(4)} USD`;
- document.getElementById('usdTo').innerText=`≈ $${(out*td.price).toFixed(4)} USD`;
- document.getElementById('result').innerText=`Recibes aprox: ${out.toFixed(6)} ${t} ($${(out*td.price).toFixed(4)})`;
+ let fN=fNet.value,tN=tNet.value,fS=fSel.value,tS=tSel.value,a=parseFloat(fAmt.value)||0;
+ let fd=TOKENS[fN].find(x=>x.s==fS)||TOKENS[fN][0],td=TOKENS[tN].find(x=>x.s==tS)||TOKENS[tN][0];
+ let unit=fd.q>0?fd.u/fd.q:fd.p, usd=a*unit, out=usd/td.p*0.997;
+ tAmt.value=out?out.toFixed(6):'0';
+ bF.innerText=`${fd.q} ${fd.s} ($${fd.u}) • ${fN}`;
+ bT.innerText=`${td.q} ${td.s} ($${td.u}) • ${tN}`;
+ usdFrom.innerText=`≈ $${usd.toFixed(4)} USD • ${fN}`;
+ usdTo.innerText=`≈ $${(out*td.p).toFixed(4)} USD • ${tN}`;
+ res.innerText=`Recibes aprox: ${out.toFixed(6)} ${td.s} ($${(out*td.p).toFixed(4)}) • ${fN} → ${tN} • Fee 0.3%`;
+ bS.innerText=`Saldo: ${fd.q} ${fd.s} ($${fd.u}) • ${fN}`;
 }
-function swapPos(){const a=document.getElementById('fSel').value, b=document.getElementById('tSel').value; document.getElementById('fSel').value=b; document.getElementById('tSel').value=a; calc();}
-function go(v){
- document.getElementById('viewHome').style.display=v=='home'?'block':'none';
- document.getElementById('viewRecibir').style.display=v=='recibir'?'block':'none';
- document.getElementById('viewInter').style.display=v=='intercambio'?'block':'none';
- document.getElementById('viewEnviar').style.display=v=='enviar'?'block':'none';
- if(v=='recibir') makeQR();
- if(v=='intercambio') calc();
-}
-function doSwap(){const a=document.getElementById('fAmt').value, f=document.getElementById('fSel').value, r=document.getElementById('tAmt').value; alert('✅ Intercambio '+a+' '+f+' → '+r+'\nDesde '+WALLET.slice(0,6)+'...');}
-function doSend(){const addr=document.getElementById('sAddr').value; if(!addr) return alert('Pon dirección 0x...'); alert('✅ Enviar desde '+WALLET.slice(0,6)+'... a '+addr);}
-calc(); makeQR();
+function go(v){home.style.display=v=='home'?'block':'none';recv.style.display=v=='recv'?'block':'none';swap.style.display=v=='swap'?'block':'none';send.style.display=v=='send'?'block':'none';if(v=='recv')qr.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+W;if(v=='swap')updateTokens();}
+function doSwap(){alert('✅ Swap '+fAmt.value+' '+fSel.value+' ('+fNet.value+') → '+tAmt.value+' '+tSel.value+' ('+tNet.value+')\nTodas las redes Polygon + World Chain\nDesde: '+W.slice(0,6)+'...');}
+function doSend(){if(!sAddr.value)return alert('Pon dirección 0x...');alert('✅ Enviar '+sAmt.value+' '+sSel.value+' a '+sAddr.value+'\nRed: '+sNet.value+'\nDesde: '+W.slice(0,6)+'...');}
+let fNet=document.getElementById('fNet'),tNet=document.getElementById('tNet'),fSel=document.getElementById('fSel'),tSel=document.getElementById('tSel'),sNet=document.getElementById('sNet'),sSel=document.getElementById('sSel'),fAmt=document.getElementById('fAmt'),tAmt=document.getElementById('tAmt'),bF=document.getElementById('bF'),bT=document.getElementById('bT'),usdFrom=document.getElementById('usdFrom'),usdTo=document.getElementById('usdTo'),res=document.getElementById('res'),bS=document.getElementById('bS'),home=document.getElementById('home'),recv=document.getElementById('recv'),swap=document.getElementById('swap'),send=document.getElementById('send'),qr=document.getElementById('qr');
+updateTokens(); qr.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+W;
 </script></body></html>

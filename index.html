@@ -1,23 +1,25 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uno</title><style>body{margin:0;background:#0a1e3c;color:#fff;font-family:system-ui;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:16px}
-.card{background:#132c54;border-radius:24px;padding:24px;width:100%;max-width:380px;text-align:center}
+<title>Uno Intercambio P2P</title>
+<style>body{margin:0;background:#0a1e3c;color:#fff;font-family:system-ui;padding:16px}
+.header{display:flex;justify-content:space-between;align-items:center}
+.binance{background:#f3ba2f;color:#000;padding:6px 12px;border-radius:8px;font-weight:900;font-size:12px}
+.card{background:#132c54;border-radius:20px;padding:18px;margin-top:14px}
+.addr{font-size:11px;opacity:.7;word-break:break-all}
 .btn{width:100%;padding:14px;border-radius:12px;border:0;background:#f3ba2f;font-weight:900;margin-top:10px}
-input{width:100%;padding:12px;border-radius:10px;border:0;margin-top:10px;box-sizing:border-box}
-.small{font-size:11px;opacity:.7;margin-top:8px}</style></head><body>
-<div class="card"><div style="background:#f3ba2f;color:#000;display:inline-block;padding:5px 12px;border-radius:8px;font-weight:900">BINANCE</div>
-<h2>Uno Intercambio</h2><div id="st">Pega tu wallet de World App</div>
-<input id="addrIn" placeholder="0x... tu dirección World App">
-<button class="btn" onclick="guardar()">Guardar y Conectar</button>
-<div class="small">Para ver tu dirección: Abre World App > Wallet > Recibir > Copiar dirección > Pégala aquí</div>
-<div id="out" style="margin-top:12px;font-size:12px;word-break:break-all"></div></div>
+.row{display:flex;justify-content:space-between;margin:10px 0}
+.green{color:#00ff88}</style></head><body>
+<div class="header"><div class="binance">⬥ BINANCE P2P</div><div id="walletMini" style="font-size:12px">0x0190...438c</div></div>
+<div class="card"><div class="row"><span>Wallet conectada</span><span class="green">● Activa</span></div>
+<div class="addr" id="fullAddr">0x019001d46cd3155ef045a41f4c359c040595438c</div>
+<div class="row"><span>WLD</span><span>0.00</span></div>
+<div class="row"><span>USDC</span><span>0.00</span></div>
+<button class="btn" onclick="alert('¡Próximamente! Aquí irá tu lógica de intercambio P2P - tu wallet ya está lista: '+localStorage.getItem('wld_addr'))">Crear Orden P2P</button>
+<button class="btn" style="background:#fff;color:#000;margin-top:8px" onclick="navigator.clipboard.writeText(localStorage.getItem('wld_addr'));alert('Dirección copiada')">Copiar mi dirección</button>
+</div>
+<div class="card"><h3 style="margin:0 0 10px 0">Intercambio Uno</h3>
+<div style="font-size:12px;opacity:.8">1. Tu wallet ya está conectada<br>2. Crea una orden de venta/compra<br>3. Comparte con tu contraparte<br>4. Intercambio seguro en World Chain</div></div>
 <script>
-const saved=localStorage.getItem('wld_addr');
-if(saved){document.getElementById('addrIn').value=saved; document.getElementById('out').innerText='Guardado: '+saved; document.getElementById('st').innerText='✅ Conectado: '+saved.slice(0,6)+'...'+saved.slice(-4);}
-function guardar(){
-  const v=document.getElementById('addrIn').value.trim();
-  if(!v.startsWith('0x')||v.length<10){alert('Pega una dirección que empiece con 0x');return;}
-  localStorage.setItem('wld_addr',v);
-  document.getElementById('out').innerText='✅ Wallet guardada: '+v+'\n\n¡Listo para intercambio P2P!';
-  document.getElementById('st').innerText='✅ Conectado: '+v.slice(0,6)+'...'+v.slice(-4);
-}
+const a=localStorage.getItem('wld_addr')||'0x019001d46cd3155ef045a41f4c359c040595438c';
+document.getElementById('fullAddr').innerText=a;
+document.getElementById('walletMini').innerText=a.slice(0,6)+'...'+a.slice(-4);
 </script></body></html>

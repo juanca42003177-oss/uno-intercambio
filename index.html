@@ -3,92 +3,87 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Uno Intercambio</title>
+<title>Uno Intercambio - Binance</title>
+<script src="https://unpkg.com/@worldcoin/minikit-js@0.0.35/dist/index.umd.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:linear-gradient(135deg,#0a1e3c,#1a4a8a);color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:system-ui;padding:20px}
-.card{width:100%;max-width:400px;background:rgba(255,255,255,0.1);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.15);border-radius:24px;padding:28px;text-align:center}
-.binance-logo{display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:12px}
-.binance-icon{width:34px;height:34px;background:#F3BA2F;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#000}
-.binance-text{font-weight:800;color:#F3BA2F;letter-spacing:1px;font-size:13px}
-h1{font-size:24px;margin-bottom:8px}
-p{color:#a8b9d6;font-size:13px;line-height:1.4}
-.btn{background:#fff;color:#0a1e3c;border:none;width:100%;padding:15px;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer;margin-top:16px}
-.status{margin-top:12px;font-size:12px;padding:12px;border-radius:10px;display:none;word-break:break-all;text-align:left}
-.ok{display:block;background:rgba(16,185,129,0.25);color:#6effb0;border:1px solid #10b981}
-.warn{display:block;background:rgba(251,191,36,0.25);color:#fde68a;border:1px solid #f59e0b}
+  body{margin:0;font-family:system-ui;background:linear-gradient(135deg,#0a1e3c,#1e3c72);min-height:100vh;display:flex;align-items:center;justify-content:center;color:white}
+  .card{background:rgba(255,255,255,0.1);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.2);border-radius:24px;padding:32px;width:90%;max-width:380px;text-align:center}
+  .binance{background:#f3ba2f;color:#000;display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:12px;font-weight:900;letter-spacing:1px}
+  .logo{width:48px;height:48px;background:#f3ba2f;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:16px auto;font-size:24px}
+  h1{margin:10px 0 8px;font-size:32px}
+  .sub{opacity:0.7;font-size:14px;margin-bottom:18px}
+  .status{font-size:12px;background:rgba(0,0,0,0.3);padding:10px;border-radius:10px;margin-bottom:16px;word-break:break-all;text-align:left}
+  .btn{width:100%;padding:16px;border-radius:14px;border:0;font-weight:800;font-size:16px;background:white;color:#0a1e3c;cursor:pointer}
+  .btn:active{transform:scale(0.98)}
+  .foot{margin-top:14px;font-size:12px;opacity:0.6}
 </style>
 </head>
 <body>
 <div class="card">
-<div class="binance-logo"><div class="binance-icon">◈</div><div class="binance-text">BINANCE</div></div>
-<h1>🔁 Uno Intercambio</h1>
-<p id="msg">Toca para conectar tu wallet de World</p>
-<div id="status" class="status"></div>
-<button class="btn" id="btn">Conectar Wallet</button>
-<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:12px">Intercambio seguro con World App</div>
+  <div class="binance">⬥ BINANCE</div>
+  <div class="logo">🔄</div>
+  <h1>Uno Intercambio</h1>
+  <div class="sub" id="sub">Si no detecta MiniKit, revisa Developer Portal</div>
+  <div class="status" id="status">Iniciando MiniKit...</div>
+  <button class="btn" id="btn" onclick="conectar()">Conectar Wallet</button>
+  <div class="foot">Intercambio seguro con World App</div>
 </div>
 
 <script>
-const statusEl = document.getElementById('status');
-const msgEl = document.getElementById('msg');
-const btn = document.getElementById('btn');
+  const APP_ID = "app_d0a270229b8199adb79b64d5c7aa7c0f";
+  let isMiniKit = false;
 
-function show(t,type){
-  statusEl.style.display='block';
-  statusEl.className='status '+type;
-  statusEl.textContent=t;
-}
-
-btn.onclick = async () => {
-  show('Verificando World App...','warn');
-
-  // World App inyecta MiniKit en window.MiniKit o window.WorldApp
-  const mk = window.MiniKit || window.WorldApp?.MiniKit || window.MiniKitJS;
-  
-  console.log('MiniKit obj:', mk);
-  console.log('UserAgent:', navigator.userAgent);
-
-  if(!mk){
-    show('❌ No se encontró MiniKit. 1) Asegúrate que tu App ID está aprobado en developer.worldcoin.org 2) Que el dominio uno-intercambio.vercel.app está en la lista de dominios permitidos 3) Actualiza World App. UA: '+navigator.userAgent.slice(0,80),'warn');
-    return;
+  function log(msg, ok){
+    const el = document.getElementById('status');
+    el.innerHTML = (ok ? '✅ ' : '❌ ') + msg + '<br><small>UA: '+navigator.userAgent+'</small>';
+    el.style.background = ok ? 'rgba(0,255,100,0.15)' : 'rgba(255,80,80,0.15)';
+    el.style.border = '1px solid ' + (ok ? '#00ff88' : '#ff5050');
+    document.getElementById('sub').innerText = msg;
   }
 
+  // Instalar MiniKit
   try{
-    show('MiniKit encontrado, solicitando wallet...','ok');
-    
-    if(mk.commandsAsync){
-      const res = await mk.commandsAsync.walletAuth({
-        nonce: '12345678',
-        statement: 'Conectar a Uno Intercambio'
-      });
-      show('Respuesta: '+JSON.stringify(res.finalPayload).slice(0,200),'ok');
-      if(res.finalPayload.status==='success'){
-        msgEl.textContent='Conectado: '+res.finalPayload.address.slice(0,6)+'...';
-        btn.textContent='✅ Conectado';
+    if(window.MiniKit){
+      window.MiniKit.install(APP_ID);
+      if(window.MiniKit.isInstalled()){
+        isMiniKit = true;
+        log('MiniKit detectado correctamente. Listo para conectar.', true);
+      } else {
+        log('MiniKit instalado pero no está en World App. Abre este link con el QR de vista previa.', false);
       }
-    } else if(mk.commands){
-      // versión vieja
-      mk.commands.walletAuth({
-        nonce: '12345678',
-        statement: 'Conectar a Uno Intercambio'
-      });
-      show('Comando enviado (versión vieja), espera popup...','ok');
     } else {
-      show('MiniKit encontrado pero sin commandsAsync. Objeto: '+Object.keys(mk).join(','),'warn');
+      log('No se encontró MiniKit. 1) Abre con el QR de Vista Previa de developer.world.org 2) Verifica que el dominio uno-intercambio.vercel.app esté permitido', false);
     }
-
   }catch(e){
-    show('Error JS: '+e.message,'warn');
+    log('Error instalando MiniKit: '+e.message, false);
   }
-};
 
-// auto check al cargar
-setTimeout(()=>{
-  const mk = window.MiniKit || window.WorldApp?.MiniKit;
-  if(mk) msgEl.textContent='MiniKit detectado ✅ - toca Conectar';
-  else msgEl.textContent='Si no detecta MiniKit, revisa Developer Portal';
-},1000);
+  async function conectar(){
+    if(!isMiniKit || !window.MiniKit || !window.MiniKit.isInstalled()){
+      alert('Abre esta app con el QR de "Vista previa de la miniaplicación" en developer.world.org, no directo en vercel.app');
+      return;
+    }
+    try{
+      document.getElementById('btn').innerText = 'Conectando...';
+      const res = await window.MiniKit.commandsAsync.walletAuth({
+        nonce: Math.random().toString(36).substring(2),
+        requestId: '0',
+        expirationTime: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
+        notBefore: new Date(new Date().getTime() - 24 * 60 * 60 * 1000),
+        statement: 'Conectar wallet para Uno Intercambio',
+      });
+      if(res.finalPayload.status === 'success'){
+        log('Wallet conectada: ' + res.finalPayload.address, true);
+        document.getElementById('btn').innerText = '¡Wallet Conectada! ' + res.finalPayload.address.slice(0,6)+'...';
+      } else {
+        log('Usuario canceló o falló: '+res.finalPayload.status, false);
+        document.getElementById('btn').innerText = 'Conectar Wallet';
+      }
+    }catch(err){
+      log('Error al conectar: '+err.message, false);
+      document.getElementById('btn').innerText = 'Conectar Wallet';
+    }
+  }
 </script>
 </body>
 </html>

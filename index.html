@@ -14,81 +14,81 @@ body{background:linear-gradient(135deg,#0a1e3c,#1a4a8a);color:#fff;display:flex;
 h1{font-size:24px;margin-bottom:8px}
 p{color:#a8b9d6;font-size:13px;line-height:1.4}
 .btn{background:#fff;color:#0a1e3c;border:none;width:100%;padding:15px;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer;margin-top:16px}
-.status{margin-top:12px;font-size:12px;padding:10px;border-radius:10px;word-break:break-all}
-.ok{background:rgba(16,185,129,0.2);color:#6effb0;border:1px solid #10b981}
-.warn{background:rgba(251,191,36,0.2);color:#fde68a;border:1px solid #f59e0b}
+.status{margin-top:12px;font-size:12px;padding:12px;border-radius:10px;display:none;word-break:break-all;text-align:left}
+.ok{display:block;background:rgba(16,185,129,0.25);color:#6effb0;border:1px solid #10b981}
+.warn{display:block;background:rgba(251,191,36,0.25);color:#fde68a;border:1px solid #f59e0b}
 </style>
 </head>
 <body>
 <div class="card">
 <div class="binance-logo"><div class="binance-icon">◈</div><div class="binance-text">BINANCE</div></div>
 <h1>🔁 Uno Intercambio</h1>
-<p id="msg">Toque Conectar Wallet para continuar</p>
-<div id="status" class="status" style="display:none"></div>
+<p id="msg">Toca para conectar tu wallet de World</p>
+<div id="status" class="status"></div>
 <button class="btn" id="btn">Conectar Wallet</button>
 <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:12px">Intercambio seguro con World App</div>
 </div>
 
-<script type="module">
-import { MiniKit } from 'https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@1.8.1/+esm'
-
+<script>
 const statusEl = document.getElementById('status');
 const msgEl = document.getElementById('msg');
 const btn = document.getElementById('btn');
 
-function log(t, type='ok'){
+function show(t,type){
   statusEl.style.display='block';
   statusEl.className='status '+type;
   statusEl.textContent=t;
-  console.log(t);
-}
-
-// Mostrar si estamos en World App o no, pero NO bloquear
-const isWA = navigator.userAgent.includes('WorldApp');
-if(isWA){
-  msgEl.textContent='Detectado World App - listo para conectar';
-  log('✅ World App detectada','ok');
-} else {
-  msgEl.textContent='Si estás en Chrome es normal, pero el botón igual intentará conectar';
 }
 
 btn.onclick = async () => {
+  show('Verificando World App...','warn');
+
+  // World App inyecta MiniKit en window.MiniKit o window.WorldApp
+  const mk = window.MiniKit || window.WorldApp?.MiniKit || window.MiniKitJS;
+  
+  console.log('MiniKit obj:', mk);
+  console.log('UserAgent:', navigator.userAgent);
+
+  if(!mk){
+    show('❌ No se encontró MiniKit. 1) Asegúrate que tu App ID está aprobado en developer.worldcoin.org 2) Que el dominio uno-intercambio.vercel.app está en la lista de dominios permitidos 3) Actualiza World App. UA: '+navigator.userAgent.slice(0,80),'warn');
+    return;
+  }
+
   try{
-    log('Intentando conectar...','warn');
-
-    // 1. Intentar con MiniKit si existe
-    if(MiniKit && MiniKit.isInstalled && MiniKit.isInstalled()){
-      log('MiniKit detectado, pidiendo walletAuth...','ok');
-      const res = await MiniKit.commandsAsync.walletAuth({
-        nonce: Math.random().toString(36).substring(2,10),
-        statement: 'Conectar a Uno Intercambio',
-        expirationTime: new Date(Date.now()+3600000)
+    show('MiniKit encontrado, solicitando wallet...','ok');
+    
+    if(mk.commandsAsync){
+      const res = await mk.commandsAsync.walletAuth({
+        nonce: '12345678',
+        statement: 'Conectar a Uno Intercambio'
       });
+      show('Respuesta: '+JSON.stringify(res.finalPayload).slice(0,200),'ok');
       if(res.finalPayload.status==='success'){
-        log('CONECTADO: '+res.finalPayload.address.slice(0,6)+'...'+res.finalPayload.address.slice(-4),'ok');
+        msgEl.textContent='Conectado: '+res.finalPayload.address.slice(0,6)+'...';
         btn.textContent='✅ Conectado';
-        return;
-      } else {
-        log('WalletAuth cancelado: '+res.finalPayload.status,'warn');
-        return;
       }
+    } else if(mk.commands){
+      // versión vieja
+      mk.commands.walletAuth({
+        nonce: '12345678',
+        statement: 'Conectar a Uno Intercambio'
+      });
+      show('Comando enviado (versión vieja), espera popup...','ok');
+    } else {
+      show('MiniKit encontrado pero sin commandsAsync. Objeto: '+Object.keys(mk).join(','),'warn');
     }
-
-    // 2. Fallback: window.ethereum (algunas versiones de World App lo usan)
-    if(window.ethereum){
-      log('Probando con window.ethereum...','warn');
-      const acc = await window.ethereum.request({method:'eth_requestAccounts'});
-      log('CONECTADO: '+acc[0].slice(0,6)+'...','ok');
-      btn.textContent='✅ Conectado';
-      return;
-    }
-
-    log('No se encontró MiniKit ni ethereum. Asegúrate de abrir este link con World App > Browser y que tu World App esté actualizada','warn');
 
   }catch(e){
-    log('Error: '+e.message,'warn');
+    show('Error JS: '+e.message,'warn');
   }
 };
+
+// auto check al cargar
+setTimeout(()=>{
+  const mk = window.MiniKit || window.WorldApp?.MiniKit;
+  if(mk) msgEl.textContent='MiniKit detectado ✅ - toca Conectar';
+  else msgEl.textContent='Si no detecta MiniKit, revisa Developer Portal';
+},1000);
 </script>
 </body>
 </html>

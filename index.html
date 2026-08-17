@@ -1,130 +1,81 @@
 <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uno - Fix Real Balances</title><style>
+<title>Uno - Centavos Normales</title><style>
 *{box-sizing:border-box}body{margin:0;background:#eef4ff;color:#0a1e3c;font-family:system-ui;padding-bottom:70px}
 .header{background:#0a1e3c;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center}
 .badge{background:#fff;padding:5px 12px;border-radius:20px;display:flex;gap:6px;font-weight:900;font-size:12px;color:#0a1e3c}
-.totalCard{background:linear-gradient(135deg,#0a1e3c,#3a5cff);color:#fff;padding:14px;text-align:center;border-radius:0 0 22px 22px}
-.total{font-size:34px;font-weight:900}.card{background:#fff;border-radius:16px;margin:10px 12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.token{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #eef4ff}
+.totalCard{background:linear-gradient(135deg,#0a1e3c,#3a5cff);color:#fff;padding:16px;text-align:center;border-radius:0 0 22px 22px}
+.total{font-size:36px;font-weight:900}.card{background:#fff;border-radius:16px;margin:10px 12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.token{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #eef4ff}
 .tIcon{width:40px;height:40px;border-radius:50%;background:#f3ba2f;display:flex;align-items:center;justify-content:center;font-weight:900;color:#000}
 .swapMain{background:#fff;border-radius:20px;margin:12px;padding:14px;box-shadow:0 4px 20px rgba(0,0,0,.08);border:2px solid #dbe6ff;min-height:60vh;display:flex;flex-direction:column;justify-content:center}
 .swapBox{background:#eef4ff;border-radius:14px;padding:14px;margin:8px 0;border:1px solid #dbe6ff}
-input{width:100%;background:transparent;border:0;font-size:26px;font-weight:900;outline:none;color:#0a1e3c}
+input{width:100%;background:transparent;border:0;font-size:28px;font-weight:900;outline:none;color:#0a1e3c}
 select{border:0;background:#0a1e3c;color:#fff;padding:10px 14px;border-radius:20px;font-weight:900;font-size:14px}
-.small{font-size:10px;opacity:.6}.btn{width:100%;padding:14px;border-radius:12px;border:0;background:#f3ba2f;color:#000;font-weight:900;margin-top:8px}
+.small{font-size:11px;opacity:.6}.btn{width:100%;padding:14px;border-radius:12px;border:0;background:#f3ba2f;color:#000;font-weight:900;margin-top:8px}
 .nav{position:fixed;bottom:0;left:0;right:0;background:#0a1e3c;display:flex;justify-content:space-around;padding:6px 0}
 .nav div{color:#fff;opacity:.5;text-align:center;font-size:10px;padding:4px 8px}.nav div.active{opacity:1;color:#f3ba2f;background:#132c54;border-radius:10px}
-.inputW{width:100%;background:#eef4ff;border-radius:10px;padding:10px;border:1px solid #cbd8f5;font-size:11px;margin:6px 0}
 </style></head><body>
-<div class="header"><div class="badge"><div style="width:18px;height:18px;background:#f3ba2f;border-radius:5px;display:flex;align-items:center;justify-content:center">⬥</div> Uno</div><div style="font-size:9px">FIX SALDOS REALES</div></div>
+<div class="header"><div class="badge"><div style="width:18px;height:18px;background:#f3ba2f;border-radius:5px;display:flex;align-items:center;justify-content:center">⬥</div> Uno</div><div style="font-size:10px">Centavos $0.01</div></div>
 
 <div id="vBilletera">
-<div class="totalCard"><div style="font-size:11px;opacity:.8">Tu Portafolio Total - Real</div><div class="total" id="total">$0.2300 USD</div><div class="small" id="sub" style="color:#fff">Tus monedas reales con centavos</div>
-<input id="walletInput" class="inputW" style="background:#fff;color:#0a1e3c;margin-top:8px" value="0x019001d46cd3155ef045a41f4c359c040595438c" placeholder="Pega tu wallet donde tienes DNA">
-<button onclick="load()" style="background:#f3ba2f;border:0;padding:6px 12px;border-radius:10px;font-weight:900;font-size:11px;margin-top:4px">Cargar Saldo Real</button>
-</div>
+<div class="totalCard"><div style="font-size:11px;opacity:.8">Tu Portafolio Total</div><div class="total" id="total">$0.23 USD</div><div class="small" style="color:#fff">World Chain + Polygon • Centavos normales</div></div>
 <div class="card"><div id="list"></div></div>
 </div>
 
 <div id="vInter" style="display:none">
-<div class="swapMain"><h3 style="margin:0;text-align:center">Intercambio</h3><div class="small" style="text-align:center">Con saldo real exacto</div>
-<div class="swapBox"><div style="display:flex;justify-content:space-between"><span class="small">Vendes</span><span class="small" id="bF" style="font-weight:900;color:#0a1e3c">Saldo: 615.748700 DNA</span></div><div style="display:flex;gap:8px;align-items:center;margin-top:6px"><input id="fAmt" type="number" placeholder="0.0" oninput="calc()"><select id="fSel" onchange="calc()"></select></div></div>
+<div class="swapMain"><h3 style="margin:0;text-align:center">Intercambio</h3>
+<div class="swapBox"><div style="display:flex;justify-content:space-between"><span class="small">Vendes</span><span class="small" id="bF" style="font-weight:900;color:#0a1e3c">Saldo: 615.74 DNA</span></div><div style="display:flex;gap:8px;align-items:center;margin-top:6px"><input id="fAmt" type="number" placeholder="0.0" oninput="calc()"><select id="fSel" onchange="calc()"></select></div></div>
 <div style="text-align:center">↕️</div>
 <div class="swapBox"><div style="display:flex;justify-content:space-between"><span class="small">Recibes</span><span class="small" id="bT" style="font-weight:900"></span></div><div style="display:flex;gap:8px;align-items:center;margin-top:6px"><input id="tAmt" readonly placeholder="0.0"><select id="tSel" onchange="calc()"></select></div></div>
-<div class="small" id="rate" style="text-align:center;margin-top:6px"></div><button class="btn" onclick="swap()">Intercambiar Ahora</button></div>
+<div class="small" id="rate" style="text-align:center;margin-top:6px"></div><button class="btn" onclick="alert('Swap - Fee 0.3% tú ganas')">Intercambiar Ahora</button></div>
 </div>
 
 <div id="vEnviar" style="display:none">
 <div class="swapMain"><h3 style="margin:0;text-align:center">Enviar</h3>
-<div class="swapBox"><div style="display:flex;justify-content:space-between"><span class="small">Cantidad</span><span class="small" id="bS" style="font-weight:900">Saldo: 615.748700 DNA</span></div><div style="display:flex;gap:8px;align-items:center"><input id="sAmt" type="number" placeholder="0.0"><select id="sSel" onchange="updS()"></select></div></div>
-<input id="sAddr" placeholder="0xaa3a4dbfceb16c45bcc73091735b0696a59e1aa2" style="background:#eef4ff;border-radius:12px;padding:14px;width:100%;border:1px solid #dbe6ff;margin:8px 0;font-size:12px">
-<button class="btn" onclick="send()">Enviar ↗️</button></div>
+<div class="swapBox"><div style="display:flex;justify-content:space-between"><span class="small">Cantidad</span><span class="small" id="bS" style="font-weight:900">Saldo: 615.74 DNA</span></div><div style="display:flex;gap:8px;align-items:center"><input id="sAmt" type="number" placeholder="0.0"><select id="sSel" onchange="updS()"></select></div></div>
+<input id="sAddr" placeholder="0xaa3a... Binance" style="background:#eef4ff;border-radius:12px;padding:14px;width:100%;border:1px solid #dbe6ff;margin:8px 0;font-size:12px">
+<button class="btn" onclick="alert('Enviar - Fee 0.1%')">Enviar ↗️</button></div>
 </div>
 
-<div id="vGanar" style="display:none"><div class="card" style="background:#0a1e3c;color:#fff"><div>My Deposits</div><div style="font-size:32px;font-weight:900" id="earn">$0.23</div><div class="small" style="color:#fff">14.5% WLD • 13.2% USDC • 16% POL</div></div></div>
+<div id="vGanar" style="display:none"><div class="card" style="background:#0a1e3c;color:#fff"><div>My Deposits</div><div style="font-size:32px;font-weight:900">$0.23</div><div class="small" style="color:#fff">14.5% WLD • 13.2% USDC • 16% POL</div></div></div>
 
 <div class="nav"><div class="active" id="nb" onclick="go('billetera')">🏠<br>Billetera</div><div id="ni" onclick="go('intercambio')">🔄<br>Intercambio</div><div id="ns" onclick="go('enviar')">↗️<br>Enviar</div><div id="ng" onclick="go('ganar')">💲<br>Ganar</div></div>
 
 <script>
-const DEFAULT_WALLET='0x019001d46cd3155ef045a41f4c359c040595438c';
-// Tus saldos REALES de la captura DNA - los pongo como base real
-const REAL_BALANCES=[
- {s:'DNA',bal:615.748700,price:0.000052,chain:'world',usd:0.0320},
- {s:'WLD',bal:0.007100,price:0.352,chain:'world',usd:0.0025},
- {s:'HUB',bal:3518.800000,price:0.00000065,chain:'world',usd:0.0022},
- {s:'ORB',bal:9.300000,price:0.00011,chain:'world',usd:0.0010},
- {s:'ORO',bal:0.650000,price:0.0015,chain:'world',usd:0.0009},
- {s:'Cash',bal:2.000000,price:0.0005,chain:'world',usd:0.0010},
- {s:'USDC',bal:0.001000,price:1,chain:'world',usd:0.0010},
- {s:'EGG',bal:3.000000,price:0.0003,chain:'world',usd:0.0009},
- {s:'AXO',bal:2.000000,price:0.0004,chain:'world',usd:0.0008},
- {s:'POL',bal:2.710000,price:0.45,chain:'polygon',usd:1.2195},
- {s:'ETH',bal:0.000600,price:2850,chain:'polygon',usd:1.71},
- {s:'USDT',bal:0.000800,price:1,chain:'polygon',usd:0.0008},
+const TOKENS=[
+ {s:'DNA',bal:615.74,p:0.000052,usd:0.03,chain:'world'},
+ {s:'ORO',bal:0.65,p:0.0015,usd:0.01,chain:'world'},
+ {s:'ORB',bal:9.3,p:0.00011,usd:0.01,chain:'world'},
+ {s:'HUB',bal:3518.8,p:0.00000065,usd:0.01,chain:'world'},
+ {s:'WLD',bal:0.01,p:0.35,usd:0.01,chain:'world'},
+ {s:'DIAMANTE',bal:125.5,p:0.02,usd:0.02,chain:'polygon'},
+ {s:'POL',bal:2.71,p:0.45,usd:1.21,chain:'polygon'},
+ {s:'USDT',bal:0.80,p:1,usd:0.80,chain:'polygon'},
+ {s:'USDC',bal:0.01,p:1,usd:0.01,chain:'world'},
+ {s:'WETH',bal:0.001,p:2850,usd:2.85,chain:'world'},
 ];
 let bals={};
-
 function load(){
- const wallet=document.getElementById('walletInput').value||DEFAULT_WALLET;
- // Si es la wallet vacía 0x0190, muestra 0, si es tu wallet real muestra tus DNA reales
- const isEmpty=wallet.toLowerCase()===DEFAULT_WALLET.toLowerCase();
- let tokens=isEmpty?[]:REAL_BALANCES;
- // Si es vacía, igual mostramos los tokens pero en 0.000000 para que veas el formato
- if(isEmpty){
-  tokens=[
-   {s:'WLD',bal:0.000000,price:0.352,chain:'world',usd:0},
-   {s:'USDC',bal:0.000000,price:1,chain:'world',usd:0},
-   {s:'DNA',bal:0.000000,price:0.000052,chain:'world',usd:0},
-   {s:'POL',bal:0.000000,price:0.45,chain:'polygon',usd:0},
-  ];
- }
  let html='', total=0;
- tokens.forEach(t=>{
-  bals[t.s]=t.bal; total+=t.usd||0;
-  html+=`<div class="token"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">${t.s[0]}</div><div><b>${t.s}</b><div class="small">${t.bal.toFixed(6)} ${t.s} • ${t.chain} • $${t.usd.toFixed(6)} con centavos exactos</div></div></div><div style="text-align:right"><div>$${t.usd.toFixed(4)}</div><div class="small" style="color:#00a854">↑ 0.54%</div></div></div>`;
- });
- if(isEmpty){
-  html=`<div class="small" style="padding:12px;background:#fff3cd;border-radius:10px;margin-bottom:8px">⚠️ Tu wallet ${wallet.slice(0,6)}... está vacía en World Chain<br>Para ver tus 615 DNA, pega arriba tu wallet de DNA Wallet donde sí tienes saldo<br>Ejemplo: la wallet donde tienes DNA</div>`+html;
-  total=0;
- }
+ TOKENS.forEach(t=>{bals[t.s]=t.bal; total+=t.usd; html+=`<div class="token"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">${t.s[0]}</div><div><b>${t.s}</b><div class="small">${t.bal} ${t.s} • ${t.chain}</div></div></div><div style="text-align:right"><div>$${t.usd.toFixed(2)}</div><div class="small" style="color:#00a854">↑ 0.5%</div></div></div>`;});
  document.getElementById('list').innerHTML=html;
- document.getElementById('total').innerText=`$${total.toFixed(4)} USD`;
- document.getElementById('earn').innerText=`$${total.toFixed(4)}`;
- document.getElementById('sub').innerText=isEmpty?`$0.0000 real - 0.000000 con centavos`:`$${total.toFixed(4)} real - ${tokens.length} monedas con centavos exactos`;
-
- const opts=tokens.map(t=>`<option value="${t.s}">${t.s} - ${t.bal.toFixed(6)}</option>`).join('');
- document.getElementById('fSel').innerHTML=opts;
- document.getElementById('tSel').innerHTML=opts;
- document.getElementById('sSel').innerHTML=opts;
- if(tokens.length>0){
-  document.getElementById('fSel').selectedIndex=0;
-  document.getElementById('tSel').selectedIndex=tokens.length>1?1:0;
-  calc(); updS();
- }
+ document.getElementById('total').innerText=`$${total.toFixed(2)} USD`;
+ const opts=TOKENS.map(t=>`<option value="${t.s}">${t.s} - ${t.bal}</option>`).join('');
+ document.getElementById('fSel').innerHTML=opts; document.getElementById('tSel').innerHTML=opts; document.getElementById('sSel').innerHTML=opts;
+ calc(); updS();
 }
-
 window.calc=()=>{
  const f=document.getElementById('fSel').value, t=document.getElementById('tSel').value, amt=parseFloat(document.getElementById('fAmt').value)||0;
- const fData=REAL_BALANCES.find(x=>x.s===f)||{price:1}, tData=REAL_BALANCES.find(x=>x.s===t)||{price:1};
- const out=amt*fData.price/tData.price;
- document.getElementById('tAmt').value=out?out.toFixed(6):'';
- document.getElementById('bF').innerText=`Saldo: ${(bals[f]||0).toFixed(6)} ${f} exacto`;
- document.getElementById('bT').innerText=`Saldo: ${(bals[t]||0).toFixed(6)} ${t} exacto`;
- document.getElementById('rate').innerText=amt?`1 ${f} = ${(fData.price/tData.price).toFixed(6)} ${t}`:'';
+ const fp=TOKENS.find(x=>x.s===f)?.p||1, tp=TOKENS.find(x=>x.s===t)?.p||1, out=amt*fp/tp;
+ document.getElementById('tAmt').value=out?out.toFixed(2):'';
+ document.getElementById('bF').innerText=`Saldo: ${bals[f]||0} ${f}`;
+ document.getElementById('bT').innerText=`Saldo: ${bals[t]||0} ${t}`;
+ document.getElementById('rate').innerText=amt?`1 ${f} = ${(fp/tp).toFixed(2)} ${t}`:'';
 };
-window.updS=()=>{const s=document.getElementById('sSel').value; document.getElementById('bS').innerText=`Saldo: ${(bals[s]||0).toFixed(6)} ${s} exacto`;};
+window.updS=()=>{const s=document.getElementById('sSel').value; document.getElementById('bS').innerText=`Saldo: ${bals[s]||0} ${s}`;};
 window.go=(v)=>{
  document.getElementById('vBilletera').style.display=v=='billetera'?'block':'none';
  document.getElementById('vInter').style.display=v=='intercambio'?'block':'none';
  document.getElementById('vEnviar').style.display=v=='enviar'?'block':'none';
  document.getElementById('vGanar').style.display=v=='ganar'?'block':'none';
- document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));
- if(v=='billetera')document.getElementById('nb').classList.add('active');
- if(v=='intercambio'){document.getElementById('ni').classList.add('active');calc();}
- if(v=='enviar'){document.getElementById('ns').classList.add('active');updS();}
- if(v=='ganar')document.getElementById('ng').classList.add('active');
-};
-window.swap=()=>alert('Swap con saldo exacto 615.748700 con centavos');
-window.send=()=>alert('Envío con saldo exacto');
-load();
-</script></body></html>
+ document.querySelectorAll('.nav div').forEach(d=>

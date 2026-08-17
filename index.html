@@ -8,40 +8,33 @@
 .token{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #eef4ff}
 .tIcon{width:40px;height:40px;border-radius:50%;background:#f3ba2f;display:flex;align-items:center;justify-content:center;font-weight:900}
 .swapMain{background:#fff;border-radius:20px;margin:12px;padding:14px;min-height:60vh;display:flex;flex-direction:column;justify-content:center}
-.swapBox{background:#eef4ff;border-radius:14px;padding:14px;margin:8px 0}
-input{width:100%;background:transparent;border:0;font-size:28px;font-weight:900;outline:none;color:#0a1e3c}
+.swapBox{background:#eef4ff;border-radius:14px;padding:14px;margin:8px 0;border:1px solid #dbe6ff}
+input{width:100%;background:transparent;border:0;font-size:30px;font-weight:900;outline:none;color:#0a1e3c}
 select{border:0;background:#0a1e3c;color:#fff;padding:10px 14px;border-radius:20px;font-weight:900}
-.small{font-size:11px;opacity:.6}.btn{width:100%;padding:14px;border-radius:12px;border:0;background:#f3ba2f;color:#000;font-weight:900;margin-top:8px}
+.small{font-size:11px;opacity:.6}.green{color:#00a854}.btn{width:100%;padding:14px;border-radius:12px;border:0;background:#f3ba2f;color:#000;font-weight:900;margin-top:8px}
 .nav{position:fixed;bottom:0;left:0;right:0;background:#0a1e3c;display:flex;justify-content:space-around;padding:6px 0}
 .nav div{color:#fff;opacity:.5;text-align:center;font-size:10px;padding:4px 8px}.nav div.active{opacity:1;color:#f3ba2f;background:#132c54;border-radius:10px}
+.calcBox{background:#0a1e3c;color:#fff;border-radius:12px;padding:10px;margin-top:8px;text-align:center;font-size:12px}
 </style></head><body>
 <div class="header"><div class="badge"><div style="width:18px;height:18px;background:#f3ba2f;border-radius:5px;display:flex;align-items:center;justify-content:center">⬥</div> Uno</div><div style="font-size:10px">World + Polygon</div></div>
 
 <div id="vBilletera">
 <div class="totalCard"><div style="font-size:11px;opacity:.8">Tu Portafolio Total</div><div class="total">$0.23 USD</div><div class="small" style="color:#fff">Tus monedas reales</div></div>
-<div class="card">
-<div class="token"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">D</div><div><b>DNA</b><div class="small">615.74 DNA • world</div></div></div><div style="text-align:right"><div>$0.03</div><div class="small">↑ 0.5%</div></div></div>
-<div class="token"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">O</div><div><b>ORO</b><div class="small">0.65 ORO • world</div></div></div><div style="text-align:right"><div>$0.01</div><div class="small">↑ 1.2%</div></div></div>
-<div class="token"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">O</div><div><b>ORB</b><div class="small">9.3 ORB • world</div></div></div><div style="text-align:right"><div>$0.01</div><div class="small">↓ 0.8%</div></div></div>
-<div class="token"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">H</div><div><b>HUB</b><div class="small">3518.8 HUB • world</div></div></div><div style="text-align:right"><div>$0.01</div><div class="small">↑ 2.1%</div></div></div>
-<div class="token"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">W</div><div><b>WLD</b><div class="small">0.01 WLD • world</div></div></div><div style="text-align:right"><div>$0.01</div><div class="small">↓ 2.2%</div></div></div>
-<div class="token"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">D</div><div><b>DIAMANTE</b><div class="small">125.5 DIAMANTE • polygon</div></div></div><div style="text-align:right"><div>$0.02</div><div class="small">↑ 5.0%</div></div></div>
-<div class="token"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">P</div><div><b>POL</b><div class="small">2.71 POL • polygon</div></div></div><div style="text-align:right"><div>$1.21</div><div class="small">↑ 6.3%</div></div></div>
-<div class="token"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">U</div><div><b>USDT</b><div class="small">0.80 USDT • polygon</div></div></div><div style="text-align:right"><div>$0.80</div><div class="small">→ 0%</div></div></div>
-</div>
+<div class="card"><div id="list"></div></div>
 </div>
 
 <div id="vInter" style="display:none">
-<div class="swapMain"><h3 style="margin:0;text-align:center">Intercambio</h3>
-<div class="swapBox"><div style="display:flex;justify-content:space-between"><span class="small">Vendes</span><span class="small" id="bF" style="font-weight:900">Saldo: 615.74 DNA</span></div><div style="display:flex;gap:8px;align-items:center"><input id="fAmt" type="number" placeholder="0.0" oninput="calc()"><select id="fSel" onchange="calc()"><option>DNA - 615.74</option><option>ORO - 0.65</option><option>ORB - 9.3</option><option>HUB - 3518.8</option><option>WLD - 0.01</option><option>DIAMANTE - 125.5</option><option>POL - 2.71</option><option>USDT - 0.80</option></select></div></div>
-<div style="text-align:center">↕️</div>
-<div class="swapBox"><div style="display:flex;justify-content:space-between"><span class="small">Recibes</span><span class="small" id="bT" style="font-weight:900">Saldo: 0.65 ORO</span></div><div style="display:flex;gap:8px;align-items:center"><input id="tAmt" readonly placeholder="0.0"><select id="tSel" onchange="calc()"><option>ORO - 0.65</option><option>DNA - 615.74</option><option>DIAMANTE - 125.5</option><option>POL - 2.71</option><option>WLD - 0.01</option><option>USDT - 0.80</option></select></div></div>
+<div class="swapMain"><h3 style="margin:0;text-align:center">Intercambio</h3><div class="small" style="text-align:center">Calcula cuánto recibes aprox.</div>
+<div class="swapBox"><div style="display:flex;justify-content:space-between"><span class="small">Vendes</span><span class="small" id="bF" style="font-weight:900">Saldo: 0.80 USDT</span></div><div style="display:flex;gap:8px;align-items:center;margin-top:6px"><input id="fAmt" type="number" placeholder="0.0" value="0.10" oninput="calc()"><select id="fSel" onchange="calc()"><option value="USDT">USDT - 0.80</option><option value="POL">POL - 2.71</option><option value="DNA">DNA - 615.74</option><option value="ORO">ORO - 0.65</option><option value="DIAMANTE">DIAMANTE - 125.5</option><option value="WLD">WLD - 0.01</option></select></div><div class="small" id="usdFrom">≈ $0.10 USD</div></div>
+<div style="text-align:center;cursor:pointer" onclick="swapPos()">↕️</div>
+<div class="swapBox"><div style="display:flex;justify-content:space-between"><span class="small">Recibes</span><span class="small" id="bT" style="font-weight:900">Saldo: 0.01 WLD</span></div><div style="display:flex;gap:8px;align-items:center;margin-top:6px"><input id="tAmt" readonly placeholder="0.0" style="color:#0a1e3c"><select id="tSel" onchange="calc()"><option value="WLD">WLD - 0.01</option><option value="USDT">USDT - 0.80</option><option value="POL">POL - 2.71</option><option value="DNA">DNA - 615.74</option><option value="ORO">ORO - 0.65</option><option value="DIAMANTE">DIAMANTE - 125.5</option></select></div><div class="small" id="usdTo">≈ $0.10 USD</div></div>
+<div class="calcBox" id="result">Recibes aprox: 0.28 WLD<br><span class="small" style="color:#fff">1 USDT = 2.85 WLD • Fee Uno 0.3% • Tú ganas $0.0003</span></div>
 <button class="btn">Intercambiar Ahora</button></div>
 </div>
 
 <div id="vEnviar" style="display:none">
 <div class="swapMain"><h3 style="margin:0;text-align:center">Enviar</h3>
-<div class="swapBox"><div style="display:flex;justify-content:space-between"><span class="small">Cantidad</span><span class="small" id="bS" style="font-weight:900">Saldo: 615.74 DNA</span></div><div style="display:flex;gap:8px;align-items:center"><input id="sAmt" type="number" placeholder="0.0"><select id="sSel"><option>DNA - 615.74</option><option>ORO - 0.65</option><option>DIAMANTE - 125.5</option><option>POL - 2.71</option></select></div></div>
+<div class="swapBox"><div style="display:flex;justify-content:space-between"><span class="small">Cantidad</span><span class="small" id="bS" style="font-weight:900">Saldo: 0.80 USDT</span></div><div style="display:flex;gap:8px;align-items:center"><input id="sAmt" type="number" placeholder="0.0"><select id="sSel"><option>USDT - 0.80</option><option>POL - 2.71</option></select></div></div>
 <input placeholder="0xaa3a... Binance" style="background:#eef4ff;border-radius:12px;padding:14px;width:100%;border:1px solid #dbe6ff;margin:8px 0">
 <button class="btn">Enviar ↗️</button></div>
 </div>
@@ -51,21 +44,43 @@ select{border:0;background:#0a1e3c;color:#fff;padding:10px 14px;border-radius:20
 <div class="nav"><div class="active" id="nb" onclick="go('billetera')">🏠<br>Billetera</div><div id="ni" onclick="go('intercambio')">🔄<br>Intercambio</div><div id="ns" onclick="go('enviar')">↗️<br>Enviar</div><div id="ng" onclick="go('ganar')">💲<br>Ganar</div></div>
 
 <script>
-function go(v){
+const PRICES={USDT:1,POL:0.45,DNA:0.000052,ORO:0.0015,ORB:0.00011,HUB:0.00000065,WLD:0.35,DIAMANTE:0.02,USDC:1};
+const BALS={USDT:0.80,POL:2.71,DNA:615.74,ORO:0.65,DIAMANTE:125.5,WLD:0.01,HUB:3518.8,ORB:9.3};
+
+function load(){
+ let html='';
+ const list=[{s:'DNA',b:615.74,usd:0.03},{s:'ORO',b:0.65,usd:0.01},{s:'ORB',b:9.3,usd:0.01},{s:'HUB',b:3518.8,usd:0.01},{s:'WLD',b:0.01,usd:0.01},{s:'DIAMANTE',b:125.5,usd:0.02},{s:'POL',b:2.71,usd:1.21},{s:'USDT',b:0.80,usd:0.80}];
+ list.forEach(t=>{html+=`<div class="token"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon">${t.s[0]}</div><div><b>${t.s}</b><div class="small">${t.b} ${t.s} • world</div></div></div><div style="text-align:right"><div>$${t.usd.toFixed(2)}</div></div></div>`;});
+ document.getElementById('list').innerHTML=html;
+ calc();
+}
+window.calc=()=>{
+ const f=document.getElementById('fSel').value, t=document.getElementById('tSel').value;
+ const amt=parseFloat(document.getElementById('fAmt').value)||0;
+ const fp=PRICES[f]||1, tp=PRICES[t]||1;
+ const fee=amt*0.003;
+ const out=(amt-fee)*fp/tp;
+ document.getElementById('tAmt').value=out?out.toFixed(2):'0.00';
+ document.getElementById('bF').innerText=`Saldo: ${BALS[f]||0} ${f}`;
+ document.getElementById('bT').innerText=`Saldo: ${BALS[t]||0} ${t}`;
+ document.getElementById('usdFrom').innerText=`≈ $${(amt*fp).toFixed(2)} USD`;
+ document.getElementById('usdTo').innerText=`≈ $${(out*tp).toFixed(2)} USD`;
+ document.getElementById('result').innerHTML=`Recibes aprox: ${out?out.toFixed(2):'0.00'} ${t}<br><span class="small" style="color:#fff">1 ${f} = ${(fp/tp).toFixed(2)} ${t} • Fee Uno 0.3% = $${(fee*fp).toFixed(4)} • Tú ganas</span>`;
+};
+window.swapPos=()=>{
+ const f=document.getElementById('fSel').value, t=document.getElementById('tSel').value;
+ document.getElementById('fSel').value=t; document.getElementById('tSel').value=f; calc();
+};
+window.go=(v)=>{
  document.getElementById('vBilletera').style.display=v=='billetera'?'block':'none';
  document.getElementById('vInter').style.display=v=='intercambio'?'block':'none';
  document.getElementById('vEnviar').style.display=v=='enviar'?'block':'none';
  document.getElementById('vGanar').style.display=v=='ganar'?'block':'none';
  document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));
  if(v=='billetera')document.getElementById('nb').classList.add('active');
- if(v=='intercambio')document.getElementById('ni').classList.add('active');
+ if(v=='intercambio'){document.getElementById('ni').classList.add('active');calc();}
  if(v=='enviar')document.getElementById('ns').classList.add('active');
  if(v=='ganar')document.getElementById('ng').classList.add('active');
-}
-function calc(){
- const f=document.getElementById('fSel').value, t=document.getElementById('tSel').value;
- document.getElementById('bF').innerText='Saldo: '+f;
- document.getElementById('bT').innerText='Saldo: '+t;
-}
-calc();
+};
+load();
 </script></body></html>

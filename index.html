@@ -1,90 +1,76 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Uno Intercambio</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0;font-family:sans-serif}
-    body{background:#0b0e11;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
-    .container{width:100%;max-width:380px;background:#161a1e;padding:28px;border-radius:16px;text-align:center}
-    h1{font-size:22px;margin-bottom:6px}
-    p{color:#9aa0a6;font-size:14px;margin-bottom:20px}
-    .btn{background:#fff;color:#000;border:none;padding:14px;border-radius:50px;font-weight:700;width:100%;cursor:pointer}
-    .btn-pay{background:#10b981;color:#fff;display:none;margin-top:12px}
-    #status{margin-top:14px;font-size:11px;background:#23282d;padding:10px;border-radius:8px;word-break:break-all;white-space:pre-wrap;text-align:left;min-height:40px}
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Uno Intercambio</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0b0e11;color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:system-ui,sans-serif;padding:20px}
+.container{width:100%;max-width:380px;background:#15181e;border:1px solid #2a2e36;border-radius:20px;padding:24px;text-align:center}
+h1{font-size:22px;margin-bottom:6px}
+p{color:#9aa0a6;font-size:14px;margin-bottom:12px;line-height:1.4}
+.btn{background:#fff;color:#000;border:none;width:100%;padding:14px;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;margin-top:10px}
+.btn-pay{background:#10b981;color:#fff}
+#status{margin-top:14px;font-size:13px;padding:10px;border-radius:10px;display:none}
+.ok{display:block!important;background:#0a3d2a;color:#6effb0;border:1px solid #10b981}
+.warn{display:block!important;background:#3d2a0a;color:#ffcc66;border:1px solid #ffaa00}
+.small{font-size:11px;color:#666;margin-top:10px;word-break:break-all}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Uno Intercambio</h1>
-    <p id="sub">Conecta tu World App</p>
-    <button class="btn" id="login">Conectar con World App</button>
-    <button class="btn btn-pay" id="pay">Pagar 1 WLD</button>
-    <div id="status">Buscando World App...</div>
-  </div>
-
+<div class="container">
+<h1>🔁 Uno Intercambio</h1>
+<p id="msg">Detectando entorno...</p>
+<div id="status"></div>
+<button class="btn" id="btnConnect">Conectar Wallet</button>
+<button class="btn btn-pay" id="btnPay" style="display:none">Pagar 1 WLD</button>
+<div class="small" id="url"></div>
+</div>
 <script>
-  const APP_ID = "app_d0a270229b8199adb79b64d5c7aa7c0f";
-  const WALLET = "0x49bcFe3c2ba24f90d2E07917fA4504793f5C9B22";
-  const statusEl = document.getElementById('status');
-  const subEl = document.getElementById('sub');
-  const log = m => statusEl.textContent = m;
+const statusEl = document.getElementById('status');
+const msgEl = document.getElementById('msg');
+const btnConnect = document.getElementById('btnConnect');
+const btnPay = document.getElementById('btnPay');
+document.getElementById('url').textContent = window.location.href;
 
-  function start() {
-    const kit = window.MiniKit;
-    if (!kit) {
-      log("Esperando World App... Si estás en Chrome es normal.\nAbre esto DENTRO de World App.");
-      setTimeout(start, 800);
-      return;
-    }
+function isWorldApp(){
+  const ua = navigator.userAgent || '';
+  return ua.includes('WorldApp') ||!!window.WorldApp ||!!window.worldApp || window.ethereum?.isWorldApp === true;
+}
 
-    try { kit.install(APP_ID); } catch(e){ try{ kit.install(); }catch{} }
-
-    log("✅ Conectado a World App!\nInstalado: " + kit.isInstalled() + "\nDale a Conectar.");
-    subEl.textContent = "World App detectada";
-
-    const getCmds = () => kit.commandsAsync || kit.commands;
-
-    document.getElementById('login').onclick = async () => {
-      try {
-        log("Pidiendo permiso...");
-        const cmds = getCmds();
-        const r = await cmds.walletAuth({
-          nonce: Math.random().toString(36).substring(2),
-          statement: "Login Uno Intercambio"
-        });
-        const p = r.finalPayload || r;
-        log(JSON.stringify(p, null, 2));
-        if (p.status === "success") {
-          document.getElementById('login').style.display = "none";
-          document.getElementById('pay').style.display = "block";
-          subEl.textContent = "¡Conectado!";
-        }
-      } catch (err) {
-        log("Error login: " + err.message);
-      }
-    };
-
-    document.getElementById('pay').onclick = async () => {
-      try {
-        log("Abriendo pago...");
-        const cmds = getCmds();
-        const r = await cmds.pay({
-          reference: "uno_" + Date.now(),
-          to: WALLET,
-          tokens: [{ symbol: "WLD", token_amount: "1.0" }],
-          description: "Pago Uno Intercambio"
-        });
-        const p = r.finalPayload || r;
-        log(JSON.stringify(p, null, 2));
-      } catch (err) {
-        log("Error pago: " + err.message);
-      }
-    };
+function setState(){
+  if(isWorldApp()){
+    msgEl.textContent = 'Estás dentro de World App. Listo para intercambiar.';
+    statusEl.className = 'ok';
+    statusEl.style.display='block';
+    statusEl.textContent = '✅ World App detectada correctamente';
+    btnConnect.style.display='block';
+  } else {
+    msgEl.textContent = 'Abre este link dentro de World App para usarlo. Si estás en Chrome es normal que diga esperando.';
+    statusEl.className = 'warn';
+    statusEl.style.display='block';
+    statusEl.textContent = '⚠️ Estás fuera de World App (Chrome). Pega este link en World App > Browser';
+    btnConnect.style.display='none';
   }
+}
+setState();
+setTimeout(setState, 800);
 
-  start();
+btnConnect.onclick = async () => {
+  try{
+    if(!window.ethereum){ alert('Abre en World App'); return; }
+    const acc = await window.ethereum.request({method:'eth_requestAccounts'});
+    statusEl.className='ok';
+    statusEl.textContent = 'Conectado: ' + acc[0].slice(0,6) + '...' + acc[0].slice(-4);
+    btnPay.style.display='block';
+    btnConnect.textContent='Conectado ✅';
+  }catch(e){ alert(e.message); }
+};
+
+btnPay.onclick = () => {
+  alert('Aquí iría tu lógica de pago con MiniKit / Pay. Wallet ya detectada!');
+};
 </script>
 </body>
 </html>

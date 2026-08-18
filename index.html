@@ -4,13 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Uno intercambio - Integración router</title>
-<style>/* (estilos idénticos a la versión anterior, acortados) */
+<style>/* estilos reducidos */
 *{box-sizing:border-box}body{margin:0;background:#fff;color:#111;font-family:system-ui;padding-bottom:90px}
 .top{padding:12px 16px;display:flex;gap:10px;align-items:center}
 .avatar{width:56px;height:56px;border-radius:50%;background:#0B0E11;display:flex;align-items:center;justify-content:center;border:2px solid #f3ba2f}
 .big{font-size:42px;font-weight:900}.small{font-size:11px;opacity:.6}.green{color:#00b15c}
 .btnY{width:100%;padding:13px;border-radius:12px;border:0;background:#f3ba2f;font-weight:900;margin-top:8px;cursor:pointer}
 .box{background:#f6f6f6;border-radius:14px;padding:12px;margin:8px 0}
+select,input{padding:8px;border-radius:8px;border:1px solid #ddd}
 </style>
 </head>
 <body>
@@ -18,20 +19,42 @@
   <div class="top"><div class="avatar"></div><div><b>Uno intercambio</b><div class="small">0x0190...38c • World Chain + Polygon • 0.5% + gas aparte</div></div></div>
   <div style="padding:12px">
     <div class="box">
-      <label>Vendes (token):</label>
-      <input id="fAmt" type="number" value="1" style="width:60%"> 
-      <select id="fSel"></select>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <div style="flex:1">
+          <label><small>Red origen</small></label><br>
+          <select id="fNet"><option value="world">World Chain</option><option value="polygon">Polygon</option><option value="zkevm">zkEVM</option></select>
+        </div>
+        <div style="flex:2">
+          <label><small>Vendes (token)</small></label><br>
+          <input id="fAmt" type="number" value="0.01" style="width:48%;"> 
+          <select id="fSel" style="width:50%"></select>
+        </div>
+      </div>
     </div>
     <div class="box">
-      <label>Recibes (token):</label>
-      <input id="tAmt" readonly>
-      <select id="tSel"></select>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <div style="flex:1">
+          <label><small>Red destino</small></label><br>
+          <select id="tNet"><option value="world">World Chain</option><option value="polygon" selected>Polygon</option><option value="zkevm">zkEVM</option></select>
+        </div>
+        <div style="flex:2">
+          <label><small>Recibes (token)</small></label><br>
+          <input id="tAmt" readonly style="width:48%">
+          <select id="tSel" style="width:50%"></select>
+        </div>
+      </div>
+      <div style="margin-top:6px"><button onclick="swapNets()">↕️ Cambiar red</button></div>
     </div>
+
     <div class="box" id="feeBox">
       Comisión plataforma (0.5%): <b id="feeUno">$0.00</b><br>
-      Comisión a: <b id="commissionAddr">0x019001d46cd3155ef045a41f4c359c040595438c</b><br>
-      Dirección Polygon autorizada: <b id="polygonAddr">0xaa3a4dbfceb16c45bcc73091735b0696a59e1aa2</b>
+      Fee puente (si aplica): <b id="feeBridge">$0.00</b><br>
+      Gas estimado (suma redes): <b id="feeGas">$0.00</b><br>
+      Total comisión a pagar: <b id="totalCommission">$0.00</b>
+      <div style="margin-top:8px">Comisión irá a: <b id="commissionAddr">0x019001d46cd3155ef045a41f4c359c040595438c</b></div>
+      <div style="margin-top:6px">Dirección Polygon autorizada: <b id="polygonAddr">0xaa3a4dbfceb16c45bcc73091735b0696a59e1aa2</b></div>
     </div>
+
     <button class="btnY" id="swapBtn">Intercambiar Ahora (0.5% + gas)</button>
     <div id="txStatus" style="margin-top:10px;font-size:13px"></div>
   </div>
@@ -39,110 +62,159 @@
 
 <script src="https://cdn.jsdelivr.net/npm/ethers@6.8.0/dist/ethers.umd.min.js"></script>
 <script>
-// Config (rellena ROUTER_ADDRESS tras desplegar)
-const ROUTER_ADDRESS = '';
+// Config
+const ROUTER_ADDRESS = ''; // Pegar tras deploy
 const COMMISSION_ADDRESS = '0x019001d46cd3155ef045a41f4c359c040595438c';
 const POLYGON_PAYMENT_ADDRESS = '0xaa3a4dbfceb16c45bcc73091735b0696a59e1aa2';
+const BRIDGE_FEE_RATE = 0.02; // ejemplo
 
-// Minimal ABIs
+// ABIs
 const ERC20_ABI = [
   'function approve(address spender, uint256 amount) public returns (bool)',
-  'function allowance(address owner, address spender) public view returns (uint256)'
+  'function allowance(address owner, address spender) public view returns (uint256)',
+  'function decimals() view returns (uint8)'
 ];
 const ROUTER_ABI = [
   'function collectToken(address token, address from, address to, uint256 amount) external',
   'function collectNative(address payable to) external payable'
 ];
 
-// Tokens list (addr fields fueron añadidos desde el repo)
+// Tokens with decimals
 const TOKENS = {
-  polygon: [
-    { s: 'USDC', addr: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174' },
-    { s: 'USDT', addr: '0xc2132D05D31c914A87C6611C10748AEb04B58e8F' },
-    { s: 'WETH', addr: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619' }
-  ],
   world: [
-    { s: 'WLD', addr: '0xdc6ff44d5d932cbd77b52e5612ba0529dc6226f1' },
-    { s: 'DNA', addr: '0xDdA1BD01B81d3420F6F84b40b7aCFbDDE579Eb0b' }
+    { s: 'WLD', addr: '0xdc6ff44d5d932cbd77b52e5612ba0529dc6226f1', decimals:18 },
+    { s: 'DNA', addr: '0xDdA1BD01B81d3420F6F84b40b7aCFbDDE579Eb0b', decimals:18 },
+    { s: 'HUB', addr: '0x6923f9b683111dcc0e20124e9a031deeae5dad93', decimals:18 },
+    { s: 'ORO', addr: '0xcd1E32B86953D79a6AC58e813D2EA7a1790cAb63', decimals:18 }
+  ],
+  polygon: [
+    { s: 'POL', addr: '0x0000000000000000000000000000000000001010', decimals:18 },
+    { s: 'USDC', addr: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174', decimals:6 },
+    { s: 'USDT', addr: '0xc2132D05D31c914A87C6611C10748AEb04B58e8F', decimals:6 },
+    { s: 'WETH', addr: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619', decimals:18 }
+  ],
+  zkevm: [
+    { s: 'MATIC', addr: '', decimals:18 }
   ]
 };
 
-// Simple UI init
-function initLists(){
+// UI init
+function populateTokensForNet(net, selectEl){
+  const list = TOKENS[net] || [];
+  selectEl.innerHTML = list.map(t => `<option value="${t.addr}" data-dec="${t.decimals}">${t.s} ${t.addr? '' : '(native)'} </option>`).join('');
+}
+
+function init(){
+  const fNet = document.getElementById('fNet');
+  const tNet = document.getElementById('tNet');
   const fSel = document.getElementById('fSel');
   const tSel = document.getElementById('tSel');
-  fSel.innerHTML = TOKENS.polygon.map(t=>`<option value="${t.addr}">${t.s}</option>`).join('');
-  tSel.innerHTML = TOKENS.polygon.map(t=>`<option value="${t.addr}">${t.s}</option>`).join('');
+  populateTokensForNet(fNet.value, fSel);
+  populateTokensForNet(tNet.value, tSel);
+  fNet.addEventListener('change', ()=>{ populateTokensForNet(fNet.value, fSel); calc(); });
+  tNet.addEventListener('change', ()=>{ populateTokensForNet(tNet.value, tSel); calc(); });
+  fSel.addEventListener('change', calc);
+  tSel.addEventListener('change', calc);
+  document.getElementById('fAmt').addEventListener('input', calc);
+  calc();
 }
-initLists();
 
-// Helpers: show status
+function swapNets(){
+  const fNet = document.getElementById('fNet');
+  const tNet = document.getElementById('tNet');
+  const tmp = fNet.value; fNet.value = tNet.value; tNet.value = tmp;
+  init();
+}
+
+// Price & fee calc (mocked prices from earlier data)
+const PRICES = {
+  WLD: 0.35, DNA: 0.0000487, HUB: 0.00000284, ORO: 0.015,
+  POL:0.45, USDC:1, USDT:1, WETH:3000
+};
+
+function calc(){
+  try{
+    const fNet = document.getElementById('fNet').value;
+    const tNet = document.getElementById('tNet').value;
+    const fSel = document.getElementById('fSel');
+    const tSel = document.getElementById('tSel');
+    const fAddr = fSel.value; const tAddr = tSel.value;
+    const fSym = fSel.options[fSel.selectedIndex].text.split(' ')[0];
+    const tSym = tSel.options[tSel.selectedIndex].text.split(' ')[0];
+    const fAmt = parseFloat(document.getElementById('fAmt').value||0);
+    const priceF = PRICES[fSym] || 0;
+    const priceT = PRICES[tSym] || 0.000001;
+    const usd = fAmt * priceF;
+    const feeUno = usd * 0.005;
+    const bridgeFee = (fNet !== tNet) ? usd * BRIDGE_FEE_RATE : 0;
+    const gasF = (fNet==='polygon'?0.03:0.01); const gasT = (tNet==='polygon'?0.03:0.01);
+    const gasTot = gasF + gasT;
+    let out = 0; if(priceT>0) out = (usd - feeUno - bridgeFee)/priceT;
+    document.getElementById('tAmt').value = out>0 ? out.toFixed(6): '0.000000';
+    document.getElementById('feeUno').innerText = '$'+feeUno.toFixed(4);
+    document.getElementById('feeBridge').innerText = '$'+bridgeFee.toFixed(4);
+    document.getElementById('feeGas').innerText = '$'+gasTot.toFixed(2);
+    document.getElementById('totalCommission').innerText = '$'+(feeUno+bridgeFee).toFixed(4);
+  }catch(e){console.warn(e)}
+}
+
+// Helpers
 function setStatus(txt){ document.getElementById('txStatus').innerText = txt; }
 
-// Approve token to router
-async function approveToken(tokenAddr, amount) {
-  if (!window.ethereum) throw new Error('No wallet');
+async function ensureConnected(){ if(!window.ethereum) throw new Error('No wallet'); await window.ethereum.request({ method: 'eth_requestAccounts' }); }
+
+async function approveToken(tokenAddr, amount, decimals){
   const provider = new ethers.BrowserProvider(window.ethereum);
   const signer = await provider.getSigner();
   const token = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
+  const amt = ethers.parseUnits(amount.toString(), decimals);
   setStatus('Solicitando approve a la wallet...');
-  const tx = await token.approve(ROUTER_ADDRESS, amount);
+  const tx = await token.approve(ROUTER_ADDRESS, amt);
   setStatus('Approve enviado. Esperando confirmación...');
   await tx.wait();
   setStatus('Approve confirmado');
 }
 
-// Call router.collectToken
-async function collectTokenViaRouter(tokenAddr, amount, recipient){
-  if (!ROUTER_ADDRESS) throw new Error('Router no configurado');
+async function collectTokenViaRouter(tokenAddr, amount, decimals, recipient){
   const provider = new ethers.BrowserProvider(window.ethereum);
   const signer = await provider.getSigner();
   const router = new ethers.Contract(ROUTER_ADDRESS, ROUTER_ABI, signer);
-  setStatus('Llamando a router.collectToken... confirma en tu wallet');
   const from = await signer.getAddress();
-  const tx = await router.collectToken(tokenAddr, from, recipient, amount);
+  const amt = ethers.parseUnits(amount.toString(), decimals);
+  setStatus('Llamando a router.collectToken... confirma en tu wallet');
+  const tx = await router.collectToken(tokenAddr, from, recipient, amt);
   setStatus('Transacción enviada. Esperando mining...');
   const receipt = await tx.wait();
   setStatus('Transacción minada: ' + receipt.transactionHash);
   return receipt;
 }
 
-// Call router.collectNative
-async function collectNativeViaRouter(amountWei, recipient){
-  if (!ROUTER_ADDRESS) throw new Error('Router no configurado');
-  const provider = new ethers.BrowserProvider(window.ethereum);
-  const signer = await provider.getSigner();
-  const router = new ethers.Contract(ROUTER_ADDRESS, ROUTER_ABI, signer);
-  setStatus('Llamando a router.collectNative... confirma en tu wallet');
-  const tx = await router.collectNative(recipient, { value: amountWei });
-  setStatus('Transacción enviada. Esperando mining...');
-  const receipt = await tx.wait();
-  setStatus('Transacción minada: ' + receipt.transactionHash);
-  return receipt;
-}
-
-// Convert decimal input to token units (simple helper assuming token has 18 decimals)
-function toWei(amount){ return ethers.parseUnits(amount.toString(), 18); }
-
-// Main swap handler hooked to button
+// Main
 document.getElementById('swapBtn').addEventListener('click', async ()=>{
   try{
-    if (!window.ethereum) return setStatus('Conecta tu wallet');
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const fAddr = document.getElementById('fSel').value;
-    const amount = parseFloat(document.getElementById('fAmt').value || 0);
-    if (amount <= 0) return setStatus('Pon un monto > 0');
-    const amountWei = toWei(amount);
-    // Aprobar y llamar a router
-    setStatus('Iniciando flujo: approve -> collectToken');
-    await approveToken(fAddr, amountWei);
-    // recipient: aquí enviamos al mismo usuario (simulación) o a otra dirección; usamos POLYGON_PAYMENT_ADDRESS como receptor final demo
-    const recipient = POLYGON_PAYMENT_ADDRESS;
-    const receipt = await collectTokenViaRouter(fAddr, amountWei, recipient);
-    setStatus('Swap finalizado. Tx: ' + receipt.transactionHash);
-  } catch(err){ console.error(err); setStatus('Error: ' + (err.message||err)); }
+    await ensureConnected();
+    const fSel = document.getElementById('fSel');
+    const tSel = document.getElementById('tSel');
+    const fNet = document.getElementById('fNet').value;
+    const tNet = document.getElementById('tNet').value;
+    const fAddr = fSel.value; const fSym = fSel.options[fSel.selectedIndex].text.split(' ')[0];
+    const fAmt = parseFloat(document.getElementById('fAmt').value||0);
+    if(!fAmt || fAmt<=0) return setStatus('Monto inválido');
+    // find decimals
+    const optDec = parseInt(fSel.options[fSel.selectedIndex].getAttribute('data-dec')) || 18;
+    // If token is native (no addr), call collectNative
+    if(!fAddr){
+      const amountWei = ethers.parseUnits(fAmt.toString(), optDec);
+      await collectNativeViaRouter(amountWei, POLYGON_PAYMENT_ADDRESS);
+      return;
+    }
+    // approve + collect
+    await approveToken(fAddr, fAmt, optDec);
+    await collectTokenViaRouter(fAddr, fAmt, optDec, POLYGON_PAYMENT_ADDRESS);
+  } catch(err){ console.error(err); setStatus('Error: '+(err.message||err)); }
 });
 
+init();
 </script>
 </body>
 </html>

@@ -1,0 +1,6 @@
+// config.js - rellena ROUTER_ADDRESS tras deploy
+export const CONFIG = {
+  ROUTER_ADDRESS: '',
+  COMMISSION_ADDRESS: '0x019001d46cd3155ef045a41f4c359c040595438c',
+  POLYGON_PAYMENT_ADDRESS: '0xaa3a4dbfceb16c45bcc73091735b0696a59e1aa2'
+};

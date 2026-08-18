@@ -4,12 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <title>Uno intercambio ✅ Verificado</title>
-    <!-- ✅ SDK OFICIAL WORLD APP (VERIFICACIÓN Y PERMISOS) -->
+    <!-- ✅ SDK OFICIAL WORLD APP -->
     <script src="https://cdn.worldcoin.org/sdk/world-app-sdk-v1.1.0.js"></script>
     <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js"></script>
     <style>
-        *{box-sizing:border-box;margin:0;padding:0}
-        body{background:#fff;color:#111;font-family:system-ui;padding-bottom:90px;overflow-x:hidden}
+        *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system}
+        body{background:#fff;color:#111;padding-bottom:90px;overflow-x:hidden}
+
+        /* ✅ PANTALLA DE VERIFICACIÓN - EXACTA A TUS CAPTURAS */
+        #pantallaVerif{position:fixed;inset:0;background:#fff;z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
+        .verifBox{width:100%;max-width:360px;text-align:center}
+        .verifIcon{font-size:48px;color:#00a3ff;margin-bottom:16px}
+        .verifTitulo{font-size:22px;font-weight:700;margin-bottom:8px}
+        .verifSub{font-size:14px;color:#666;margin-bottom:32px;line-height:1.4}
+        .permisos{background:#f5f5f7;border-radius:16px;padding:20px;margin-bottom:32px;text-align:left}
+        .permisoItem{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:15px}
+        .permisoIcon{font-size:18px;width:24px;text-align:center}
+        .permisoCheck{color:#0071e3;font-weight:bold}
+        .btnIniciar{width:100%;background:#000;color:#fff;border:none;border-radius:12px;padding:14px;font-size:17px;font-weight:600;cursor:pointer}
+        .btnIniciar:disabled{opacity:0.6;cursor:not-allowed}
+
+        /* ✅ VENTANA DE CONFIRMACIÓN - IGUAL A LAS OTRAS APPS */
+        #ventanaConfirm{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+        .confirmBox{background:#fff;border-radius:20px;width:100%;max-width:340px;overflow:hidden}
+        .confirmHeader{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid #eee}
+        .confirmApp{display:flex;align-items:center;gap:10px}
+        .confirmIcon{width:40px;height:40px;border-radius:10px;background:#f3ba2f;display:flex;align-items:center;justify-content:center;color:#000;font-weight:bold;font-size:20px}
+        .confirmTitulo{font-weight:600;font-size:16px}
+        .confirmCerrar{width:32px;height:32px;border-radius:50%;background:#f5f5f7;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px}
+        .confirmBody{padding:20px}
+        .confirmTexto{font-size:14px;color:#666;margin-bottom:24px;line-height:1.5}
+        .confirmPermisos{margin-bottom:24px}
+        .confirmPermItem{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:14px}
+        .confirmBtn{width:100%;background:#000;color:#fff;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:600;cursor:pointer}
+
+        /* ✅ RESTO DE LA APP - TAL CUAL TU DISEÑO */
         .top{padding:12px 16px;display:flex;gap:10px;align-items:center}
         .avatar{width:56px;height:56px;border-radius:50%;background:#0B0E11;display:flex;align-items:center;justify-content:center;border:2px solid #f3ba2f}
         .big{font-size:42px;font-weight:900}
@@ -41,35 +70,75 @@
         .actionRow{display:flex;gap:8px;margin-top:10px}.actionRow button{flex:1;padding:12px;border-radius:12px;border:0;font-weight:900;cursor:pointer}
         .badgeVerif{background:#00a3ff;color:#fff;font-size:9px;padding:2px 6px;border-radius:10px;margin-left:6px}
         .estado{font-size:10px;color:#00b15c;font-weight:900}
+        .oculto{display:none !important}
+        .deshabilitado{opacity:.5;pointer-events:none}
     </style>
 </head>
 <body>
 
-<!-- ✅ PANTALLA DE VERIFICACIÓN INICIAL -->
-<div id="pantallaVerif" style="position:fixed;inset:0;background:#fff;z-index:999;display:flex;align-items:center;justify-content:center;padding:20px">
-    <div class="modalBox" style="text-align:center">
-        <div style="font-size:48px;color:#00a3ff">✅</div>
-        <h2 style="margin:12px 0">Verificación Oficial</h2>
-        <p style="font-size:14px;opacity:.7;margin-bottom:20px">Conectando con World App • Se requiere permiso para acceder a tu billetera y firmar transacciones</p>
-        <div style="text-align:left;background:#f6f6f6;padding:12px;border-radius:12px;margin-bottom:20px">
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-                <input type="checkbox" checked id="permisoCuenta">
-                <span>📖 Ver tu dirección y saldos</span>
-            </label>
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:6px">
-                <input type="checkbox" checked id="permisoTx">
-                <span>✍️ Firmar transacciones (enviar/intercambiar)</span>
-            </label>
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:6px">
-                <input type="checkbox" checked id="permisoHuman">
-                <span>✅ Verificación: Ser humano único</span>
-            </label>
+<!-- ✅ PANTALLA DE VERIFICACIÓN - EXACTA A TUS CAPTURAS -->
+<div id="pantallaVerif">
+    <div class="verifBox">
+        <div class="verifIcon">✅</div>
+        <h1 class="verifTitulo">Verificación Oficial</h1>
+        <p class="verifSub">Conectando con World App • Se requiere permiso para acceder a tu billetera y firmar transacciones</p>
+
+        <div class="permisos">
+            <div class="permisoItem">
+                <span class="permisoCheck">✓</span>
+                <span class="permisoIcon">📖</span>
+                <span>Ver tu dirección y saldos</span>
+            </div>
+            <div class="permisoItem">
+                <span class="permisoCheck">✓</span>
+                <span class="permisoIcon">✍️</span>
+                <span>Firmar transacciones (enviar/intercambiar</span>
+            </div>
+            <div class="permisoItem">
+                <span class="permisoCheck">✓</span>
+                <span class="permisoIcon">✅</span>
+                <span>Verificación: Ser humano único</span>
+            </div>
         </div>
-        <button class="btnY" id="btnIniciarVerif">🔓 Aprobar y Conectar</button>
+
+        <button class="btnIniciar" id="btnIniciarSesion">Iniciar sesión</button>
     </div>
 </div>
 
-<div id="home" style="opacity:.5;pointer-events:none">
+<!-- ✅ VENTANA DE CONFIRMACIÓN - IGUAL A WORLD ID / HOLDSTATION -->
+<div id="ventanaConfirm" class="oculto">
+    <div class="confirmBox">
+        <div class="confirmHeader">
+            <div class="confirmApp">
+                <div class="confirmIcon">U</div>
+                <div>
+                    <div class="confirmTitulo">Uno intercambio</div>
+                    <div class="small" style="color:#00a3ff">Verificado ✅</div>
+                </div>
+            </div>
+            <div class="confirmCerrar" onclick="cerrarVentana()">×</div>
+        </div>
+        <div class="confirmBody">
+            <p class="confirmTexto">Firma para confirmar la propiedad de la billetera y autenticarte en Uno intercambio.</p>
+
+            <div class="confirmPermisos">
+                <div class="confirmPermItem">
+                    <span>✓</span>
+                    <span>Billetera</span>
+                </div>
+                <div class="confirmPermItem">
+                    <span>✓</span>
+                    <span>Nivel de verificación</span>
+                </div>
+            </div>
+
+            <button class="confirmBtn" id="btnConfirmar">Iniciar sesión</button>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ TU APP ORIGINAL -->
+<div id="home" class="deshabilitado">
     <div class="top">
         <div class="avatar"><svg viewBox="0 0 32 32" width="28" height="28"><path d="M16 7.5 L19.5 11 L16 14.5 L12.5 11 Z M11 12.5 L14.5 16 L11 19.5 L7.5 16 Z M21 12.5 L24.5 16 L21 19.5 L17.5 16 Z M16 17.5 L19.5 21 L16 24.5 L12.5 21 Z" fill="#F3BA2F"/></svg></div>
         <div><b>Uno intercambio <span class="badgeVerif">VERIFICADO ✅</span></b><div class="small" id="miDireccion">0x0190...38c • World Chain + Polygon • 0.5% + gas aparte</div><div class="estado" id="estadoConexion">🔴 Sin conexión</div></div>
@@ -259,7 +328,7 @@
 <div id="modal" class="modal" onclick="this.style.display='none'"><div class="modalBox" style="text-align:center"><div style="font-size:32px">✅</div><div id="modalTxt" style="font-weight:900;margin-top:8px"></div><button class="btnY" onclick="document.getElementById('modal').style.display='none'">Cerrar</button></div></div>
 
 <script>
-// ✅ SDK WORLD APP - VERIFICACIÓN OFICIAL
+// ✅ SDK WORLD APP - VERIFICACIÓN COMPLETA
 let worldApp;
 let provider;
 let signer;
@@ -292,8 +361,14 @@ let saldos = {};
 let precios = {};
 let cur = null, curDep = null, curRet = null;
 
-// ✅ INICIAR VERIFICACIÓN Y CONEXIÓN
-document.getElementById('btnIniciarVerif').addEventListener('click', async () => {
+// ✅ BOTÓN INICIAR SESIÓN - ABRE VENTANA IGUAL A LAS OTRAS APPS
+document.getElementById('btnIniciarSesion').addEventListener('click', () => {
+    document.getElementById('pantallaVerif').classList.add('oculto');
+    document.getElementById('ventanaConfirm').classList.remove('oculto');
+});
+
+// ✅ CONFIRMAR - VERIFICACIÓN REAL
+document.getElementById('btnConfirmar').addEventListener('click', async () => {
     try {
         // Inicializar SDK Oficial
         worldApp = new window.WorldAppSDK({
@@ -301,7 +376,7 @@ document.getElementById('btnIniciarVerif').addEventListener('click', async () =>
             redirectUri: window.location.origin
         });
 
-        // 🟢 PEDIR PERMISOS OFICIALES (lo que te faltaba)
+        // 🟢 PEDIR PERMISOS OFICIALES
         const auth = await worldApp.auth.request({
             scope: 'openid wallet:read wallet:send wallet:sign verification'
         });
@@ -313,10 +388,9 @@ document.getElementById('btnIniciarVerif').addEventListener('click', async () =>
         signer = provider.getSigner();
         MI_DIRECCION = await signer.getAddress();
 
-        // ✅ OCULTAR PANTALLA DE VERIFICACIÓN Y HABILITAR APP
-        document.getElementById('pantallaVerif').style.display = 'none';
-        document.getElementById('home').style.opacity = '1';
-        document.getElementById('home').style.pointerEvents = 'auto';
+        // ✅ OCULTAR VENTANAS Y HABILITAR APP
+        document.getElementById('ventanaConfirm').classList.add('oculto');
+        document.getElementById('home').classList.remove('deshabilitado');
         document.getElementById('estadoConexion').innerText = '🟢 Conectado y Verificado';
         document.getElementById('miDireccion').innerText = `${MI_DIRECCION.slice(0,6)}...${MI_DIRECCION.slice(-4)} • Verificado ✅`;
         document.getElementById('addrReal').innerText = MI_DIRECCION;
@@ -327,8 +401,14 @@ document.getElementById('btnIniciarVerif').addEventListener('click', async () =>
 
     } catch(e) {
         alert('❌ Debes aprobar permisos para usar la app: ' + e.message);
+        cerrarVentana();
     }
 });
+
+function cerrarVentana() {
+    document.getElementById('ventanaConfirm').classList.add('oculto');
+    document.getElementById('pantallaVerif').classList.remove('oculto');
+}
 
 // ✅ PRECIOS DE COINGECKO
 async function cargarPrecios() {
@@ -356,7 +436,7 @@ async function cargarPrecios() {
     actualizarVista();
 }
 
-// ✅ LEER SALDOS REALES DE TU BILLETERA (conectada)
+// ✅ LEER SALDOS REALES DE TU BILLETERA
 async function cargarSaldos() {
     if(!provider) return;
     const provWorld = new ethers.providers.JsonRpcProvider(REDES.world.rpc);
@@ -455,59 +535,4 @@ function actualizarVista() {
 
     // TOTAL
     let total = 0;
-    Object.entries(saldos.world).forEach(([s,q])=> total += q*(precios[s]?.usd||0));
-    Object.entries(saldos.polygon).forEach(([s,q])=> total += q*(precios[s]?.usd||0));
-    document.getElementById('saldoTotal').innerText = `$${total.toFixed(2)}`;
-    document.getElementById('saldoEarn').innerText = `$${total.toFixed(2)}`;
-}
-
-// ✅ FUNCIONES DE NAVEGACIÓN
-function go(v) {
-    ['home','swap','earn','send','recv','tokenDetail'].forEach(id=>{
-        let e=document.getElementById(id);
-        if(e)e.style.display=id===v?'block':'none'
-    });
-    document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));
-    if(v=='home') document.getElementById('navHome').classList.add('active');
-    if(v=='recv') document.getElementById('qr').src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+MI_DIRECCION;
-    if(v=='swap') { upd(); calc(); }
-}
-
-function openToken(s, red) {
-    cur = {...TOKENS[red].find(x=>x.s===s), red};
-    if(!cur) return;
-    const q = saldos[red][s] || 0;
-    const u = q * (precios[s]?.usd || 0);
-    const ch = precios[s]?.cambio || 0;
-
-    go('tokenDetail');
-    let i=document.getElementById('dIcon');
-    i.innerText=cur.icon;
-    i.style.background=cur.color;
-    i.style.color=cur.s==='DNA'||cur.s==='ORO'?'#000':'#fff';
-
-    document.getElementById('dName').innerText=cur.s;
-    document.getElementById('dSym').innerText=`${q.toFixed(4)} ${cur.s} • ${cur.desc}`;
-    document.getElementById('dPrice').innerText=`$${(precios[s]?.usd||0).toFixed(4)}`;
-    document.getElementById('dChain').innerText=REDES[red].nombre;
-    document.getElementById('dBal').innerText=`${q.toFixed(4)} ${cur.s}`;
-    document.getElementById('dUsd').innerText=`$${u.toFixed(2)}`;
-    document.getElementById('dAnnual').innerText=`Ganas ${cur.apy} APY`;
-    document.getElementById('dChange').innerText=`${ch>=0?'▲':'▼'} ${Math.abs(ch).toFixed(1)}% hoy • En vivo • 0.5% + gas`;
-    document.getElementById('dChange').className = `small ${ch>=0?'green':'red'}`;
-}
-
-function goSwapD(){if(!cur)return;go('swap');document.getElementById('fSel').value=cur.s;document.getElementById('fNet').value=cur.red;upd();calc();}
-function goSendD(){if(!cur)return;go('send');const q=saldos[cur.red][cur.s]||0;document.getElementById('sAmt').value=q;document.getElementById('bS').innerText=`Saldo: ${q.toFixed(4)} ${cur.s} • ${REDES[cur.red].nombre}`;}
-
-function upd(){let fNet=document.getElementById('fNet'),tNet=document.getElementById('tNet'),fSel=document.getElementById('fSel'),tSel=document.getElementById('tSel'),sSel=document.getElementById('sSel');
-fSel.innerHTML=TOKENS[fNet.value].map(t=>`<option value="${t.s}">${t.s} ${(saldos[fNet.value][t.s]||0).toFixed(4)}</option>`).join('');
-tSel.innerHTML=TOKENS[tNet.value].map(t=>`<option value="${t.s}">${t.s}</option>`).join('');
-sSel.innerHTML=TOKENS.world.map(t=>`<option>${t.s} ${(saldos.world[t.s]||0).toFixed(4)}</option>`).join('');}
-
-function setPerc(p){document.querySelectorAll('.perc button').forEach(b=>b.classList.remove('active'));document.getElementById('p'+p).classList.add('active');let fd=TOKENS[document.getElementById('fNet').value].find(x=>x.s==document.getElementById('fSel').value);const q=saldos[document.getElementById('fNet').value][fd.s]||0;document.getElementById('fAmt').value=(q*p/100).toFixed(6);document.getElementById('percLabel').innerText=p+'%';calc();}
-
-function calc(){let fNet=document.getElementById('fNet'),tNet=document.getElementById('tNet'),fSel=document.getElementById('fSel'),tSel=document.getElementById('tSel'),fAmt=document.getElementById('fAmt'),tAmt=document.getElementById('tAmt');
-let fd=TOKENS[fNet.value].find(x=>x.s==fSel.value),td=TOKENS[tNet.value].find(x=>x.s==tSel.value);
-const qfd=saldos[fNet.value][fd.s]||0;
-if(parseFloat(fAmt.value)>qfd){document.getElementById('usdFrom').
+    Object.entries(saldos.world).forEach((

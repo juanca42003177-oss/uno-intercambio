@@ -11,26 +11,28 @@
         *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system}
         body{background:#fff;color:#111;padding-bottom:90px;overflow-x:hidden}
 
-        /* ✅ PANTALLA DE VERIFICACIÓN - EXACTA A TUS CAPTURAS */
+        /* ✅ PANTALLA DE VERIFICACIÓN - IGUAL A TU IMAGEN + LOGO BINANCE */
         #pantallaVerif{position:fixed;inset:0;background:#fff;z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
         .verifBox{width:100%;max-width:360px;text-align:center}
-        .verifIcon{font-size:48px;color:#00a3ff;margin-bottom:16px}
+        .logoBinance{width:70px;height:70px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;background:#F3BA2F;border-radius:16px;font-weight:bold;font-size:36px;color:#000}
+        .verifIcon{font-size:48px;color:#2485F4;margin-bottom:16px}
         .verifTitulo{font-size:22px;font-weight:700;margin-bottom:8px}
-        .verifSub{font-size:14px;color:#666;margin-bottom:32px;line-height:1.4}
-        .permisos{background:#f5f5f7;border-radius:16px;padding:20px;margin-bottom:32px;text-align:left}
-        .permisoItem{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:15px}
-        .permisoIcon{font-size:18px;width:24px;text-align:center}
-        .permisoCheck{color:#0071e3;font-weight:bold}
-        .btnIniciar{width:100%;background:#000;color:#fff;border:none;border-radius:12px;padding:14px;font-size:17px;font-weight:600;cursor:pointer}
+        .verifSub{font-size:14px;color:#666;margin-bottom:32px;line-height:1.4;padding:0 10px}
+        .permisos{background:#f8f8f9;border-radius:16px;padding:24px;margin-bottom:32px;text-align:left;border:1px solid #eee}
+        .permisoItem{display:flex;align-items:center;gap:12px;padding:10px 0;font-size:16px}
+        .permisoCheck{color:#2485F4;font-weight:bold;font-size:18px}
+        .permisoIcon{font-size:20px;width:26px;text-align:center}
+        .btnIniciar{width:100%;background:#000;color:#fff;border:none;border-radius:14px;padding:16px;font-size:17px;font-weight:600;cursor:pointer}
         .btnIniciar:disabled{opacity:0.6;cursor:not-allowed}
 
-        /* ✅ VENTANA DE CONFIRMACIÓN - IGUAL A LAS OTRAS APPS */
-        #ventanaConfirm{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+        /* ✅ VENTANA DE CONFIRMACIÓN - IGUAL A HOLDSTATION / WORLD ID */
+        #ventanaConfirm{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
         .confirmBox{background:#fff;border-radius:20px;width:100%;max-width:340px;overflow:hidden}
         .confirmHeader{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid #eee}
         .confirmApp{display:flex;align-items:center;gap:10px}
-        .confirmIcon{width:40px;height:40px;border-radius:10px;background:#f3ba2f;display:flex;align-items:center;justify-content:center;color:#000;font-weight:bold;font-size:20px}
+        .confirmIcon{width:40px;height:40px;border-radius:10px;background:#F3BA2F;display:flex;align-items:center;justify-content:center;color:#000;font-weight:bold;font-size:20px}
         .confirmTitulo{font-weight:600;font-size:16px}
+        .confirmVerif{font-size:12px;color:#2485F4;display:flex;align-items:center;gap:4px}
         .confirmCerrar{width:32px;height:32px;border-radius:50%;background:#f5f5f7;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px}
         .confirmBody{padding:20px}
         .confirmTexto{font-size:14px;color:#666;margin-bottom:24px;line-height:1.5}
@@ -38,9 +40,9 @@
         .confirmPermItem{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:14px}
         .confirmBtn{width:100%;background:#000;color:#fff;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:600;cursor:pointer}
 
-        /* ✅ RESTO DE LA APP - TAL CUAL TU DISEÑO */
+        /* ✅ RESTO DE LA APP - TU DISEÑO ORIGINAL */
         .top{padding:12px 16px;display:flex;gap:10px;align-items:center}
-        .avatar{width:56px;height:56px;border-radius:50%;background:#0B0E11;display:flex;align-items:center;justify-content:center;border:2px solid #f3ba2f}
+        .avatar{width:56px;height:56px;border-radius:50%;background:#0B0E11;display:flex;align-items:center;justify-content:center;border:2px solid #F3BA2F}
         .big{font-size:42px;font-weight:900}
         .small{font-size:11px;opacity:.6}
         .green{color:#00b15c}
@@ -58,7 +60,7 @@
         .box{background:#f6f6f6;border-radius:14px;padding:12px;margin:8px 0}
         input{width:100%;border:0;background:transparent;font-size:20px;font-weight:900;outline:none}
         select{border:0;background:#111;color:#fff;padding:6px 12px;border-radius:20px;font-weight:900;font-size:11px}
-        .btnY{width:100%;padding:13px;border-radius:12px;border:0;background:#f3ba2f;font-weight:900;margin-top:8px;cursor:pointer}
+        .btnY{width:100%;padding:13px;border-radius:12px;border:0;background:#F3BA2F;font-weight:900;margin-top:8px;cursor:pointer}
         .btnY:disabled{background:#e0b020;cursor:not-allowed;opacity:.7}
         .perc{display:flex;gap:6px;margin-top:8px}
         .perc button{flex:1;padding:8px;border-radius:20px;border:1px solid #111;background:#fff;font-weight:900;font-size:11px;cursor:pointer}
@@ -68,7 +70,7 @@
         .modalBox{background:#fff;border-radius:22px;padding:18px;width:100%;max-width:360px}
         .inpAmt{width:100%;background:#f6f6f6;border:1px solid #ddd;border-radius:12px;padding:12px;margin:10px 0;font-size:18px;font-weight:900}
         .actionRow{display:flex;gap:8px;margin-top:10px}.actionRow button{flex:1;padding:12px;border-radius:12px;border:0;font-weight:900;cursor:pointer}
-        .badgeVerif{background:#00a3ff;color:#fff;font-size:9px;padding:2px 6px;border-radius:10px;margin-left:6px}
+        .badgeVerif{background:#2485F4;color:#fff;font-size:9px;padding:2px 6px;border-radius:10px;margin-left:6px}
         .estado{font-size:10px;color:#00b15c;font-weight:900}
         .oculto{display:none !important}
         .deshabilitado{opacity:.5;pointer-events:none}
@@ -76,9 +78,10 @@
 </head>
 <body>
 
-<!-- ✅ PANTALLA DE VERIFICACIÓN - EXACTA A TUS CAPTURAS -->
+<!-- ✅ PANTALLA DE VERIFICACIÓN - EXACTA A TU IMAGEN + LOGO BINANCE -->
 <div id="pantallaVerif">
     <div class="verifBox">
+        <div class="logoBinance">B</div> <!-- LOGO BINANCE TU MARCA -->
         <div class="verifIcon">✅</div>
         <h1 class="verifTitulo">Verificación Oficial</h1>
         <p class="verifSub">Conectando con World App • Se requiere permiso para acceder a tu billetera y firmar transacciones</p>
@@ -92,7 +95,7 @@
             <div class="permisoItem">
                 <span class="permisoCheck">✓</span>
                 <span class="permisoIcon">✍️</span>
-                <span>Firmar transacciones (enviar/intercambiar</span>
+                <span>Firmar transacciones (enviar/intercambiar)</span>
             </div>
             <div class="permisoItem">
                 <span class="permisoCheck">✓</span>
@@ -105,15 +108,15 @@
     </div>
 </div>
 
-<!-- ✅ VENTANA DE CONFIRMACIÓN - IGUAL A WORLD ID / HOLDSTATION -->
+<!-- ✅ VENTANA DE CONFIRMACIÓN - IGUAL A LAS OTRAS APPS -->
 <div id="ventanaConfirm" class="oculto">
     <div class="confirmBox">
         <div class="confirmHeader">
             <div class="confirmApp">
-                <div class="confirmIcon">U</div>
+                <div class="confirmIcon">B</div> <!-- LOGO BINANCE -->
                 <div>
                     <div class="confirmTitulo">Uno intercambio</div>
-                    <div class="small" style="color:#00a3ff">Verificado ✅</div>
+                    <div class="confirmVerif">✅ Verificado</div>
                 </div>
             </div>
             <div class="confirmCerrar" onclick="cerrarVentana()">×</div>
@@ -290,7 +293,7 @@
         <div style="border:1px solid #eee;border-radius:18px;padding:14px;margin:10px 0">
             <div style="display:flex;justify-content:space-between;align-items:center">
                 <div style="display:flex;gap:10px;align-items:center"><div class="tIcon" style="background:#000;color:#fff">W</div><div><b>WLD Vault - Diamante</b><div class="small" id="vaultSaldo">0.0000 WLD ($0.00) real • World Chain 480</div></div></div>
-                <div style="background:#111;color:#f3ba2f;padding:6px 10px;border-radius:10px;font-size:10px;font-weight:900">4.19% APY</div>
+                <div style="background:#111;color:#F3BA2F;padding:6px 10px;border-radius:10px;font-size:10px;font-weight:900">4.19% APY</div>
             </div>
             <div style="display:flex;gap:6px;margin-top:10px"><button class="btnY" style="flex:1" onclick="openDep('WLD')">Depositar</button><button class="btnY" style="flex:1;background:#eee" onclick="openRet('WLD')">Retirar</button></div>
         </div>
@@ -328,7 +331,7 @@
 <div id="modal" class="modal" onclick="this.style.display='none'"><div class="modalBox" style="text-align:center"><div style="font-size:32px">✅</div><div id="modalTxt" style="font-weight:900;margin-top:8px"></div><button class="btnY" onclick="document.getElementById('modal').style.display='none'">Cerrar</button></div></div>
 
 <script>
-// ✅ SDK WORLD APP - VERIFICACIÓN COMPLETA
+// ✅ SDK WORLD APP - VERIFICACIÓN REAL Y SIN TRABARSE
 let worldApp;
 let provider;
 let signer;
@@ -361,13 +364,13 @@ let saldos = {};
 let precios = {};
 let cur = null, curDep = null, curRet = null;
 
-// ✅ BOTÓN INICIAR SESIÓN - ABRE VENTANA IGUAL A LAS OTRAS APPS
+// ✅ BOTÓN INICIAR SESIÓN - ABRE VENTANA
 document.getElementById('btnIniciarSesion').addEventListener('click', () => {
     document.getElementById('pantallaVerif').classList.add('oculto');
     document.getElementById('ventanaConfirm').classList.remove('oculto');
 });
 
-// ✅ CONFIRMAR - VERIFICACIÓN REAL
+// ✅ CONFIRMAR - CONEXIÓN REAL SIN TRABARSE
 document.getElementById('btnConfirmar').addEventListener('click', async () => {
     try {
         // Inicializar SDK Oficial
@@ -376,31 +379,31 @@ document.getElementById('btnConfirmar').addEventListener('click', async () => {
             redirectUri: window.location.origin
         });
 
-        // 🟢 PEDIR PERMISOS OFICIALES
+        // 🟢 Pedir permisos oficiales
         const auth = await worldApp.auth.request({
             scope: 'openid wallet:read wallet:send wallet:sign verification'
         });
 
         if(!auth.success) throw new Error('Permisos denegados');
 
-        // 🟢 CONECTAR A BILLETERA REAL
+        // 🟢 Conectar a billetera
         provider = new ethers.providers.Web3Provider(worldApp.getProvider(), "any");
         signer = provider.getSigner();
         MI_DIRECCION = await signer.getAddress();
 
-        // ✅ OCULTAR VENTANAS Y HABILITAR APP
+        // ✅ Habilitar app
         document.getElementById('ventanaConfirm').classList.add('oculto');
         document.getElementById('home').classList.remove('deshabilitado');
         document.getElementById('estadoConexion').innerText = '🟢 Conectado y Verificado';
         document.getElementById('miDireccion').innerText = `${MI_DIRECCION.slice(0,6)}...${MI_DIRECCION.slice(-4)} • Verificado ✅`;
         document.getElementById('addrReal').innerText = MI_DIRECCION;
 
-        // ✅ CARGAR DATOS REALES
+        // ✅ Cargar datos
         await cargarPrecios();
         await cargarSaldos();
 
     } catch(e) {
-        alert('❌ Debes aprobar permisos para usar la app: ' + e.message);
+        alert('❌ Error: ' + e.message);
         cerrarVentana();
     }
 });
@@ -410,7 +413,7 @@ function cerrarVentana() {
     document.getElementById('pantallaVerif').classList.remove('oculto');
 }
 
-// ✅ PRECIOS DE COINGECKO
+// ✅ PRECIOS
 async function cargarPrecios() {
     try {
         const ids = Object.values(TOKENS).flat().map(t=>t.coingecko).filter(Boolean).join(',');
@@ -436,7 +439,7 @@ async function cargarPrecios() {
     actualizarVista();
 }
 
-// ✅ LEER SALDOS REALES DE TU BILLETERA
+// ✅ SALDOS REALES
 async function cargarSaldos() {
     if(!provider) return;
     const provWorld = new ethers.providers.JsonRpcProvider(REDES.world.rpc);
@@ -455,7 +458,7 @@ async function cargarSaldos() {
                 bal = parseFloat(ethers.utils.formatUnits(await c.balanceOf(MI_DIRECCION), t.dec));
             }
         } catch(e) {bal=0}
-        saldos.world[t.s] = bal;
+        saldos.world[t.s) = bal;
     }
 
     // Polygon
@@ -495,7 +498,7 @@ function actualizarVista() {
 
     // HUB
     const hubQ = saldos.world.HUB || 0;
-    const hubU = hubQ * (precios.HUB?.usd || 0);
+    const hubU = hubQ * (precios.Hub?.usd || 0);
     document.getElementById('hubSaldo').innerText = `${hubQ.toFixed(4)} HUB • Hub`;
     document.getElementById('hubUsd').innerText = `$${hubU.toFixed(2)}`;
     document.getElementById('hubCambio').innerText = `${precios.HUB?.cambio >=0 ? '+' : ''}${precios.HUB?.cambio.toFixed(1)}%`;
@@ -530,9 +533,4 @@ function actualizarVista() {
     // WETH
     const wethQ = saldos.polygon.WETH || 0;
     const wethU = wethQ * (precios.WETH?.usd || 0);
-    document.getElementById('wethSaldo').innerText = `${wethQ.toFixed(4)} WETH • diamante ETH`;
-    document.getElementById('wethUsd').innerText = `$${wethU.toFixed(2)}`;
-
-    // TOTAL
-    let total = 0;
-    Object.entries(saldos.world).forEach((
+    document.getElementById('wethSaldo').innerText = `${wethQ.toFixed(4)} WETH • diamante ETH`

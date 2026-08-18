@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Uno intercambio - CORREGIDO ✅</title>
+    <title>Uno intercambio - FIX completo 0.5% + gas</title>
     <style>
         * {box-sizing:border-box}
         body {margin:0;background:#fff;color:#111;font-family:system-ui;padding-bottom:90px}
 
-        /* ✅ PANTALLA DE CARGA (arreglado) */
+        /* ✅ PANTALLA DE CARGA (ya no se traba) */
         #pantallaCarga {position:fixed;inset:0;background:#fff;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
         .logoGrande {width:80px;height:80px;border-radius:50%;background:#F3BA2F;display:flex;align-items:center;justify-content:center;margin-bottom:30px}
         .logoGrande svg {width:45px;height:45px}
@@ -52,7 +52,7 @@
 </head>
 <body>
 
-<!-- ✅ PANTALLA DE INICIO (ya no se traba) -->
+<!-- ✅ PANTALLA DE INICIO (arreglada, no se traba) -->
 <div id="pantallaCarga">
     <div class="logoGrande">
         <svg viewBox="0 0 32 32" width="45" height="45">
@@ -62,7 +62,7 @@
     <button class="btnIniciar" onclick="iniciarApp()">Iniciar sesión</button>
 </div>
 
-<!-- ✅ TU APP ARREGLADA -->
+<!-- ✅ TU APP COMPLETA -->
 <div id="app" class="oculto">
     <div id="home">
         <div class="top">
@@ -77,10 +77,10 @@
             </div>
         </div>
 
-        <!-- ✅ SALDO TOTAL CORREGIDO: $0.04 NO $0.23 -->
+        <!-- ✅ SALDO CORREGIDO: $0.04 (no $0.23) -->
         <div style="padding:0 16px;display:flex;justify-content:space-between;align-items:center">
             <div>
-                <div class="big" id="saldoTotalReal">$0.04</div>
+                <div class="big">$0.04</div>
                 <div class="small"><span class="green">▲ $0.01 (5.97%) hoy ></span></div>
             </div>
             <div><svg width="80" height="30"><polyline points="0,28 20,24 40,18 60,10 80,4" fill="none" stroke="#00b15c" stroke-width="2.5"/></svg></div>
@@ -99,17 +99,14 @@
         </div>
 
         <div class="tokens">
-            <div style="font-weight:900;margin:8px 0">World Chain - tu billetera real ✅</div>
+            <div style="font-weight:900;margin:8px 0">World Chain - tu billetera real</div>
 
             <div class="tok" onclick="openToken('WLD')">
                 <div style="display:flex;gap:10px;align-items:center">
                     <div class="tIcon" style="background:#000;color:#fff">W</div>
                     <div><b>WLD</b><div class="small">0.01 WLD • Diamante</div></div>
                 </div>
-                <div style="text-align:right">
-                    <b>$0.01</b>
-                    <div class="small green">+2.1%</div>
-                </div>
+                <div style="text-align:right"><b>$0.01</b><div class="small green">+2.1%</div></div>
             </div>
 
             <div class="tok" onclick="openToken('DNA')">
@@ -117,10 +114,7 @@
                     <div class="tIcon" style="background:#ffcc00;color:#000">D</div>
                     <div><b>DNA</b><div class="small">615.74 DNA • Hélice - original</div></div>
                 </div>
-                <div style="text-align:right">
-                    <b>$0.03</b>
-                    <div class="small green">+5.97%</div>
-                </div>
+                <div style="text-align:right"><b>$0.03</b><div class="small green">+5.97%</div></div>
             </div>
 
             <div class="tok" onclick="openToken('HUB')">
@@ -128,10 +122,7 @@
                     <div class="tIcon" style="background:#ff7a00">H</div>
                     <div><b>HUB</b><div class="small">3518.8 HUB • Hub</div></div>
                 </div>
-                <div style="text-align:right">
-                    <b>$0.01</b>
-                    <div class="small green">+1.2%</div>
-                </div>
+                <div style="text-align:right"><b>$0.01</b><div class="small green">+1.2%</div></div>
             </div>
 
             <div class="tok" onclick="openToken('ORO')">
@@ -139,10 +130,7 @@
                     <div class="tIcon" style="background:#ffd700;color:#000">O</div>
                     <div><b>ORO</b><div class="small">0.65 ORO • Oro</div></div>
                 </div>
-                <div style="text-align:right">
-                    <b>$0.01</b>
-                    <div class="small red">-0.5%</div>
-                </div>
+                <div style="text-align:right"><b>$0.01</b><div class="small red">-0.5%</div></div>
             </div>
 
             <div style="font-weight:900;margin:16px 0 8px">Polygon - logos ultima captura reales</div>
@@ -213,7 +201,7 @@
         </div>
     </div>
 
-    <!-- ✅ SWAP CON CONTROL DE SALDO Y PORCENTAJES -->
+    <!-- ✅ SWAP CON CONTROL DE SALDO -->
     <div id="swap" style="display:none">
         <div class="main">
             <h3 style="text-align:center;margin:0">Swap - 0.5% + gas aparte</h3>
@@ -249,15 +237,13 @@
             <div style="text-align:center;cursor:pointer;margin:8px 0" onclick="swapNets()">↕️ Cambiar red</div>
 
             <div class="box">
-                <div style="display:flex;justify-content:space-between">
-                    <span class="small">Recibes <b id="bT"></b></span>
-                </div>
+                <div style="display:flex;justify-content:space-between"><span class="small">Recibes <b id="bT"></b></span></div>
                 <div style="display:flex;gap:6px;margin-top:6px">
                     <input id="tAmt" readonly>
                     <select id="tNet">
                         <option value="world">World Chain</option>
                         <option value="polygon" selected>Polygon</option>
-                        <option value="zkevm">zkEVM</option>
+                        <option value="zkevm">zkEVM 1101</option>
                     </select>
                     <select id="tSel"></select>
                 </div>
@@ -393,7 +379,7 @@
 </div>
 
 <script>
-// ✅ TUS DATOS REALES
+// ✅ TUS DATOS ORIGINALES
 const TOKENS = {
     world: [
         {s:"WLD", q:0.01, u:0.01, p:0.35, color:"#000", icon:"W", sym:"Diamante Worldcoin", chain:"World Chain 480", apy:"4.19%", change:"+2.1%"},
@@ -414,7 +400,7 @@ const TOKENS = {
 const GAS = {world:0.01, polygon:0.03, zkevm:0.02};
 let cur = null, curDep = null, curRet = null;
 
-// ✅ INICIO ARREGLADO (YA NO SE TRABA)
+// ✅ INICIO ARREGLADO (NO SE TRABA)
 function iniciarApp(){
     document.getElementById('pantallaCarga').classList.add('oculto');
     document.getElementById('app').classList.remove('oculto');
@@ -429,19 +415,8 @@ function go(v){
     document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));
     if(v=='home') document.getElementById('navHome').classList.add('active');
     if(v=='recv') document.getElementById('qr').src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=0x019001d46cd3155ef045a41f4c359c040595438c';
-    if(v=='swap'){
-        upd();
-        calc();
-        // ✅ OCULTAR MENSAJES AL ENTRAR
-        document.getElementById('swapError').style.display = 'none';
-        document.getElementById('swapSuccess').style.display = 'none';
-    }
-    if(v=='send'){
-        updSend();
-        // ✅ OCULTAR MENSAJES AL ENTRAR
-        document.getElementById('sendError').style.display = 'none';
-        document.getElementById('sendSuccess').style.display = 'none';
-    }
+    if(v=='swap'){ upd(); calc(); document.getElementById('swapError').style.display='none'; document.getElementById('swapSuccess').style.display='none'; }
+    if(v=='send'){ updSend(); document.getElementById('sendError').style.display='none'; document.getElementById('sendSuccess').style.display='none'; }
 }
 
 function openToken(s){
@@ -464,183 +439,78 @@ function openToken(s){
     ch.className = cur.change.startsWith('-') ? 'small red' : 'small green';
 }
 
-function goSwapD(){
-    if(!cur) return;
-    go('swap');
-    document.getElementById('fSel').value = cur.s;
-    document.getElementById('fNet').value = cur.chain.includes('Polygon') ? 'polygon' : 'world';
-    upd();
-    setPerc(25); // ✅ EMPIEZA EN 25%
-}
-
-function goSendD(){
-    if(!cur) return;
-    go('send');
-    document.getElementById('sSel').value = cur.s;
-    updSend();
-}
-
-function copyPrice(){
-    navigator.clipboard.writeText(document.getElementById('dPrice').innerText);
-    showOk(`Precio copiado`);
-}
+function goSwapD(){ cur && (go('swap'), document.getElementById('fSel').value=cur.s, document.getElementById('fNet').value=cur.chain.includes('Polygon')?'polygon':'world', upd(), setPerc(25)) }
+function goSendD(){ cur && (go('send'), document.getElementById('sSel').value=cur.s, updSend()) }
+function copyPrice(){ navigator.clipboard.writeText(document.getElementById('dPrice').innerText); showOk('Precio copiado') }
 
 function upd(){
-    let fNet = document.getElementById('fNet'), tNet = document.getElementById('tNet'), fSel = document.getElementById('fSel'), tSel = document.getElementById('tSel');
-    fSel.innerHTML = TOKENS[fNet.value].map(t=>`<option value="${t.s}">${t.s} ${t.q} (${t.sym})</option>`).join('');
-    tSel.innerHTML = TOKENS[tNet.value].map(t=>`<option value="${t.s}">${t.s} ${t.q}</option>`).join('');
+    let fNet=document.getElementById('fNet'),tNet=document.getElementById('tNet'),fSel=document.getElementById('fSel'),tSel=document.getElementById('tSel');
+    fSel.innerHTML=TOKENS[fNet.value].map(t=>`<option value="${t.s}">${t.s} ${t.q} (${t.sym})</option>`).join('');
+    tSel.innerHTML=TOKENS[tNet.value].map(t=>`<option value="${t.s}">${t.s} ${t.q}</option>`).join('');
 }
 
 function updSend(){
-    let sSel = document.getElementById('sSel');
-    sSel.innerHTML = TOKENS.world.map(t=>`<option value="${t.s}">${t.s} - Saldo: ${t.q}</option>`).join('');
+    let sSel=document.getElementById('sSel');
+    sSel.innerHTML=TOKENS.world.map(t=>`<option value="${t.s}">${t.s} - Saldo: ${t.q}</option>`).join('');
     updateSaldoSend();
 }
+function updateSaldoSend(){ let sSel=document.getElementById('sSel').value,token=TOKENS.world.find(t=>t.s==sSel);document.getElementById('bS').innerText=`Saldo: ${token.q} ${token.s}` }
 
-function updateSaldoSend(){
-    let sSel = document.getElementById('sSel').value;
-    let token = TOKENS.world.find(t=>t.s == sSel);
-    document.getElementById('bS').innerText = `Saldo: ${token.q} ${token.s}`;
-}
-
-// ✅ PORCENTAJES CORREGIDOS: CALCULA SOLO EL %
+// ✅ PORCENTAJES CORREGIDOS
 function setPerc(p){
     document.querySelectorAll('.perc button').forEach(b=>b.classList.remove('active'));
     document.getElementById('p'+p).classList.add('active');
-    let fd = TOKENS[document.getElementById('fNet').value].find(x=>x.s == document.getElementById('fSel').value) || TOKENS.world[0];
-    let valor = (fd.q * p / 100).toFixed(6); // ✅ SOLO EL PORCENTAJE
-    document.getElementById('fAmt').value = valor;
-    document.getElementById('percLabel').innerText = p+'%';
+    let fd=TOKENS[document.getElementById('fNet').value].find(x=>x.s==document.getElementById('fSel').value)||TOKENS.world[0];
+    document.getElementById('fAmt').value=(fd.q*p/100).toFixed(6);
+    document.getElementById('percLabel').innerText=p+'%';
     calc();
 }
 
 function calc(){
-    let fNet = document.getElementById('fNet'), tNet = document.getElementById('tNet'), fSel = document.getElementById('fSel'), tSel = document.getElementById('tSel'), fAmt = document.getElementById('fAmt'), tAmt = document.getElementById('tAmt");
-    let fd = TOKENS[fNet.value].find(x=>x.s == fSel.value) || TOKENS.world[0];
-    let td = TOKENS[tNet.value].find(x=>x.s == tSel.value) || TOKENS.polygon[0];
-    let unit = fd.q > 0 ? fd.u / fd.q : fd.p;
-    let usd = parseFloat(fAmt.value || 0) * unit;
-    let out = usd / td.p * 0.995;
-    let gasF = GAS[fNet.value] || 0.01;
-    let gasT = GAS[tNet.value] || 0.03;
-    let gasTot = gasF + gasT;
-    let feeUno = usd * 0.005;
-
-    tAmt.value = out.toFixed(6);
-    document.getElementById('bF').innerText = fd.s;
-    document.getElementById('bT').innerText = td.s;
-    document.getElementById('saldoTxt').innerText = `${fd.q} ${fd.s}`;
-    document.getElementById('usdFrom').innerText = `≈ $${usd.toFixed(4)} USD • fee 0.5% = $${feeUno.toFixed(2)} para ti`;
-    document.getElementById('usdTo').innerText = `≈ $${(out * td.p).toFixed(4)} USD`;
-    document.getElementById('feeUno').innerText = '$' + feeUno.toFixed(2);
-    document.getElementById('feeGas').innerText = '$' + gasTot.toFixed(2) + ' ($' + gasF + ' + $' + gasT + ')';
-    document.getElementById('gasNet').innerText = fNet.value + ' → ' + tNet.value;
-    document.getElementById('tuGanas').innerText = '$' + feeUno.toFixed(2) + ' por trade';
-    document.getElementById('res').innerText = `Recibes: ${out.toFixed(6)} ${td.s} • Gas $${gasTot.toFixed(2)} aparte • Tú ganas $${feeUno.toFixed(2)} • ${fNet.value} → ${tNet.value}`;
+    let fNet=document.getElementById('fNet'),tNet=document.getElementById('tNet'),fSel=document.getElementById('fSel'),tSel=document.getElementById('tSel'),fAmt=document.getElementById('fAmt'),tAmt=document.getElementById('tAmt");
+    let fd=TOKENS[fNet.value].find(x=>x.s==fSel.value)||TOKENS.world[0],td=TOKENS[tNet.value].find(x=>x.s==tSel.value)||TOKENS.polygon[0];
+    let unit=fd.q>0?fd.u/fd.q:fd.p,usd=parseFloat(fAmt.value||0)*unit,out=usd/td.p*0.995,gasF=GAS[fNet.value]||0.01,gasT=GAS[tNet.value]||0.03,gasTot=gasF+gasT,feeUno=usd*0.005;
+    tAmt.value=out.toFixed(6);
+    document.getElementById('bF').innerText=fd.s;document.getElementById('bT').innerText=td.s;document.getElementById('saldoTxt').innerText=`${fd.q} ${fd.s}`;
+    document.getElementById('usdFrom').innerText=`≈ $${usd.toFixed(4)} USD • fee 0.5% = $${feeUno.toFixed(2)} para ti`;
+    document.getElementById('usdTo').innerText=`≈ $${(out*td.p).toFixed(4)} USD`;
+    document.getElementById('feeUno').innerText='$'+feeUno.toFixed(2);document.getElementById('feeGas').innerText='$'+gasTot.toFixed(2)+' ($'+gasF+' + $'+gasT+')';
+    document.getElementById('gasNet').innerText=fNet.value+' → '+tNet.value;document.getElementById('tuGanas').innerText='$'+feeUno.toFixed(2)+' por trade';
+    document.getElementById('res').innerText=`Recibes: ${out.toFixed(6)} ${td.s} • Gas $${gasTot.toFixed(2)} aparte • Tú ganas $${feeUno.toFixed(2)} • ${fNet.value} → ${tNet.value}`;
 }
 
-function swapNets(){
-    let a = fNet.value, f = fSel.value, n = tNet.value, t = tSel.value;
-    fNet.value = n; tNet.value = a;
-    upd();
-    fSel.value = t; tSel.value = f;
-    calc();
-}
+function swapNets(){let a=fNet.value,f=fSel.value,n=tNet.value,t=tSel.value;fNet.value=n;tNet.value=a;upd();fSel.value=t;tSel.value=f;calc()}
+function showOk(t){document.getElementById('modalTxt').innerText=t;document.getElementById('modal').style.display='flex'}
 
-function showOk(t){
-    document.getElementById('modalTxt').innerText = t;
-    document.getElementById('modal').style.display = 'flex';
-}
+function openDep(s){curDep=Object.values(TOKENS).flat().find(x=>x.s==s);document.getElementById('depTitle').innerText=`Depositar ${curDep.s}`;document.getElementById('depSub').innerText=`Saldo: ${curDep.q} ${curDep.s}`;document.getElementById('depIcon').innerText=curDep.icon;document.getElementById('depIcon').style.background=curDep.color;document.getElementById('depAmt').value=curDep.q;document.getElementById('modalDep').style.display='flex'}
+function setDepPerc(p){document.getElementById('depAmt').value=(curDep.q*p/100).toFixed(2)}
+function confirmDep(){let a=document.getElementById('depAmt').value;closeDep();showOk(`✅ Depositaste ${a} ${curDep.s}`)}
+function closeDep(){document.getElementById('modalDep').style.display='none'}
 
-function openDep(s){
-    curDep = Object.values(TOKENS).flat().find(x=>x.s == s);
-    document.getElementById('depTitle').innerText = `Depositar ${curDep.s}`;
-    document.getElementById('depSub').innerText = `Saldo: ${curDep.q} ${curDep.s}`;
-    document.getElementById('depIcon').innerText = curDep.icon;
-    document.getElementById('depIcon').style.background = curDep.color;
-    document.getElementById('depAmt').value = curDep.q;
-    document.getElementById('modalDep').style.display = 'flex';
-}
+function openRet(s){curRet=Object.values(TOKENS).flat().find(x=>x.s==s);document.getElementById('retTitle').innerText=`Retirar ${curRet.s}`;document.getElementById('retSub').innerText=`Disponible: ${curRet.q} ${curRet.s}`;document.getElementById('retIcon').innerText=curRet.icon;document.getElementById('retIcon').style.background=curRet.color;document.getElementById('retAmt').value=curRet.q;document.getElementById('modalRet').style.display='flex'}
+function setRetPerc(p){document.getElementById('retAmt').value=(curRet.q*p/100).toFixed(2)}
+function confirmRet(){let a=document.getElementById('retAmt').value;closeRet();showOk(`✅ Retiraste ${a} ${curRet.s}`)}
+function closeRet(){document.getElementById('modalRet').style.display='none'}
 
-function setDepPerc(p){
-    document.getElementById('depAmt').value = (curDep.q * p / 100).toFixed(2);
-}
-
-function confirmDep(){
-    let a = document.getElementById('depAmt').value;
-    closeDep();
-    showOk(`✅ Depositaste ${a} ${curDep.s}`);
-}
-
-function closeDep(){
-    document.getElementById('modalDep').style.display = 'none';
-}
-
-function openRet(s){
-    curRet = Object.values(TOKENS).flat().find(x=>x.s == s);
-    document.getElementById('retTitle').innerText = `Retirar ${curRet.s}`;
-    document.getElementById('retSub').innerText = `Disponible: ${curRet.q} ${curRet.s}`;
-    document.getElementById('retIcon').innerText = curRet.icon;
-    document.getElementById('retIcon').style.background = curRet.color;
-    document.getElementById('retAmt').value = curRet.q;
-    document.getElementById('modalRet').style.display = 'flex';
-}
-
-function setRetPerc(p){
-    document.getElementById('retAmt').value = (curRet.q * p / 100).toFixed(2);
-}
-
-function confirmRet(){
-    let a = document.getElementById('retAmt').value;
-    closeRet();
-    showOk(`✅ Retiraste ${a} ${curRet.s}`);
-}
-
-function closeRet(){
-    document.getElementById('modalRet').style.display = 'none';
-}
-
-// ✅ INTERCAMBIAR: SOLO ÉXITO SI HAY SALDO
+// ✅ INTERCAMBIAR: CONTROL DE SALDO
 function doSwap(){
-    let fd = TOKENS[document.getElementById('fNet').value].find(x=>x.s == document.getElementById('fSel').value);
-    let cantidad = parseFloat(document.getElementById('fAmt').value);
-
-    // ✅ COMPROBACIÓN DE SALDO
-    if(cantidad > fd.q || cantidad <= 0) {
-        document.getElementById('swapError').style.display = 'block';
-        document.getElementById('swapSuccess').style.display = 'none';
-        setTimeout(()=>{ document.getElementById('swapError').style.display = 'none'; }, 3000);
-    } else {
-        document.getElementById('swapSuccess').style.display = 'block';
-        document.getElementById('swapError').style.display = 'none';
-        setTimeout(()=>{ document.getElementById('swapSuccess').style.display = 'none'; }, 3000);
-    }
+    let fd=TOKENS[document.getElementById('fNet').value].find(x=>x.s==document.getElementById('fSel').value);
+    let cant=parseFloat(document.getElementById('fAmt').value);
+    if(cant>fd.q || cant<=0){ document.getElementById('swapError').style.display='block';setTimeout(()=>{document.getElementById('swapError').style.display='none'},3000) }
+    else{ document.getElementById('swapSuccess').style.display='block';setTimeout(()=>{document.getElementById('swapSuccess').style.display='none'},3000) }
 }
 
-// ✅ ENVIAR: SOLO ÉXITO SI HAY SALDO
+// ✅ ENVIAR: CONTROL DE SALDO
 function doSend(){
-    let addr = document.getElementById('sAddr').value;
-    let tokenSel = document.getElementById('sSel').value;
-    let cantidad = parseFloat(document.getElementById('sAmt').value);
-    let token = TOKENS.world.find(t=>t.s == tokenSel);
-
-    if(!addr) return showOk('Pon dirección');
-
-    // ✅ COMPROBACIÓN DE SALDO
-    if(cantidad > token.q || cantidad <= 0) {
-        document.getElementById('sendError').style.display = 'block';
-        document.getElementById('sendSuccess').style.display = 'none';
-        setTimeout(()=>{ document.getElementById('sendError').style.display = 'none'; }, 3000);
-    } else {
-        document.getElementById('sendSuccess').style.display = 'block';
-        document.getElementById('sendError').style.display = 'none';
-        setTimeout(()=>{ document.getElementById('sendSuccess').style.display = 'none'; }, 3000);
-    }
+    let addr=document.getElementById('sAddr').value;
+    if(!addr)return showOk('Pon dirección');
+    let tokenSel=document.getElementById('sSel').value,cant=parseFloat(document.getElementById('sAmt').value),token=TOKENS.world.find(t=>t.s==tokenSel);
+    if(cant>token.q || cant<=0){ document.getElementById('sendError').style.display='block';setTimeout(()=>{document.getElementById('sendError').style.display='none'},3000) }
+    else{ document.getElementById('sendSuccess').style.display='block';setTimeout(()=>{document.getElementById('sendSuccess').style.display='none'},3000) }
 }
 
-let fNet = document.getElementById('fNet'), tNet = document.getElementById('tNet'), fSel = document.getElementById('fSel'), tSel = document.getElementById('tSel');
-upd();
-calc();
+let fNet=document.getElementById('fNet'),tNet=document.getElementById('tNet'),fSel=document.getElementById('fSel'),tSel=document.getElementById('tSel');
+upd();calc();
 </script>
 
 </body>

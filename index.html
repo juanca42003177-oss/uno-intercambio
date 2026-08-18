@@ -116,6 +116,11 @@ function init(){
   fSel.addEventListener('change', calc);
   tSel.addEventListener('change', calc);
   document.getElementById('fAmt').addEventListener('input', calc);
+  // initialize display values to zeroed, then calculate
+  document.getElementById('feeUno').innerText = '$0.00';
+  document.getElementById('feeBridge').innerText = '$0.00';
+  document.getElementById('feeGas').innerText = '$0.00';
+  document.getElementById('totalCommission').innerText = '$0.00';
   calc();
 }
 
@@ -151,10 +156,12 @@ function calc(){
     const gasTot = gasF + gasT;
     let out = 0; if(priceT>0) out = (usd - feeUno - bridgeFee)/priceT;
     document.getElementById('tAmt').value = out>0 ? out.toFixed(6): '0.000000';
-    document.getElementById('feeUno').innerText = '$'+feeUno.toFixed(4);
-    document.getElementById('feeBridge').innerText = '$'+bridgeFee.toFixed(4);
+    // show fees with consistent 2 decimals
+    document.getElementById('feeUno').innerText = '$'+feeUno.toFixed(2);
+    document.getElementById('feeBridge').innerText = '$'+bridgeFee.toFixed(2);
     document.getElementById('feeGas').innerText = '$'+gasTot.toFixed(2);
-    document.getElementById('totalCommission').innerText = '$'+(feeUno+bridgeFee).toFixed(4);
+    const total = feeUno + bridgeFee;
+    document.getElementById('totalCommission').innerText = '$'+total.toFixed(2);
   }catch(e){console.warn(e)}
 }
 

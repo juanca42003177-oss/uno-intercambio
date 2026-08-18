@@ -1,124 +1,24 @@
-<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uno intercambio - FIX completo 0.5% + gas</title>
-<script src="https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@1.8.1/dist/minikit-js.umd.js"></script>
-<style>
-*{box-sizing:border-box}body{margin:0;background:#fff;color:#111;font-family:system-ui;padding-bottom:90px}
-.top{padding:12px 16px;display:flex;gap:10px;align-items:center}
-.avatar{width:56px;height:56px;border-radius:50%;background:#0B0E11;display:flex;align-items:center;justify-content:center;border:2px solid #f3ba2f}
-.big{font-size:42px;font-weight:900}.small{font-size:11px;opacity:.6}.green{color:#00b15c}.red{color:#ff3b30}
-.btns{display:flex;gap:8px;padding:0 12px}.btn{flex:1;background:#ffe6f4;color:#ff3ab2;border-radius:18px;padding:12px;font-weight:700;text-align:center;font-size:12px;cursor:pointer}
-.tokens{padding:0 16px}.tok{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid #f1f1f1;align-items:center;cursor:pointer}
-.tIcon{width:42px;height:42px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0;background:#fff;border:1px solid #eee}
-.tIcon img{width:100%;height:100%;object-fit:cover}
-.nav{position:fixed;bottom:10px;left:16px;right:16px;background:#fff;border:1px solid #eee;border-radius:30px;display:flex;justify-content:space-around;padding:8px;z-index:10}
-.nav div{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px}
-.nav div.active{background:#111;color:#fff}
-.main{margin:10px;padding:14px;border:2px solid #ffe6f4;border-radius:20px;min-height:60vh}
-.box{background:#f6f6f6;border-radius:14px;padding:12px;margin:8px 0}
-input{width:100%;border:0;background:transparent;font-size:20px;font-weight:900;outline:none}
-select{border:0;background:#111;color:#fff;padding:6px 12px;border-radius:20px;font-weight:900;font-size:11px}
-.btnY{width:100%;padding:13px;border-radius:12px;border:0;background:#f3ba2f;font-weight:900;margin-top:8px;cursor:pointer}
-.perc{display:flex;gap:6px;margin-top:8px}.perc button{flex:1;padding:8px;border-radius:20px;border:1px solid #111;background:#fff;font-weight:900;font-size:11px;cursor:pointer}
-.perc button.active{background:#111;color:#fff}
-.pill{background:#111;color:#fff;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:900;margin-left:6px}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:99}
-.modalBox{background:#fff;border-radius:22px;padding:18px;width:100%;max-width:360px}
-.inpAmt{width:100%;background:#f6f6f6;border:1px solid #ddd;border-radius:12px;padding:12px;margin:10px 0;font-size:18px;font-weight:900}
-.actionRow{display:flex;gap:8px;margin-top:10px}.actionRow button{flex:1;padding:12px;border-radius:12px;border:0;font-weight:900;cursor:pointer}
-</style></head><body>
-<div id="home"><div class="top"><div class="avatar"><svg viewBox="0 0 32 32" width="28" height="28"><path d="M16 7.5 L19.5 11 L16 14.5 L12.5 11 Z M11 12.5 L14.5 16 L11 19.5 L7.5 16 Z M21 12.5 L24.5 16 L21 19.5 L17.5 16 Z M16 17.5 L19.5 21 L16 24.5 L12.5 21 Z" fill="#F3BA2F"/></svg></div><div><b>Uno intercambio</b><div class="small">0x0190...38c • World Chain + Polygon • 0.5% + gas aparte</div></div></div>
-<div style="padding:0 16px;display:flex;justify-content:space-between;align-items:center"><div><div class="big">$0.04</div><div class="small"><span class="green">▲ $0.01 (5.97%) hoy ></span></div></div><div><svg width="80" height="30"><polyline points="0,28 20,24 40,18 60,10 80,4" fill="none" stroke="#00b15c" stroke-width="2.5"/></svg></div></div>
-<div class="btns"><div class="btn" onclick="go('swap')">⇆<br>Swap</div><div class="btn" onclick="go('earn')">↗<br>Ganar</div><div class="btn" onclick="go('send')">↗<br>Enviar</div><div class="btn" onclick="go('recv')">↓<br>Recibir</div></div>
-<div class="box" style="background:#fff;border:1px solid #eee;display:flex;justify-content:space-between;cursor:pointer;margin:12px" onclick="go('earn')"><div>Gana hasta un <b style="color:#ff3ab2">4.19% APY</b> anual</div><div>World + Polygon ></div></div>
-<div class="tokens">
-<div style="font-weight:900;margin:8px 0">World Chain - tu billetera real</div>
-<div class="tok" onclick="openToken('WLD')"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon" style="background:#000;color:#fff">W</div><div><b>WLD</b><div class="small">0.01 WLD • Diamante</div></div></div><div style="text-align:right"><b>$0.01</b><div class="small green">+2.1%</div></div></div>
-<div class="tok" onclick="openToken('DNA')"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon" style="background:#ffcc00;color:#000">D</div><div><b>DNA</b><div class="small">615.74 DNA • Hélice - original</div></div></div><div style="text-align:right"><b>$0.03</b><div class="small green">+5.97%</div></div></div>
-<div class="tok" onclick="openToken('HUB')"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon" style="background:#ff7a00">H</div><div><b>HUB</b><div class="small">3518.8 HUB • Hub</div></div></div><div style="text-align:right"><b>$0.01</b><div class="small green">+1.2%</div></div></div>
-<div class="tok" onclick="openToken('ORO')"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon" style="background:#ffd700;color:#000">O</div><div><b>ORO</b><div class="small">0.65 ORO • Oro</div></div></div><div style="text-align:right"><b>$0.01</b><div class="small red">-0.5%</div></div></div>
-<div style="font-weight:900;margin:16px 0 8px">Polygon - logos ultima captura reales</div>
-<div class="tok" onclick="openToken('POL')"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon"><img src="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png"></div><div><b>POL</b><div class="small">Polygon • POL morado oficial</div></div></div><b>$0.00</b></div>
-<div class="tok" onclick="openToken('USDC')"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon"><img src="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png"></div><div><b>USDC</b><div class="small">USDC • círculo azul $</div></div></div><b>$0.00</b></div>
-<div class="tok" onclick="openToken('USDT')"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon"><img src="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png"></div><div><b>USDT</b><div class="small">USDT • diamante verde T</div></div></div><b>$0.00</b></div>
-<div class="tok" onclick="openToken('WETH')"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon"><img src="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png"></div><div><b>WETH</b><div class="small">WETH • diamante ETH</div></div></div><b>$0.00</b></div>
-</div></div><div id="tokenDetail" style="display:none"><div class="main"><div style="display:flex;justify-content:space-between"><button onclick="go('home')" style="border:0;background:#f6f6f6;padding:8px 14px;border-radius:20px;font-weight:900;cursor:pointer">← Volver</button><span class="small" id="dChain">World Chain 480</span></div><div style="text-align:center;margin-top:12px"><div id="dIcon" class="tIcon" style="width:68px;height:68px;font-size:30px;margin:0 auto"></div><h2 id="dName" style="margin:10px 0 0">WLD</h2><div class="small" id="dSym">0.01 WLD</div><div style="font-size:34px;font-weight:900;margin-top:10px" id="dPrice">$0.355819</div><div id="dChange" class="small green">▲ +2.1% hoy • En vivo • 0.5% + gas</div></div><div style="background:#f9f9f9;border-radius:16px;padding:12px;margin-top:12px"><div style="display:flex;justify-content:space-between"><span class="small">Precio en vivo</span><span class="small" style="background:#00d9a5;color:#fff;padding:3px 10px;border-radius:8px">• LIVE</span></div><svg viewBox="0 0 100 40" style="width:100%;height:80px"><polyline id="cLine" points="0,30 10,28 20,25 30,27 40,20 50,18 60,22 70,15 80,10 90,12 100,5" fill="none" stroke="#00b15c" stroke-width="2.5"/></svg></div><div class="box"><div style="display:flex;justify-content:space-between"><span class="small">Tu balance</span><span class="small">Valor USD</span></div><div style="display:flex;justify-content:space-between;font-weight:900;font-size:18px"><span id="dBal">0.01 WLD</span><span id="dUsd">$0.01</span></div><div class="small" id="dAnnual">Ganas 4.19% APY</div></div><div class="actionRow"><button style="background:#ffe6f4;color:#ff3ab2" onclick="goSwapD()">⇆ Intercambiar 0.5%</button><button style="background:#111;color:#fff" onclick="goSendD()">↗ Enviar</button></div></div></div>
-<div id="swap" style="display:none"><div class="main"><h3 style="text-align:center;margin:0">Swap - 0.5% + gas aparte</h3><div class="small" style="text-align:center">World Chain ↔ Polygon ↔ zkEVM</div><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><span class="small">Vendes <b id="bF"></b> <span id="percLabel" class="pill">100%</span></span><span class="small" style="font-weight:900">Saldo: <span id="saldoTxt">0.01 WLD</span></span></div><div style="display:flex;gap:6px;margin-top:8px"><input id="fAmt" type="number" value="0.01"><select id="fNet"><option value="world">World Chain</option><option value="polygon">Polygon 137</option><option value="zkevm">zkEVM 1101</option></select><select id="fSel"></select></div><div class="small" id="usdFrom"></div><div class="perc"><button id="p25" onclick="setPerc(25)">25%</button><button id="p50" onclick="setPerc(50)">50%</button><button id="p75" onclick="setPerc(75)">75%</button><button id="p100" class="active" onclick="setPerc(100)">100%</button></div></div><div style="text-align:center;cursor:pointer;margin:8px 0" onclick="swapNets()">↕️ Cambiar red</div><div class="box"><div style="display:flex;justify-content:space-between"><span class="small">Recibes <b id="bT"></b></span></div><div style="display:flex;gap:6px;margin-top:6px"><input id="tAmt" readonly><select id="tNet"><option value="world">World Chain</option><option value="polygon" selected>Polygon</option><option value="zkevm">zkEVM</option></select><select id="tSel"></select></div><div class="small" id="usdTo"></div></div>
-<div style="background:#f0f0f0;border-radius:12px;padding:10px;margin:8px 0;font-size:11px">
-<div style="display:flex;justify-content:space-between"><span>Comisión Uno (0.5%):</span><b id="feeUno">$0.00</b></div>
-<div style="display:flex;justify-content:space-between"><span>Gas <span id="gasNet">Polygon</span> aparte:</span><b id="feeGas">$0.04</b></div>
-<div style="display:flex;justify-content:space-between;font-weight:900;margin-top:4px;border-top:1px dashed #ccc;padding-top:4px"><span>Tú ganas:</span><span id="tuGanas" style="color:#00a32e">$0.00 por trade</span></div>
-</div>
-<div style="background:#111;color:#fff;border-radius:12px;padding:12px;text-align:center;font-size:11px" id="res">Recibes: 0.022111 POL ≈ $0.0100</div><button class="btnY" onclick="doSwap()">Intercambiar Ahora (0.5% + gas)</button><button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:8px;cursor:pointer">← Volver</button></div></div>
-<div id="earn" style="display:none"><div class="main"><h3 style="text-align:center;margin:0">Ganar - 4.19% APY</h3><div class="small" style="text-align:center">Gana anual, retira cuando quieras - tu saldo real</div><div style="background:#111;color:#fff;border-radius:18px;padding:14px;margin-top:12px"><div class="small" style="color:#aaa">Tu balance total</div><div style="font-size:28px;font-weight:900">$0.04</div><div class="small" style="color:#00d9a5">+ $0.0096 / año + $50/día con 0.5% fee (100 pers x $100)</div></div><div style="border:1px solid #eee;border-radius:18px;padding:14px;margin:10px 0"><div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon" style="background:#000;color:#fff">W</div><div><b>WLD Vault - Diamante</b><div class="small">0.01 WLD ($0.01) real • World Chain 480</div></div></div><div style="background:#111;color:#f3ba2f;padding:6px 10px;border-radius:10px;font-size:10px;font-weight:900">4.19% APY</div></div><div style="display:flex;gap:6px;margin-top:10px"><button class="btnY" style="flex:1" onclick="openDep('WLD')">Depositar</button><button class="btnY" style="flex:1;background:#eee" onclick="openRet('WLD')">Retirar</button></div></div><button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:12px;cursor:pointer">← Volver</button></div></div>
-<div id="send" style="display:none"><div class="main"><h3 style="text-align:center">Enviar</h3><div class="box"><div class="small" id="bS">Saldo: 0.01 WLD • World Chain 480 REAL</div><div style="display:flex;gap:6px"><input id="sAmt" type="number" value="0.01"><select id="sSel"></select></div></div><input id="sAddr" placeholder="0x... destino REAL" style="background:#f0f0f0;border-radius:12px;padding:14px;width:100%;border:0;margin:8px 0" value="0x61c3AE677BEBD9377069d3228399519c42C"><button class="btnY" onclick="doSendReal()" style="background:#111;color:#fff">Enviar REAL ↗️ - Tira notificación como ORO</button><div style="display:flex;gap:6px;margin-top:8px"><button class="btnY" style="background:#7b61ff;color:#fff;flex:1" onclick="verificarParaReclamar()">Verificar para enviar (como ORO)</button><button class="btnY" style="background:#eee;color:#111;flex:1" onclick="enviarSinVerificar()">¿No verificado?</button></div><button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:8px;cursor:pointer">← Volver</button></div></div>
-<div id="recv" style="display:none"><div class="main"><h3 style="text-align:center;margin:0">Recibir</h3><div style="text-align:center;margin-top:12px;border:1px solid #eee;border-radius:20px;padding:16px"><img id="qr" width="200" height="200"><div style="font-size:10px;font-weight:900;background:#f6f6f6;padding:10px;border-radius:10px;margin-top:10px;word-break:break-all">0x019001d46cd3155ef045a41f4c359c040595438c</div><div class="small" style="margin-top:6px">Misma dirección World 480 + Polygon 137 + zkEVM 1101</div><button class="btnY" onclick="navigator.clipboard.writeText('0x019001d46cd3155ef045a41f4c359c040595438c');showOk('Dirección real copiada')">📋 Copiar dirección</button></div><button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:10px;cursor:pointer">← Volver</button></div></div>
-<div class="nav"><div id="navHome" class="active" onclick="go('home')">🏠</div><div onclick="go('swap')" style="font-size:26px;font-weight:900">⇆</div><div onclick="go('earn')">💰</div><div style="background:#ff3ab2;color:#fff" onclick="go('recv')">↓</div></div>
-<div id="modalDep" class="modal"><div class="modalBox"><div style="display:flex;gap:10px;align-items:center"><div id="depIcon" class="tIcon"></div><div><b id="depTitle">Depositar</b><div class="small" id="depSub"></div></div></div><div class="small" style="margin-top:10px">¿Cuánto deseas depositar?</div><input id="depAmt" class="inpAmt" type="number"><div class="perc"><button onclick="setDepPerc(25)">25%</button><button onclick="setDepPerc(50)">50%</button><button onclick="setDepPerc(75)">75%</button><button onclick="setDepPerc(100)">100%</button></div><button class="btnY" onclick="confirmDep()">Confirmar Depósito</button><button style="border:0;background:transparent;width:100%;margin-top:8px;cursor:pointer" onclick="closeDep()">Cancelar</button></div></div>
-<div id="modalRet" class="modal"><div class="modalBox"><div style="display:flex;gap:10px;align-items:center"><div id="retIcon" class="tIcon"></div><div><b id="retTitle">Retirar</b><div class="small" id="retSub"></div></div></div><div class="small" style="margin-top:10px">¿Cuánto deseas retirar?</div><input id="retAmt" class="inpAmt" type="number"><div class="perc"><button onclick="setRetPerc(25)">25%</button><button onclick="setRetPerc(50)">50%</button><button onclick="setRetPerc(75)">75%</button><button onclick="setRetPerc(100)">100%</button></div><button class="btnY" style="background:#111;color:#fff" onclick="confirmRet()">Confirmar Retiro</button><button style="border:0;background:transparent;width:100%;margin-top:8px;cursor:pointer" onclick="closeRet()">Cancelar</button></div></div>
-<div id="modal" class="modal" onclick="this.style.display='none'"><div class="modalBox" style="text-align:center"><div style="font-size:32px">✅</div><div id="modalTxt" style="font-weight:900;margin-top:8px"></div><button class="btnY" onclick="document.getElementById('modal').style.display='none'">Cerrar</button></div></div>
-<script>
-const TOKENS={world:[{s:"WLD",q:0.01,u:0.01,p:0.35,color:"#000",icon:"W",sym:"Diamante Worldcoin",chain:"World Chain 480",apy:"4.19%",change:"+2.1%"},{s:"DNA",q:615.74,u:0.03,p:0.0000487,color:"#ffcc00",icon:"D",sym:"Hélice - original",chain:"World Chain 480",apy:"3.5%",change:"+5.97%"},{s:"HUB",q:3518.8,u:0.01,p:0.00000284,color:"#ff7a00",icon:"H",sym:"Hub World",chain:"World Chain 480",apy:"2.1%",change:"+1.2%"},{s:"ORO",q:0.65,u:0.01,p:0.015,color:"#ffd700",icon:"O",sym:"Oro real",chain:"World Chain 480",apy:"2.5%",change:"-0.5%"}],polygon:[{s:"POL",q:0,u:0,p:0.45,color:"#7b3cff",icon:"⬣",sym:"POL morado oficial",chain:"Polygon 137",apy:"3.2%",change:"+3.4%"},{s:"USDC",q:0,u:0,p:1,color:"#2775ca",icon:"$",sym:"$1.00",chain:"Polygon 137",apy:"5.0%",change:"0.00%"},{s:"USDT",q:0,u:0,p:1,color:"#00a87e",icon:"₮",sym:"$1.00",chain:"Polygon 137",apy:"5.2%",change:"0.00%"},{s:"WETH",q:0,u:0,p:3000,color:"#627eea",icon:"♦",sym:"diamante ETH",chain:"Polygon 137",apy:"2.8%",change:"+1.8%"}],zkevm:[{s:"MATIC",q:0,u:0,p:0.45,color:"#7b3cff",icon:"⬣",sym:"Hexágono",chain:"zkEVM 1101"}]};
-const GAS={world:0.01, polygon:0.03, zkevm:0.02};
-let cur=null,curDep=null,curRet=null,walletAddress=null;
-function go(v){['home','swap','earn','send','recv','tokenDetail'].forEach(id=>{let e=document.getElementById(id);if(e)e.style.display=id===v?'block':'none'});document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));if(v=='home')document.getElementById('navHome').classList.add('active');if(v=='recv')document.getElementById('qr').src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=0x019001d46cd3155ef045a41f4c359c040595438c';if(v=='swap'){upd();calc();}}
-function openToken(s){cur=Object.values(TOKENS).flat().find(x=>x.s==s);if(!cur)return;go('tokenDetail');let i=document.getElementById('dIcon');i.innerText=cur.icon;i.style.background=cur.color;i.style.color=cur.s=='DNA'||cur.s=='ORO'?'#000':'#fff';document.getElementById('dName').innerText=cur.s;document.getElementById('dSym').innerText=`${cur.q} ${cur.s} • ${cur.sym}`;document.getElementById('dPrice').innerText=`$${cur.p}`;document.getElementById('dChain').innerText=cur.chain;document.getElementById('dBal').innerText=`${cur.q} ${cur.s}`;document.getElementById('dUsd').innerText=`$${cur.u}`;document.getElementById('dAnnual').innerText=`Ganas ${cur.apy} APY`;let ch=document.getElementById('dChange');ch.innerText=`${cur.change.startsWith('+')?'▲':'▼'} ${cur.change} hoy • En vivo • 0.5% + gas`;ch.className=cur.change.startsWith('-')?'small red':'small green';}
-function goSwapD(){if(!cur)return;go('swap');document.getElementById('fSel').value=cur.s;document.getElementById('fNet').value=cur.chain.includes('Polygon')?'polygon':'world';upd();calc();}
-function goSendD(){if(!cur)return;go('send');document.getElementById('sAmt').value=cur.q;document.getElementById('bS').innerText=`Saldo: ${cur.q} ${cur.s} • ${cur.chain} REAL`;}
-function upd(){let fNet=document.getElementById('fNet'),tNet=document.getElementById('tNet'),fSel=document.getElementById('fSel'),tSel=document.getElementById('tSel'),sSel=document.getElementById('sSel');fSel.innerHTML=TOKENS[fNet.value].map(t=>`<option value="${t.s}">${t.s} ${t.q} (${t.sym})</option>`).join('');tSel.innerHTML=TOKENS[tNet.value].map(t=>`<option value="${t.s}">${t.s} ${t.q}</option>`).join('');sSel.innerHTML=TOKENS.world.map(t=>`<option>${t.s} ${t.q} ${t.sym}</option>`).join('');}
-function setPerc(p){document.querySelectorAll('.perc button').forEach(b=>b.classList.remove('active'));document.getElementById('p'+p).classList.add('active');let fd=TOKENS[document.getElementById('fNet').value].find(x=>x.s==document.getElementById('fSel').value)||TOKENS.world[0];document.getElementById('fAmt').value=(fd.q*p/100).toFixed(6);document.getElementById('percLabel').innerText=p+'%';calc();}
-function calc(){let fNet=document.getElementById('fNet'),tNet=document.getElementById('tNet'),fSel=document.getElementById('fSel'),tSel=document.getElementById('tSel'),fAmt=document.getElementById('fAmt'),tAmt=document.getElementById('tAmt');let fd=TOKENS[fNet.value].find(x=>x.s==fSel.value)||TOKENS.world[0],td=TOKENS[tNet.value].find(x=>x.s==tSel.value)||TOKENS.polygon[0];let unit=fd.q>0?fd.u/fd.q:fd.p,usd=parseFloat(fAmt.value||0)*unit,out=usd/td.p*0.995;let gasF=GAS[fNet.value]||0.01,gasT=GAS[tNet.value]||0.03,gasTot=gasF+gasT,feeUno=usd*0.005;tAmt.value=out.toFixed(6);document.getElementById('bF').innerText=fd.s;document.getElementById('bT').innerText=td.s;document.getElementById('saldoTxt').innerText=`${fd.q} ${fd.s}`;document.getElementById('usdFrom').innerText=`≈ $${usd.toFixed(4)} USD • fee 0.5% = $${feeUno.toFixed(4)} para ti`;document.getElementById('usdTo').innerText=`≈ $${(out*td.p).toFixed(4)} USD`;document.getElementById('feeUno').innerText='$'+feeUno.toFixed(4);document.getElementById('feeGas').innerText='$'+gasTot.toFixed(2)+' ($'+gasF+' + $'+gasT+')';document.getElementById('gasNet').innerText=fNet.value+' → '+tNet.value;document.getElementById('tuGanas').innerText='$'+feeUno.toFixed(4)+' por trade';document.getElementById('res').innerText=`Recibes: ${out.toFixed(6)} ${td.s} • Gas $${gasTot.toFixed(2)} aparte • Tú ganas $${feeUno.toFixed(4)} • ${fNet.value} → ${tNet.value}`;}
-function swapNets(){let a=fNet.value,f=fSel.value,n=tNet.value,t=tSel.value;fNet.value=n;tNet.value=a;upd();fSel.value=t;tSel.value=f;calc();}
-function showOk(t){document.getElementById('modalTxt').innerText=t;document.getElementById('modal').style.display='flex';}
-function openDep(s){curDep=Object.values(TOKENS).flat().find(x=>x.s==s);document.getElementById('depTitle').innerText=`Depositar ${curDep.s}`;document.getElementById('depSub').innerText=`Saldo: ${curDep.q} ${curDep.s}`;document.getElementById('depIcon').innerText=curDep.icon;document.getElementById('depIcon').style.background=curDep.color;document.getElementById('depAmt').value=curDep.q;document.getElementById('modalDep').style.display='flex';}
-function setDepPerc(p){document.getElementById('depAmt').value=(curDep.q*p/100).toFixed(6);}
-function confirmDep(){let a=document.getElementById('depAmt').value;closeDep();showOk(`✅ Depositaste ${a} ${curDep.s}`);}
-function closeDep(){document.getElementById('modalDep').style.display='none';}
-function openRet(s){curRet=Object.values(TOKENS).flat().find(x=>x.s==s);document.getElementById('retTitle').innerText=`Retirar ${curRet.s}`;document.getElementById('retSub').innerText=`Disponible: ${curRet.q} ${curRet.s}`;document.getElementById('retIcon').innerText=curRet.icon;document.getElementById('retIcon').style.background=curRet.color;document.getElementById('retAmt').value=curRet.q;document.getElementById('modalRet').style.display='flex';}
-function setRetPerc(p){document.getElementById('retAmt').value=(curRet.q*p/100).toFixed(6);}
-function confirmRet(){let a=document.getElementById('retAmt').value;closeRet();showOk(`✅ Retiraste ${a} ${curRet.s}`);}
-function closeRet(){document.getElementById('modalRet').style.display='none';}
-function doSwap(){let fee=document.getElementById('feeUno').innerText;showOk(`✅ Swap ${document.getElementById('fAmt').value} ${document.getElementById('fSel').value} • Tú ganas ${fee} (0.5%) + gas aparte`);}
-
-// --- FIX REAL - NO BORRA TU DISEÑO, SOLO AGREGA LA LOGICA DE ORO / HOLDSTATION ---
-async function doSendReal(){
+// REEMPLAZA SOLO ESTA FUNCION EN TU CODIGO VIEJO, EL DISEÑO QUEDA IGUAL
+async function doSend(){
   let addr=document.getElementById('sAddr').value;
   let amt=document.getElementById('sAmt').value;
-  if(!addr) return showOk('Pon dirección REAL');
-  // Si está en World App, tira la ventana REAL de ORO
+  if(!addr) return showOk('Pon dirección');
+  
+  // Si está dentro de World App, tira la notificación REAL como ORO
   if(typeof MiniKit !== 'undefined' && MiniKit.isInstalled()){
-    try{
-      // Paso 1: walletAuth como Holdstation (tu foto 4)
-      if(!walletAddress){
-        const auth = await MiniKit.commandsAsync.walletAuth({
-          nonce: '0x'+Date.now().toString(16),
-          requestId: 'uno-'+Date.now(),
-          statement: 'Firma para confirmar la propiedad de la billetera y autenticarte en Uno intercambio (como Holdstation).'
-        });
-        if(auth.finalPayload.status!=='success'){ return showOk('❌ Sesión cancelada'); }
-        walletAddress=auth.finalPayload.address;
-      }
-      // Paso 2: sendTransaction como ORO (tu foto 2 y 3)
-      const tx = await MiniKit.commandsAsync.sendTransaction({
-        transaction: [{ address: '0x2cFcDB76E1f3a6d5B2fE3f8c8a1dD1a6B6c9d0e0', abi: [{"inputs":[{"name":"to","type":"address"},{"name":"value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}], functionName: 'transfer', args: [addr, (parseFloat(amt)*1e18).toString()] }]
-      });
-      if(tx.finalPayload.status==='success'){ showOk('✅ WLD ENVIADO REAL! Tx: '+tx.finalPayload.transaction_id.slice(0,16)+'...'); }
-      else{ showOk('❌ Tx: '+tx.finalPayload.error_code); }
-    }catch(e){ showOk('❌ Error: '+e.message); }
+    const tx = await MiniKit.commandsAsync.sendTransaction({
+      transaction: [{
+        address: '0x2cFcDB76E1f3a6d5B2fE3f8c8a1dD1a6B6c9d0e0',
+        abi: [{"inputs":[{"name":"to","type":"address"},{"name":"value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}],
+        functionName: 'transfer',
+        args: [addr, (parseFloat(amt)*1e18).toString()]
+      }]
+    });
+    if(tx.finalPayload.status==='success'){
+      showOk(`✅ Enviar ${amt} a ${addr} REAL Tx:${tx.finalPayload.transaction_id.slice(0,10)}`);
+    }
   } else {
-    // Fuera de World App, solo demo como antes (para que no se trabe)
-    showOk(`✅ Enviar ${amt} a ${addr} (DEMO - abre dentro de World App para REAL)`);
+    // Si está fuera de World App, queda como en tu foto 5 (demo)
+    showOk(`✅ Enviar ${amt} a ${addr}`);
   }
 }
-async function verificarParaReclamar(){
-  if(typeof MiniKit === 'undefined' || !MiniKit.isInstalled()){ return showOk('Abre dentro de World App para Verificar como ORO'); }
-  try{
-    const v = await MiniKit.commandsAsync.verify({ action: 'send-wld', verification_level: 'orb' });
-    if(v.finalPayload.status==='success'){ showOk('✅ Verificado como ORO - Ser humano único - Ahora puedes enviar'); }
-  }catch(e){ showOk('Error verificar'); }
-}
-async function enviarSinVerificar(){ doSendReal(); }
-
-let fNet=document.getElementById('fNet'),tNet=document.getElementById('tNet'),fSel=document.getElementById('fSel'),tSel=document.getElementById('tSel');
-if(typeof MiniKit !== 'undefined'){ MiniKit.install(); }
-upd();calc();
-</script></body></html>

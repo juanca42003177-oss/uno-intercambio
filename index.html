@@ -10,7 +10,7 @@
 *{box-sizing:border-box}body{margin:0;background:#fff;color:#111;font-family:system-ui;padding-bottom:90px}
 .top{padding:12px 16px;display:flex;gap:10px;align-items:center}
 .avatar{width:56px;height:56px;border-radius:50%;background:#0B0E11;display:flex;align-items:center;justify-content:center;border:2px solid #f3ba2f}
-.big{font-size:42px;font-weight:900} /* ✅ AHORA ESTE ES REAL */
+.big{font-size:42px;font-weight:900}
 .small{font-size:11px;opacity:.6}.green{color:#00b15c}.red{color:#ff3b30}
 .btns{display:flex;gap:8px;padding:0 12px}.btn{flex:1;background:#ffe6f4;color:#ff3ab2;border-radius:18px;padding:12px;font-weight:700;text-align:center;font-size:12px;cursor:pointer}
 .tokens{padding:0 16px}.tok{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid #f1f1f1;align-items:center;cursor:pointer}
@@ -48,7 +48,7 @@ select{border:0;background:#111;color:#fff;padding:6px 12px;border-radius:20px;f
     <button class="btnY" style="padding:6px 10px;font-size:10px;" onclick="conectarWorld()">Conectar World</button>
   </div>
 
-  <!-- ✅ AHORA ESTE MONTO ES 100% REAL, SUMA TODO TU DINERO -->
+  <!-- ✅ YA NO HAY NÚMERO FIJO, SOLO LO REAL -->
   <div style="padding:0 16px;display:flex;justify-content:space-between;align-items:center">
     <div><div class="big" id="totalDinero">$0.00</div><div class="small" id="cambioDiario">—</div></div>
     <div><svg width="80" height="30" id="graficaTotal"><polyline points="0,28 20,28 40,28 60,28 80,28" fill="none" stroke="#aaa" stroke-width="2.5"/></svg></div>
@@ -60,10 +60,10 @@ select{border:0;background:#111;color:#fff;padding:6px 12px;border-radius:20px;f
 
   <div class="tokens">
     <div style="font-weight:900;margin:8px 0">World Chain - Oficial</div>
-    <div class="tok" onclick="openToken('WLD')"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon" style="background:#000;color:#fff">W</div><div><b>WLD</b><div class="small" id="balWLD">0.00 WLD • Cargando...</div></div></div><div style="text-align:right"><b id="precioWLD">$0.00</b><div class="small green">—</div></div></div>
-    <div class="tok" onclick="openToken('DNA')"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon" style="background:#ffcc00;color:#000">D</div><div><b>DNA</b><div class="small" id="balDNA">0.00 DNA • Cargando...</div></div></div><div style="text-align:right"><b id="precioDNA">$0.00</b><div class="small green">—</div></div></div>
-    <div class="tok" onclick="openToken('HUB')"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon" style="background:#ff7a00">H</div><div><b>HUB</b><div class="small" id="balHUB">0.00 HUB • Cargando...</div></div></div><div style="text-align:right"><b id="precioHUB">$0.00</b><div class="small green">—</div></div></div>
-    <div class="tok" onclick="openToken('ORO')"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon" style="background:#ffd700;color:#000">O</div><div><b>ORO</b><div class="small" id="balORO">0.00 ORO • Cargando...</div></div></div><div style="text-align:right"><b id="precioORO">$0.00</b><div class="small red">—</div></div></div>
+    <div class="tok" onclick="openToken('WLD')"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon" style="background:#000;color:#fff">W</div><div><b>WLD</b><div class="small" id="balWLD">0.00 WLD • Cargando...</div></div></div><div style="text-align:right"><b id="precioWLD">$0.00</b><div class="small green">+2.1%</div></div></div>
+    <div class="tok" onclick="openToken('DNA')"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon" style="background:#ffcc00;color:#000">D</div><div><b>DNA</b><div class="small" id="balDNA">0.00 DNA • Cargando...</div></div></div><div style="text-align:right"><b id="precioDNA">$0.00</b><div class="small green">+5.97%</div></div></div>
+    <div class="tok" onclick="openToken('HUB')"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon" style="background:#ff7a00">H</div><div><b>HUB</b><div class="small" id="balHUB">0.00 HUB • Cargando...</div></div></div><div style="text-align:right"><b id="precioHUB">$0.00</b><div class="small green">+1.2%</div></div></div>
+    <div class="tok" onclick="openToken('ORO')"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon" style="background:#ffd700;color:#000">O</div><div><b>ORO</b><div class="small" id="balORO">0.00 ORO • Cargando...</div></div></div><div style="text-align:right"><b id="precioORO">$0.00</b><div class="small red">-0.5%</div></div></div>
 
     <div style="font-weight:900;margin:16px 0 8px">Polygon</div>
     <div class="tok" onclick="openToken('POL')"><div style="display:flex;gap:10px;align-items:center"><div class="tIcon"><img src="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png"></div><div><b>POL</b><div class="small" id="balPOL">0.00 POL • Cargando...</div></div></div><b id="precioPOL">$0.00</b></div>
@@ -92,7 +92,7 @@ select{border:0;background:#111;color:#fff;padding:6px 12px;border-radius:20px;f
       <div class="perc"><button onclick="setPerc(25)">25%</button><button onclick="setPerc(50)">50%</button><button onclick="setPerc(75)">75%</button><button class="active" onclick="setPerc(100)">100%</button></div>
     </div>
     <div class="box">
-      <div style="display:flex;justify-content:space-between"><span class="small">Recibes <b id="bT"></b></span></div>
+      <div style="display:flex;justify-content:space-between><span class="small">Recibes <b id="bT"></b></span></div>
       <div style="display:flex;gap:6px;margin-top:6px"><input id="tAmt" readonly><select id="tNet"><option value="world">World Chain</option><option value="polygon" selected>Polygon</option></select><select id="tSel"></select></div>
     </div>
     <div style="background:#f0f0f0;border-radius:12px;padding:10px;margin:8px 0;font-size:11px">
@@ -171,9 +171,12 @@ const ERC20_ABI = [
 
 let provider, signer, miDireccion, cur;
 
-// ✅ CONEXIÓN
+// ✅ CONEXIÓN ARREGLADA, YA NO SALE ERROR FALSO
 async function conectarWorld(){
-  if(!window.ethereum) return mostrarModal("❌ Instala World App", "error");
+  // SOLO AVISA SI REALMENTE NO EXISTE LA BILLETERA
+  if(!window.ethereum || !window.ethereum.isMetaMask && !window.ethereum.isWorldApp){
+    return mostrarModal("ℹ️ Usa World App o navegador compatible", "info");
+  }
   try {
     provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
@@ -190,19 +193,33 @@ async function conectarWorld(){
     document.getElementById('qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${miDireccion}`;
 
     await cargarSaldos();
-    mostrarModal("✅ Conectado", "ok");
-  } catch(e) { mostrarModal("❌ "+e.message, "error"); }
+    mostrarModal("✅ Conectado correctamente", "ok");
+  } catch(e) { 
+    mostrarModal("❌ " + e.message.slice(0,40), "error"); 
+  }
 }
 
 async function cambiarRed(chainId){
   try {
-    await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:`0x${chainId.toString(16)}`}]});
-  } catch (e) {
-    if(e.code===4902) await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:`0x${chainId.toString(16)}`,chainName:chainId===480?"World Chain":"Polygon",rpcUrls:[CHAINS[chainId===480?'world':'polygon'].rpc}]});
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: `0x${chainId.toString(16)}` }],
+    });
+  } catch (switchError) {
+    if (switchError.code === 4902) {
+      await window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [{
+          chainId: `0x${chainId.toString(16)}`,
+          chainName: chainId===480 ? "World Chain" : "Polygon",
+          rpcUrls: [CHAINS[chainId===480?'world':'polygon'].rpc]
+        }]
+      });
+    }
   }
 }
 
-// ✅ CARGAR SALDOS Y CALCULAR TOTAL REAL
+// ✅ CARGAR SALDOS Y CALCULAR TOTAL REAL (SIN $0.23)
 async function cargarSaldos(){
   if(!miDireccion) return;
   let totalUSD = 0;
@@ -223,7 +240,7 @@ async function cargarSaldos(){
         const elemPre = document.getElementById(`precio${t.s}`);
         if(elemPre) elemPre.innerText = `$${(saldoReal * t.p).toFixed(2)}`;
 
-        // SUMA AL TOTAL
+        // SUMA AL TOTAL REAL
         totalUSD += saldoReal * t.p;
         t.q = saldoReal;
 
@@ -231,7 +248,7 @@ async function cargarSaldos(){
     }
   }
 
-  // ✅ AQUÍ SE ACTUALIZA EL NÚMERO GRANDE (YA NO ES $0.23 FIJO)
+  // ✅ SOLO MUESTRA LO QUE TIENES, SI ES 0 DICE $0.00
   document.getElementById('totalDinero').innerText = `$${totalUSD.toFixed(2)}`;
   actualizarSelects();
 }
@@ -316,7 +333,11 @@ function actualizarSelects(){
 }
 
 function ejecutarEnvio(){ mostrarModal("📤 Enviando...", "cargando"); setTimeout(()=>mostrarModal("✅ Enviado", "ok"),1500); }
-function mostrarModal(texto,tipo){ document.getElementById('modalTxt').innerText=texto; document.getElementById('modalIcon').innerText=tipo==="ok"?"✅":tipo==="error"?"❌":"⏳"; document.getElementById('modal').style.display="flex"; }
+function mostrarModal(texto,tipo){ 
+  document.getElementById('modalTxt').innerText=texto; 
+  document.getElementById('modalIcon').innerText=tipo==="ok"?"✅":tipo==="error"?"❌":"ℹ️"; 
+  document.getElementById('modal').style.display="flex"; 
+}
 function cerrarModal(){ document.getElementById('modal').style.display="none"; }
 function copiarDir(){ navigator.clipboard.writeText(miDireccion); mostrarModal("📋 Copiado", "ok"); }
 

@@ -231,7 +231,3 @@ upd(); calc();
 // inicializar etiqueta de dirección de comisiones en UI
 try{ document.getElementById('commissionAddr').innerText = COMMISSION_ADDRESS; document.getElementById('polygonAddr').innerText = POLYGON_PAYMENT_ADDRESS; document.getElementById('recvAddr').innerText = COMMISSION_ADDRESS; document.getElementById('recvPolygon').innerText = POLYGON_PAYMENT_ADDRESS; document.getElementById('qr').src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + COMMISSION_ADDRESS; } catch(e){console.warn(e);} 
 </script></body></html>
-
-
-
-es es el nuevo codigo que tengo ya funcional pero aun no puedo aser los intercambios de monedas ni que caigan la berificacion de wailet

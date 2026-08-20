@@ -322,33 +322,68 @@ let cur = null;
 
 // ===================== MINIKIT =====================
 async function initMiniKit() {
-  try {
+  console.log("=== INICIANDO MINIKIT ===");
+  console.log("location.href =", window.location.href);
+  console.log("window.MiniKit =", window.MiniKit);
+  console.log("window.WorldApp =", window.WorldApp);
+
+  // Esperamos a que MiniKit esté disponible
+  let attempts = 0;
+  const maxAttempts = 20;
+
+  const check = setInterval(() => {
+    attempts++;
+    console.log("Intento", attempts, "- MiniKit existe?", !!window.MiniKit);
+
     if (window.MiniKit) {
-      const res = MiniKit.install();
-      console.log("MiniKit install:", res);
-      setTimeout(updateUserInfo, 700);
+      clearInterval(check);
+      try {
+        const res = MiniKit.install();
+        console.log("install() result:", res);
+        console.log("isInstalled() =", MiniKit.isInstalled());
+        console.log("user =", MiniKit.user);
+        updateUserInfo();
+      } catch (e) {
+        console.error("Error en install:", e);
+      }
     }
-  } catch (e) {
-    console.warn("MiniKit:", e);
-  }
+
+    if (attempts >= maxAttempts) {
+      clearInterval(check);
+      console.error("MiniKit nunca apareció después de 10 segundos");
+    }
+  }, 500);
 }
 
-function updateUserInfo() {
-  const info = document.getElementById("userInfo");
-  const btn = document.getElementById("connectBtn");
-  if (window.MiniKit && MiniKit.isInstalled()) {
-    const addr = MiniKit.user?.walletAddress;
-    if (addr) {
-      info.innerText = (MiniKit.user.username ? "@" + MiniKit.user.username : addr.slice(0,6)+"..."+addr.slice(-4)) + " • Conectado";
-      btn.innerText = "Conectado";
-      btn.style.background = "#00b15c";
-    } else {
-      info.innerText = "Listo para conectar • World Chain + Polygon";
-      btn.innerText = "Conectar";
-    }
-  } else {
-    info.innerText = "No conectado • World Chain + Polygon";
-    btn.innerText = "Conectar";
+async function connectWallet() {
+  console.log("=== BOTÓN CONECTAR ===");
+  console.log("MiniKit existe?", !!window.MiniKit);
+  
+  if (!window.MiniKit) {
+    showOk("MiniKit no se cargó.\n\nPrueba esto:\n1. Cierra completamente World App\n2. Vuelve a abrirla\n3. Abre de nuevo la Mini App");
+    return;
+  }
+
+  console.log("isInstalled?", MiniKit.isInstalled());
+  console.log("user?", MiniKit.user);
+
+  if (!MiniKit.isInstalled()) {
+    showOk("MiniKit detectado pero no instalado.\n\nEsto normalmente significa que el dominio de tu Mini App no coincide exactamente con el que registraste en el Developer Portal.");
+    return;
+  }
+
+  try {
+    const nonce = Date.now().toString() + Math.random().toString(36).slice(2);
+    const result = await MiniKit.walletAuth({
+      nonce: nonce,
+      statement: "Iniciar sesión en Uno Intercambio"
+    });
+    console.log("walletAuth result:", result);
+    updateUserInfo();
+    showOk("¡Conectado correctamente!");
+  } catch (err) {
+    console.error(err);
+    showOk("Error al conectar: " + (err.message || JSON.stringify(err)));
   }
 }
 

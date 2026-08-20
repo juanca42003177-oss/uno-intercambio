@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Uno Intercambio</title>
 <script type="module">
-  import { MiniKit } from "https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@1.9.2/+esm";
+  import { MiniKit } from "https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@1.9.9/+esm";
   window.MiniKit = MiniKit;
 </script>
 <style>
@@ -16,7 +16,6 @@
 .btns{display:flex;gap:8px;padding:0 12px}.btn{flex:1;background:#ffe6f4;color:#ff3ab2;border-radius:18px;padding:12px;font-weight:700;text-align:center;font-size:12px;cursor:pointer}
 .tokens{padding:0 16px}.tok{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid #f1f1f1;align-items:center;cursor:pointer}
 .tIcon{width:42px;height:42px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0;background:#fff;border:1px solid #eee}
-.tIcon img{width:100%;height:100%;object-fit:cover}
 .nav{position:fixed;bottom:10px;left:16px;right:16px;background:#fff;border:1px solid #eee;border-radius:30px;display:flex;justify-content:space-around;padding:8px;z-index:10}
 .nav div{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px}
 .nav div.active{background:#111;color:#fff}
@@ -30,15 +29,12 @@ select{border:0;background:#111;color:#fff;padding:6px 12px;border-radius:20px;f
 .pill{background:#111;color:#fff;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:900;margin-left:6px}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:99}
 .modalBox{background:#fff;border-radius:22px;padding:18px;width:100%;max-width:360px}
-.inpAmt{width:100%;background:#f6f6f6;border:1px solid #ddd;border-radius:12px;padding:12px;margin:10px 0;font-size:18px;font-weight:900}
-.actionRow{display:flex;gap:8px;margin-top:10px}.actionRow button{flex:1;padding:12px;border-radius:12px;border:0;font-weight:900;cursor:pointer}
 .connect-btn{background:#111;color:#fff;border:0;padding:10px 16px;border-radius:20px;font-weight:700;font-size:13px;cursor:pointer}
 .user-info{font-size:12px;opacity:.8;margin-top:2px}
 </style>
 </head>
 <body>
 
-<!-- HOME -->
 <div id="home">
   <div class="top">
     <div class="avatar">
@@ -53,11 +49,8 @@ select{border:0;background:#111;color:#fff;padding:6px 12px;border-radius:20px;f
 
   <div style="padding:0 16px;display:flex;justify-content:space-between;align-items:center">
     <div>
-      <div class="big">$0.23</div>
-      <div class="small"><span class="green">▲ $0.01 (5.97%) hoy</span></div>
-    </div>
-    <div>
-      <svg width="80" height="30"><polyline points="0,28 20,24 40,18 60,10 80,4" fill="none" stroke="#00b15c" stroke-width="2.5"/></svg>
+      <div class="big" id="totalBalance">$0.00</div>
+      <div class="small"><span class="green">World Chain</span></div>
     </div>
   </div>
 
@@ -68,9 +61,8 @@ select{border:0;background:#111;color:#fff;padding:6px 12px;border-radius:20px;f
     <div class="btn" onclick="go('recv')">↓<br>Recibir</div>
   </div>
 
-  <div class="box" style="background:#fff;border:1px solid #eee;display:flex;justify-content:space-between;cursor:pointer;margin:12px" onclick="go('earn')">
+  <div class="box" style="background:#fff;border:1px solid #eee;margin:12px" onclick="go('earn')">
     <div>Gana hasta un <b style="color:#ff3ab2">4.19% APY</b> anual</div>
-    <div>World Chain ></div>
   </div>
 
   <div class="tokens">
@@ -78,179 +70,135 @@ select{border:0;background:#111;color:#fff;padding:6px 12px;border-radius:20px;f
     <div class="tok" onclick="openToken('WLD')">
       <div style="display:flex;gap:10px;align-items:center">
         <div class="tIcon" style="background:#000;color:#fff">W</div>
-        <div><b>WLD</b><div class="small">0.01 WLD</div></div>
+        <div><b>WLD</b><div class="small" id="balWLD">0 WLD</div></div>
       </div>
-      <div style="text-align:right"><b>$0.01</b><div class="small green">+2.1%</div></div>
+      <div style="text-align:right"><b>$0.00</b></div>
     </div>
     <div class="tok" onclick="openToken('DNA')">
       <div style="display:flex;gap:10px;align-items:center">
         <div class="tIcon" style="background:#ffcc00;color:#000">D</div>
-        <div><b>DNA</b><div class="small">615.74 DNA</div></div>
+        <div><b>DNA</b><div class="small">Simulado</div></div>
       </div>
-      <div style="text-align:right"><b>$0.03</b><div class="small green">+5.97%</div></div>
+      <div style="text-align:right"><b>—</b></div>
     </div>
     <div class="tok" onclick="openToken('HUB')">
       <div style="display:flex;gap:10px;align-items:center">
         <div class="tIcon" style="background:#ff7a00">H</div>
-        <div><b>HUB</b><div class="small">3518.8 HUB</div></div>
+        <div><b>HUB</b><div class="small">Simulado</div></div>
       </div>
-      <div style="text-align:right"><b>$0.01</b><div class="small green">+1.2%</div></div>
+      <div style="text-align:right"><b>—</b></div>
     </div>
     <div class="tok" onclick="openToken('ORO')">
       <div style="display:flex;gap:10px;align-items:center">
         <div class="tIcon" style="background:#ffd700;color:#000">O</div>
-        <div><b>ORO</b><div class="small">0.65 ORO</div></div>
+        <div><b>ORO</b><div class="small">Simulado</div></div>
       </div>
-      <div style="text-align:right"><b>$0.01</b><div class="small red">-0.5%</div></div>
+      <div style="text-align:right"><b>—</b></div>
     </div>
   </div>
 </div>
 
-<!-- TOKEN DETAIL -->
+<!-- Resto de secciones (tokenDetail, swap, earn, send, recv) iguales pero con textos corregidos -->
+
 <div id="tokenDetail" style="display:none">
   <div class="main">
-    <div style="display:flex;justify-content:space-between">
-      <button onclick="go('home')" style="border:0;background:#f6f6f6;padding:8px 14px;border-radius:20px;font-weight:900;cursor:pointer">← Volver</button>
-      <span class="small" id="dChain">World Chain 480</span>
-    </div>
-    <div style="text-align:center;margin-top:12px">
+    <button onclick="go('home')" style="border:0;background:#f6f6f6;padding:8px 14px;border-radius:20px;font-weight:900">← Volver</button>
+    <div style="text-align:center;margin-top:20px">
       <div id="dIcon" class="tIcon" style="width:68px;height:68px;font-size:30px;margin:0 auto"></div>
-      <h2 id="dName" style="margin:10px 0 0">WLD</h2>
-      <div class="small" id="dSym">0.01 WLD</div>
-      <div style="font-size:34px;font-weight:900;margin-top:10px" id="dPrice">$0.35</div>
-      <div id="dChange" class="small green">▲ +2.1% hoy</div>
+      <h2 id="dName">WLD</h2>
+      <div class="small" id="dSym">—</div>
+      <div style="font-size:34px;font-weight:900;margin-top:10px" id="dPrice">$0.00</div>
     </div>
     <div class="box">
-      <div style="display:flex;justify-content:space-between"><span class="small">Tu balance</span><span class="small">Valor USD</span></div>
       <div style="display:flex;justify-content:space-between;font-weight:900;font-size:18px">
-        <span id="dBal">0.01 WLD</span>
-        <span id="dUsd">$0.01</span>
+        <span id="dBal">0 WLD</span>
+        <span id="dUsd">$0.00</span>
       </div>
     </div>
-    <div class="actionRow">
-      <button style="background:#ffe6f4;color:#ff3ab2" onclick="goSwapD()">⇆ Intercambiar</button>
-      <button style="background:#111;color:#fff" onclick="goSendD()">↗ Enviar</button>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button style="flex:1;background:#ffe6f4;color:#ff3ab2;padding:12px;border:0;border-radius:12px;font-weight:900" onclick="goSwapD()">⇆ Intercambiar</button>
+      <button style="flex:1;background:#111;color:#fff;padding:12px;border:0;border-radius:12px;font-weight:900" onclick="goSendD()">↗ Enviar</button>
     </div>
   </div>
 </div>
 
-<!-- SWAP -->
 <div id="swap" style="display:none">
   <div class="main">
-    <h3 style="text-align:center;margin:0">Swap · 0.5% + gas</h3>
-    <div class="small" style="text-align:center">World Chain</div>
-
+    <h3 style="text-align:center;margin:0">Swap · 0.5%</h3>
     <div class="box">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span class="small">Vendes <b id="bF"></b> <span id="percLabel" class="pill">100%</span></span>
-        <span class="small" style="font-weight:900">Saldo: <span id="saldoTxt">615.74 DNA</span></span>
+      <div style="display:flex;justify-content:space-between">
+        <span class="small">Vendes <b id="bF">WLD</b></span>
+        <span class="small">Saldo: <span id="saldoTxt">0</span></span>
       </div>
       <div style="display:flex;gap:6px;margin-top:8px">
-        <input id="fAmt" type="number" value="100" oninput="calc()">
-        <select id="fNet" onchange="upd();calc()">
-          <option value="world">World Chain</option>
-        </select>
+        <input id="fAmt" type="number" value="0" oninput="calc()">
         <select id="fSel" onchange="calc()"></select>
       </div>
       <div class="small" id="usdFrom"></div>
       <div class="perc">
-        <button id="p25" onclick="setPerc(25)">25%</button>
-        <button id="p50" onclick="setPerc(50)">50%</button>
-        <button id="p75" onclick="setPerc(75)">75%</button>
-        <button id="p100" class="active" onclick="setPerc(100)">100%</button>
+        <button onclick="setPerc(25)">25%</button>
+        <button onclick="setPerc(50)">50%</button>
+        <button onclick="setPerc(75)">75%</button>
+        <button class="active" onclick="setPerc(100)">100%</button>
       </div>
     </div>
-
-    <div style="text-align:center;margin:8px 0">↕️</div>
-
+    <div style="text-align:center;margin:10px 0">↕️</div>
     <div class="box">
-      <div style="display:flex;justify-content:space-between"><span class="small">Recibes <b id="bT"></b></span></div>
+      <div class="small">Recibes <b id="bT">WLD</b></div>
       <div style="display:flex;gap:6px;margin-top:6px">
         <input id="tAmt" readonly>
-        <select id="tNet" onchange="upd();calc()">
-          <option value="world">World Chain</option>
-        </select>
         <select id="tSel" onchange="calc()"></select>
       </div>
       <div class="small" id="usdTo"></div>
     </div>
-
-    <div style="background:#f0f0f0;border-radius:12px;padding:10px;margin:8px 0;font-size:11px">
-      <div style="display:flex;justify-content:space-between"><span>Comisión Uno (0.5%):</span><b id="feeUno">$0.00</b></div>
-      <div style="display:flex;justify-content:space-between;font-weight:900;margin-top:4px;border-top:1px dashed #ccc;padding-top:4px">
-        <span>Total comisión:</span>
-        <span id="totalCommission" style="color:#00a32e">$0.00</span>
-      </div>
-      <div style="margin-top:8px;font-size:12px">
-        Comisión a: <b id="commissionAddr">0x019001d46cd3155ef045a41f4c359c040595438c</b>
-      </div>
+    <div style="background:#f0f0f0;border-radius:12px;padding:10px;margin:8px 0;font-size:12px">
+      <div style="display:flex;justify-content:space-between"><span>Comisión 0.5%:</span><b id="feeUno">$0.00</b></div>
+      <div style="margin-top:6px;font-size:11px">A: 0x019001d46cd3155ef045a41f4c359c040595438c</div>
     </div>
-
-    <div style="background:#f0f0f0;border-radius:12px;padding:10px;margin:8px 0;font-size:11px" id="res">
-      Recibes aprox...
-    </div>
-
-    <button class="btnY" onclick="doSwap()">Intercambiar Ahora (0.5%)</button>
-    <button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:8px;cursor:pointer">← Volver</button>
+    <button class="btnY" onclick="doSwap()">Intercambiar Ahora</button>
+    <button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:8px">← Volver</button>
   </div>
 </div>
 
-<!-- EARN -->
 <div id="earn" style="display:none">
   <div class="main">
-    <h3 style="text-align:center;margin:0">Ganar · 4.19% APY</h3>
-    <div class="small" style="text-align:center">World Chain</div>
+    <h3 style="text-align:center">Ganar · 4.19% APY</h3>
     <div style="background:#111;color:#fff;border-radius:18px;padding:14px;margin-top:12px">
-      <div class="small" style="color:#aaa">Tu balance total</div>
-      <div style="font-size:28px;font-weight:900">$0.23</div>
+      <div class="small" style="color:#aaa">Tu balance</div>
+      <div style="font-size:28px;font-weight:900" id="earnBalance">$0.00</div>
     </div>
-    <div style="border:1px solid #eee;border-radius:18px;padding:14px;margin:10px 0">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="display:flex;gap:10px;align-items:center">
-          <div class="tIcon" style="background:#000;color:#fff">W</div>
-          <div><b>WLD Vault</b><div class="small">0.01 WLD · World Chain</div></div>
-        </div>
-        <div style="background:#111;color:#f3ba2f;padding:6px 10px;border-radius:10px;font-size:10px;font-weight:900">4.19% APY</div>
-      </div>
-    </div>
-    <button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:12px;cursor:pointer">← Volver</button>
+    <button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:20px">← Volver</button>
   </div>
 </div>
 
-<!-- SEND -->
 <div id="send" style="display:none">
   <div class="main">
     <h3 style="text-align:center">Enviar</h3>
     <div class="box">
-      <div class="small" id="bS">Saldo: 615.74 DNA</div>
-      <div style="display:flex;gap:6px">
-        <input id="sAmt" type="number" value="10">
+      <div class="small" id="bS">Saldo: 0</div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input id="sAmt" type="number" value="0">
         <select id="sSel"></select>
       </div>
     </div>
     <input id="sAddr" placeholder="0x... dirección destino" style="background:#f0f0f0;border-radius:12px;padding:14px;width:100%;border:0;margin:8px 0">
-    <button class="btnY" onclick="doSend()">Enviar ↗️</button>
-    <button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:8px;cursor:pointer">← Volver</button>
+    <button class="btnY" onclick="doSend()">Enviar</button>
+    <button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:8px">← Volver</button>
   </div>
 </div>
 
-<!-- RECEIVE -->
 <div id="recv" style="display:none">
   <div class="main">
-    <h3 style="text-align:center;margin:0">Recibir</h3>
+    <h3 style="text-align:center">Recibir</h3>
     <div style="text-align:center;margin-top:12px;border:1px solid #eee;border-radius:20px;padding:16px">
-      <img id="qr" width="200" height="200" alt="QR">
-      <div style="font-size:11px;font-weight:900;background:#f6f6f6;padding:10px;border-radius:10px;margin-top:10px;word-break:break-all">
-        <b id="recvAddr">0x019001d46cd3155ef045a41f4c359c040595438c</b>
-      </div>
-      <div class="small" style="margin-top:6px">World Chain 480</div>
-      <button class="btnY" onclick="copyAddress()">📋 Copiar dirección</button>
+      <img id="qr" width="180" height="180" alt="QR">
+      <div style="font-size:11px;font-weight:900;background:#f6f6f6;padding:10px;border-radius:10px;margin-top:10px;word-break:break-all" id="recvAddr">0x019001d46cd3155ef045a41f4c359c040595438c</div>
+      <button class="btnY" onclick="copyAddress()">📋 Copiar</button>
     </div>
-    <button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:10px;cursor:pointer">← Volver</button>
+    <button onclick="go('home')" style="border:0;background:transparent;width:100%;margin-top:10px">← Volver</button>
   </div>
 </div>
 
-<!-- NAV -->
 <div class="nav">
   <div id="navHome" class="active" onclick="go('home')">🏠</div>
   <div onclick="go('swap')" style="font-size:26px;font-weight:900">⇆</div>
@@ -258,7 +206,6 @@ select{border:0;background:#111;color:#fff;padding:6px 12px;border-radius:20px;f
   <div style="background:#ff3ab2;color:#fff" onclick="go('recv')">↓</div>
 </div>
 
-<!-- MODAL OK -->
 <div id="modal" class="modal" onclick="this.style.display='none'">
   <div class="modalBox" style="text-align:center">
     <div style="font-size:32px">✅</div>
@@ -272,85 +219,79 @@ const COMMISSION_ADDRESS = "0x019001d46cd3155ef045a41f4c359c040595438c";
 
 const TOKENS = {
   world: [
-    {s:"WLD", q:0.01, u:0.01, p:0.35, color:"#000", icon:"W", sym:"Worldcoin", chain:"World Chain 480"},
-    {s:"DNA", q:615.74, u:0.03, p:0.0000487, color:"#ffcc00", icon:"D", sym:"Hélice", chain:"World Chain 480"},
-    {s:"HUB", q:3518.8, u:0.01, p:0.00000284, color:"#ff7a00", icon:"H", sym:"Hub", chain:"World Chain 480"},
-    {s:"ORO", q:0.65, u:0.01, p:0.015, color:"#ffd700", icon:"O", sym:"Oro", chain:"World Chain 480"}
+    {s:"WLD", q:0, u:0, p:0.35, color:"#000", icon:"W", sym:"Worldcoin"},
+    {s:"DNA", q:0, u:0, p:0.00005, color:"#ffcc00", icon:"D", sym:"DNA"},
+    {s:"HUB", q:0, u:0, p:0.000003, color:"#ff7a00", icon:"H", sym:"HUB"},
+    {s:"ORO", q:0, u:0, p:0.015, color:"#ffd700", icon:"O", sym:"ORO"}
   ]
 };
 
 let cur = null;
-let isConnected = false;
-let userAddress = null;
 
-// ===================== MINIKIT =====================
 async function initMiniKit() {
   try {
     if (window.MiniKit) {
-      const { success } = await MiniKit.install();
-      console.log("MiniKit installed:", success);
-      if (MiniKit.isInstalled()) {
-        updateUserInfo();
-      }
+      const res = MiniKit.install();
+      console.log("MiniKit install:", res);
+      setTimeout(updateUserInfo, 600);
     }
   } catch (e) {
-    console.warn("MiniKit no disponible (probablemente fuera de World App):", e);
+    console.warn("MiniKit error:", e);
   }
 }
 
 function updateUserInfo() {
   const info = document.getElementById("userInfo");
   const btn = document.getElementById("connectBtn");
-  if (MiniKit.isInstalled() && MiniKit.user?.walletAddress) {
-    userAddress = MiniKit.user.walletAddress;
-    isConnected = true;
-    const short = userAddress.slice(0,6) + "..." + userAddress.slice(-4);
-    info.innerText = MiniKit.user.username ? `@${MiniKit.user.username}` : short;
-    btn.innerText = "Conectado";
-    btn.style.background = "#00b15c";
+  if (window.MiniKit && MiniKit.isInstalled()) {
+    const addr = MiniKit.user?.walletAddress;
+    if (addr) {
+      info.innerText = MiniKit.user.username ? "@" + MiniKit.user.username : (addr.slice(0,6) + "..." + addr.slice(-4));
+      btn.innerText = "Conectado";
+      btn.style.background = "#00b15c";
+    } else {
+      info.innerText = "Listo para conectar";
+      btn.innerText = "Conectar";
+    }
   } else {
     info.innerText = "No conectado";
     btn.innerText = "Conectar";
-    btn.style.background = "#111";
   }
 }
 
 async function connectWallet() {
-  if (!window.MiniKit || !MiniKit.isInstalled()) {
-    showOk("Abre esta Mini App desde dentro de World App para conectar la wallet.");
+  if (!window.MiniKit) {
+    showOk("MiniKit no cargó. Recarga la Mini App.");
+    return;
+  }
+  if (!MiniKit.isInstalled()) {
+    showOk("Esta función solo funciona dentro de World App.\n\nAsegúrate de abrirla desde World App (no desde el navegador).");
     return;
   }
   try {
-    // Generamos un nonce simple (en producción debe venir de tu backend)
-    const nonce = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const nonce = crypto.randomUUID().replace(/-/g, "").slice(0, 16);
     const result = await MiniKit.walletAuth({
       nonce: nonce,
-      statement: "Iniciar sesión en Uno Intercambio",
-      expirationTime: new Date(Date.now() + 1000 * 60 * 60)
+      statement: "Iniciar sesión en Uno Intercambio"
     });
-    if (result && result.data?.status === "success") {
-      isConnected = true;
-      updateUserInfo();
-      showOk("¡Wallet conectada correctamente!");
-    } else {
-      showOk("No se pudo conectar la wallet.");
-    }
+    console.log("walletAuth result:", result);
+    updateUserInfo();
+    showOk("¡Wallet conectada!");
   } catch (err) {
     console.error(err);
-    showOk("Error al conectar: " + (err.message || err));
+    showOk("Error al conectar:\n" + (err.message || err));
   }
 }
 
-// ===================== NAVEGACIÓN =====================
 function go(v) {
   ["home","swap","earn","send","recv","tokenDetail"].forEach(id => {
-    const e = document.getElementById(id);
-    if (e) e.style.display = id === v ? "block" : "none";
+    const el = document.getElementById(id);
+    if (el) el.style.display = (id === v) ? "block" : "none";
   });
   document.querySelectorAll(".nav div").forEach(d => d.classList.remove("active"));
   if (v === "home") document.getElementById("navHome").classList.add("active");
   if (v === "recv") {
-    document.getElementById("qr").src = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + COMMISSION_ADDRESS;
+    document.getElementById("qr").src = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + COMMISSION_ADDRESS;
   }
   if (v === "swap") { upd(); calc(); }
 }
@@ -364,14 +305,10 @@ function openToken(s) {
   i.style.background = cur.color;
   i.style.color = (cur.s === "DNA" || cur.s === "ORO") ? "#000" : "#fff";
   document.getElementById("dName").innerText = cur.s;
-  document.getElementById("dSym").innerText = `${cur.q} ${cur.s} · ${cur.sym}`;
-  document.getElementById("dPrice").innerText = `\[ {cur.p}`;
-  document.getElementById("dChain").innerText = cur.chain;
-  document.getElementById("dBal").innerText = `${cur.q} ${cur.s}`;
-  document.getElementById("dUsd").innerText = ` \]{cur.u}`;
-  const ch = document.getElementById("dChange");
-  ch.innerText = `▲ +2.1% hoy`;
-  ch.className = "small green";
+  document.getElementById("dSym").innerText = cur.sym;
+  document.getElementById("dPrice").innerText = "$" + cur.p;
+  document.getElementById("dBal").innerText = cur.q + " " + cur.s;
+  document.getElementById("dUsd").innerText = "$" + cur.u;
 }
 
 function goSwapD() {
@@ -385,25 +322,23 @@ function goSendD() {
   if (!cur) return;
   go("send");
   document.getElementById("sAmt").value = cur.q;
-  document.getElementById("bS").innerText = `Saldo: ${cur.q} ${cur.s}`;
+  document.getElementById("bS").innerText = "Saldo: " + cur.q + " " + cur.s;
 }
 
-// ===================== SWAP =====================
 function upd() {
   const fSel = document.getElementById("fSel");
   const tSel = document.getElementById("tSel");
   const sSel = document.getElementById("sSel");
-  fSel.innerHTML = TOKENS.world.map(t => `<option value="\( {t.s}"> \){t.s} (${t.q})</option>`).join("");
+  fSel.innerHTML = TOKENS.world.map(t => `<option value="\( {t.s}"> \){t.s}</option>`).join("");
   tSel.innerHTML = TOKENS.world.map(t => `<option value="\( {t.s}"> \){t.s}</option>`).join("");
-  sSel.innerHTML = TOKENS.world.map(t => `<option value="\( {t.s}"> \){t.s} ${t.q}</option>`).join("");
+  sSel.innerHTML = TOKENS.world.map(t => `<option value="\( {t.s}"> \){t.s}</option>`).join("");
 }
 
 function setPerc(p) {
   document.querySelectorAll(".perc button").forEach(b => b.classList.remove("active"));
-  document.getElementById("p" + p).classList.add("active");
-  const fd = TOKENS.world.find(x => x.s === document.getElementById("fSel").value) || TOKENS.world[1];
+  event.target.classList.add("active");
+  const fd = TOKENS.world.find(x => x.s === document.getElementById("fSel").value) || TOKENS.world[0];
   document.getElementById("fAmt").value = (fd.q * p / 100).toFixed(4);
-  document.getElementById("percLabel").innerText = p + "%";
   calc();
 }
 
@@ -414,70 +349,47 @@ function calc() {
   const fd = TOKENS.world.find(x => x.s === fSel) || TOKENS.world[0];
   const td = TOKENS.world.find(x => x.s === tSel) || TOKENS.world[0];
 
-  const unitPrice = fd.u > 0 ? (fd.u / Math.max(fd.q, 1e-9)) : fd.p;
-  const usd = fAmt * unitPrice;
+  const usd = fAmt * fd.p;
   const feeUno = usd * 0.005;
   const out = td.p > 0 ? (usd - feeUno) / td.p : 0;
 
-  document.getElementById("tAmt").value = out > 0 ? out.toFixed(6) : "0.000000";
+  document.getElementById("tAmt").value = out > 0 ? out.toFixed(6) : "0";
   document.getElementById("bF").innerText = fd.s;
   document.getElementById("bT").innerText = td.s;
-  document.getElementById("saldoTxt").innerText = `${fd.q} ${fd.s}`;
-  document.getElementById("usdFrom").innerText = `≈ \[ {usd.toFixed(4)} · fee 0.5% = \]{feeUno.toFixed(4)}`;
-  document.getElementById("usdTo").innerText = `≈ \[ {(out * td.p).toFixed(4)}`;
+  document.getElementById("saldoTxt").innerText = fd.q + " " + fd.s;
+  document.getElementById("usdFrom").innerText = "≈ $" + usd.toFixed(4) + " · fee 0.5% = $" + feeUno.toFixed(4);
+  document.getElementById("usdTo").innerText = "≈ $" + (out * td.p).toFixed(4);
   document.getElementById("feeUno").innerText = "$" + feeUno.toFixed(4);
-  document.getElementById("totalCommission").innerText = "$" + feeUno.toFixed(4);
-  document.getElementById("res").innerText = `Recibes ≈ ${out.toFixed(6)} ${td.s} · Comisión \]{feeUno.toFixed(4)}`;
 }
 
-// ===================== ACCIONES =====================
 async function doSwap() {
   calc();
   const feeTxt = document.getElementById("feeUno").innerText;
-  const amount = parseFloat(document.getElementById("fAmt").value) || 0;
-  const fromToken = document.getElementById("fSel").value;
-
   if (!window.MiniKit || !MiniKit.isInstalled()) {
-    showOk(`Swap simulado:\n${amount} ${fromToken}\nComisión: ${feeTxt}\n\nAbre esta app desde World App para pagar la comisión real.`);
+    showOk("Abre la Mini App desde World App para poder pagar la comisión.");
     return;
   }
-
-  // Pedimos confirmación y cobramos la comisión con MiniKit.pay
-  const confirmPay = confirm(`¿Confirmas el swap de ${amount} ${fromToken}?\nSe cobrará una comisión de ${feeTxt} en WLD.`);
-  if (!confirmPay) return;
+  const ok = confirm("¿Confirmas el swap?\nSe cobrará " + feeTxt + " de comisión.");
+  if (!ok) return;
 
   try {
-    // Convertimos la comisión a cantidad de WLD (usando precio aproximado)
     const feeUsd = parseFloat(feeTxt.replace("$","")) || 0.01;
-    const wldPrice = 0.35; // precio aproximado
-    const wldAmount = (feeUsd / wldPrice).toFixed(6);
-
+    const wldAmount = (feeUsd / 0.35).toFixed(6);
     const result = await MiniKit.pay({
       to: COMMISSION_ADDRESS,
-      tokens: [
-        {
-          symbol: "WLD",
-          token_amount: (parseFloat(wldAmount) * 1e18).toString() // 18 decimales
-        }
-      ],
-      description: `Comisión 0.5% - Uno Intercambio (${fromToken})`
+      tokens: [{ symbol: "WLD", token_amount: (parseFloat(wldAmount) * 1e18).toString() }],
+      description: "Comisión 0.5% - Uno Intercambio"
     });
-
-    if (result?.data?.status === "success") {
-      showOk(`✅ Swap solicitado\nComisión pagada: ${feeTxt}\nTx: ${result.data.transaction_id || "ok"}`);
-    } else {
-      showOk("El pago de la comisión fue cancelado o falló.");
-    }
+    showOk(result?.data?.status === "success" ? "✅ Comisión pagada\n" + feeTxt : "Pago cancelado o fallido");
   } catch (err) {
-    console.error(err);
-    showOk("Error al pagar comisión: " + (err.message || err));
+    showOk("Error: " + (err.message || err));
   }
 }
 
 function doSend() {
   const addr = document.getElementById("sAddr").value.trim();
-  if (!addr) return showOk("Pon una dirección destino");
-  showOk(`✅ Enviar \( {document.getElementById("sAmt").value} a\n \){addr}\n\n(Función de envío real se implementará con sendTransaction)`);
+  if (!addr) return showOk("Escribe una dirección");
+  showOk("Función de envío real se agregará con sendTransaction.\nDestino: " + addr);
 }
 
 function copyAddress() {
@@ -490,14 +402,12 @@ function showOk(t) {
   document.getElementById("modal").style.display = "flex";
 }
 
-// ===================== INICIO =====================
-document.getElementById("commissionAddr").innerText = COMMISSION_ADDRESS;
+// Inicio
 document.getElementById("recvAddr").innerText = COMMISSION_ADDRESS;
-
 upd();
 calc();
 initMiniKit();
-setTimeout(updateUserInfo, 800);
+setTimeout(updateUserInfo, 1000);
 </script>
 </body>
 </html>

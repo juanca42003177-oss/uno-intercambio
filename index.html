@@ -391,13 +391,15 @@ function go(v) {
 }
 
 function openToken(s) {
-  cur = Object.values(TOKENS).flat().find(x => x.s === s);
+  cur = Object.values(TOKENS).flat().find(function(x) { return x.s === s; });
   if (!cur) return;
   go("tokenDetail");
+  
   const i = document.getElementById("dIcon");
   i.innerText = cur.icon;
   i.style.background = cur.color;
   i.style.color = (cur.s === "DNA" || cur.s === "ORO") ? "#000" : "#fff";
+  
   document.getElementById("dName").innerText = cur.s;
   document.getElementById("dSym").innerText = cur.q + " " + cur.s + " • " + cur.sym;
   document.getElementById("dPrice").innerText = "$" + cur.p;
@@ -405,8 +407,10 @@ function openToken(s) {
   document.getElementById("dBal").innerText = cur.q + " " + cur.s;
   document.getElementById("dUsd").innerText = "$" + cur.u;
   document.getElementById("dAnnual").innerText = "Ganas " + (cur.apy || "—") + " APY";
+  
   const ch = document.getElementById("dChange");
-  ch.innerText = (cur.change && cur.change.startsWith("-") ? "▼ " : "▲ ") + (cur.change || "") + " hoy • 0.5% + gas";
+  const arrow = (cur.change && cur.change.startsWith("-")) ? "▼ " : "▲ ";
+  ch.innerText = arrow + (cur.change || "") + " hoy • 0.5% + gas";
   ch.className = (cur.change && cur.change.startsWith("-")) ? "small red" : "small green";
 }
 
@@ -432,9 +436,24 @@ function upd() {
   const tSel = document.getElementById("tSel");
   const sSel = document.getElementById("sSel");
 
-  fSel.innerHTML = (TOKENS[fNet] || []).map(t => `<option value="\( {t.s}"> \){t.s} ${t.q}</option>`).join("");
-  tSel.innerHTML = (TOKENS[tNet] || []).map(t => `<option value="\( {t.s}"> \){t.s}</option>`).join("");
-  sSel.innerHTML = TOKENS.world.map(t => `<option value="\( {t.s}"> \){t.s} ${t.q}</option>`).join("");
+  // Usamos concatenación para evitar que se rompan los ${}
+  let fOptions = "";
+  (TOKENS[fNet] || []).forEach(function(t) {
+    fOptions += '<option value="' + t.s + '">' + t.s + ' ' + t.q + '</option>';
+  });
+  fSel.innerHTML = fOptions;
+
+  let tOptions = "";
+  (TOKENS[tNet] || []).forEach(function(t) {
+    tOptions += '<option value="' + t.s + '">' + t.s + '</option>';
+  });
+  tSel.innerHTML = tOptions;
+
+  let sOptions = "";
+  TOKENS.world.forEach(function(t) {
+    sOptions += '<option value="' + t.s + '">' + t.s + ' ' + t.q + '</option>';
+  });
+  sSel.innerHTML = sOptions;
 }
 
 function setPerc(p) {

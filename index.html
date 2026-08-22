@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Uno Intercambio</title>
+<script type="module">
+  import { MiniKit } from "https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@1.9.9/+esm";
+  window.MiniKit = MiniKit;
+  window.addEventListener('load', async () => {
+    if (typeof window.MiniKit !== 'undefined') {
+      await window.MiniKit.install();
+    }
+  });
+</script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#fff;color:#111;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding-bottom:90px}
+  .top{padding:16px;display:flex;gap:12px;align-items:center;border-bottom:1px solid #f0f0f0;position:sticky;top:0;background:#fff;z-index:10}
+  .avatar{width:48px;height:48px;border-radius:50%;background:#0B0E11;display:flex;align-items:center;justify-content:center;border:2px solid #f3ba2f;color:#fff;font-weight:900;font-size:18px}
+  .main{padding:16px;min-height:60vh}
+  h2{margin-bottom:20px;font-size:24px}
+  .box{background:#f8f8f8;border-radius:16px;padding:16px;margin-bottom:16px}
+  .box label{font-size:12px;color:#666;display:block;margin-bottom:8px}
+  .row{display:flex;justify-content:space-between;align-items:center}
+  .row input{width:70%;border:0;background:transparent;font-size:22px;font-weight:700;outline:none}
+  .row b{font-size:16px}
+  .rate{font-size:12px;color:#888;margin-top:8px}
+  .btnY{width:100%;padding:18px;background:#f3ba2f;border:0;border-radius:16px;font-weight:900;font-size:17px;cursor:pointer;margin-top:20px}
+  .btnY:active{transform:scale(0.98)}
+  .nav{position:fixed;bottom:10px;left:16px;right:16px;background:#fff;border:1px solid #eee;border-radius:30px;display:flex;justify-content:space-around;padding:6px;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+  .nav button{flex:1;background:none;border:0;padding:10px;border-radius:24px;font-size:13px;color:#999;font-weight:600}
+  .nav button.active{background:#f3ba2f;color:#111}
+  .page{display:none}
+  .page.active{display:block}
+  .tx-item{display:flex;justify-content:space-between;padding:14px;border-bottom:1px solid #f0f0f0}
+  .tx-item:last-child{border:0}
+  .badge{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:700}
+  .badge.success{background:#d1fae5;color:#065f46}
+  .wallet-card{background:linear-gradient(135deg,#f3ba2f 0%,#ffb700 100%);border-radius:20px;padding:20px;color:#111;margin-bottom:20px}
+  .wallet-card h3{font-size:14px;margin-bottom:8px}
+  .wallet-card .balance{font-size:28px;font-weight:900}
+  .address{font-size:11px;background:#f0f0f0;padding:8px;border-radius:8px;word-break:break-all;margin-top:10px}
+</style>
+</head>
+<body>
+
+  <div class="top">
+    <div class="avatar">JC</div>
+    <div><b>Uno Intercambio</b></div>
+  </div>
+
+  <div class="main">
+    <!-- PANTALLA 1: INTERCAMBIO -->
+    <div id="page-swap" class="page active">
+      <h2>Intercambio</h2>
+      <div class="box">
+        <label>Vendes</label>
+        <div class="row">
+          <input id="sellAmount" type="number" placeholder="0.0" oninput="updateQuote()">
+          <b>WLD</b>
+        </div>
+        <div class="rate">Saldo: 10.5 WLD</div>
+      </div>
+      <div class="box">
+        <label>Recibes</label>
+        <div class="row">
+          <input id="buyAmount" type="number" placeholder="0.0" readonly>
+          <b>USDC</b>
+        </div>
+        <div class="rate" id="quoteRate">Tasa: 1 WLD ≈ 2.15 USDC</div>
+      </div>
+      <button class="btnY" onclick="handleSwap()">⇄ Intercambiar</button>
+    </div>
+
+    <!-- PANTALLA 2: HISTORIAL -->
+    <div id="page-history" class="page">
+      <h2>Historial</h2>
+      <div class="box">
+        <div class="tx-item">
+          <div>
+            <div><b>1.00 WLD → 2.15 USDC</b></div>
+            <div style="font-size:12px;color:#888">Hace 2 horas</div>
+          </div>
+          <span class="badge success">Exitoso</span>
+        </div>
+        <div class="tx-item">
+          <div>
+            <div><b>0.50 WLD → 1.07 USDC</b></div>
+            <div style="font-size:12px;color:#888">Ayer</div>
+          </div>
+          <span class="badge success">Exitoso</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANTALLA 3: BILLETERA -->
+    <div id="page-wallet" class="page">
+      <h2>Billetera</h2>
+      <div class="wallet-card">
+        <h3>Balance Total</h3>
+        <div class="balance">12.65 USDC</div>
+        <div style="margin-top:10px">10.5 WLD</div>
+      </div>
+      <div class="box">
+        <label>Tu Wallet de Comisión</label>
+        <div class="address">0x019001d46cd3155ef045a41f4c359c040595438c</div>
+      </div>
+      <div class="box">
+        <label>App ID</label>
+        <div class="address">app_d0a270229b8199adb79b64d5c7aa7c0f</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button id="btn-swap" class="active" onclick="showPage('swap')">Intercambio</button>
+    <button id="btn-history" onclick="showPage('history')">Historial</button>
+    <button id="btn-wallet" onclick="showPage('wallet')">Billetera</button>
+  </div>
+
+<script>
+  const WORLD_APP_ID = "app_d0a270229b8199adb79b64d5c7aa7c0f" 
+  const COMMISSION_WALLET = "0x019001d46cd3155ef045a41f4c359c040595438c" 
+  const TASA_WLD_USDC = 2.15;
+
+  function showPage(page){
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-'+page).classList.add('active');
+    document.getElementById('btn-'+page).classList.add('active');
+  }
+
+  function updateQuote(){
+    const sell = parseFloat(document.getElementById('sellAmount').value) || 0;
+    const buy = (sell * TASA_WLD_USDC).toFixed(4);
+    document.getElementById('buyAmount').value = buy;
+  }
+
+  async function handleSwap() {
+    const amount = document.getElementById('sellAmount').value;
+    if(!amount || amount <= 0){
+      alert("Ingresa una cantidad");
+      return;
+    }
+    if(typeof window.MiniKit === 'undefined'){
+      alert("Error: Abre esta app desde World App");
+      return;
+    }
+    try {
+      const res = await window.MiniKit.commandsAsync.pay({
+        reference: "swap-" + Date.now(),
+        to: COMMISSION_WALLET,
+        tokens: [{symbol: "WLD", amount: amount}],
+        description: `Intercambio ${amount} WLD a USDC en Uno Intercambio`
+      });
+      if(res.finalPayload.status === 'success'){
+        alert("¡Pago enviado! TX: " + res.finalPayload.transaction_id);
+        showPage('history');
+      } else {
+        alert("Pago cancelado");
+      }
+    } catch (error) {
+      alert("Error: " + error.message);
+    }
+  }
+</script>
+</body>
+</html>

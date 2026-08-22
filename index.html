@@ -15,22 +15,22 @@
 body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;padding-bottom:100px}
 .top{padding:14px 16px;display:flex;gap:12px;align-items:center;border-bottom:1px solid #f0f0f0}
 .avatar{width:48px;height:48px;border-radius:50%;background:#0B0E11;display:flex;align-items:center;justify-content:center;border:2px solid #f3ba2f}
-.big{font-size:36px;font-weight:900}
+.big{font-size:34px;font-weight:900}
 .small{font-size:12px;opacity:.65}
 .green{color:#00b15c}
 .red{color:#ff3b30}
 .btns{display:flex;gap:8px;padding:12px 16px}
-.btn{flex:1;background:#ffe6f4;color:#ff3ab2;border-radius:16px;padding:12px 6px;font-weight:700;text-align:center;font-size:13px;cursor:pointer}
-.tokens{padding:0 16px}
-.tok{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f1f1f1;align-items:center;cursor:pointer}
+.btn{flex:1;background:#ffe6f4;color:#ff3ab2;border-radius:16px;padding:12px 4px;font-weight:700;text-align:center;font-size:13px;cursor:pointer}
+.tokens{padding:0 16px 20px}
+.tok{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid #f1f1f1;align-items:center}
 .tIcon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0}
 .nav{position:fixed;bottom:12px;left:16px;right:16px;background:#fff;border:1px solid #eee;border-radius:28px;display:flex;justify-content:space-around;padding:8px;z-index:20;box-shadow:0 4px 20px rgba(0,0,0,.08)}
 .nav div{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px}
 .nav div.active{background:#111;color:#fff}
 .main{margin:12px;padding:16px;border:2px solid #ffe6f4;border-radius:20px;min-height:55vh}
 .box{background:#f7f7f7;border-radius:14px;padding:14px;margin:10px 0}
-input,select{border:0;background:transparent;font-size:18px;font-weight:800;outline:none;width:100%}
-select{background:#111;color:#fff;padding:8px 12px;border-radius:20px;font-size:12px;width:auto}
+input{border:0;background:transparent;font-size:20px;font-weight:800;outline:none;width:100%}
+select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;font-size:12px;font-weight:700}
 .btnY{width:100%;padding:14px;border-radius:14px;border:0;background:#f3ba2f;font-weight:900;font-size:15px;cursor:pointer;margin-top:10px}
 .btnConnect{background:#f3ba2f;border:0;padding:9px 16px;border-radius:20px;font-weight:800;font-size:13px;cursor:pointer}
 .perc{display:flex;gap:6px;margin-top:10px}
@@ -38,7 +38,7 @@ select{background:#111;color:#fff;padding:8px 12px;border-radius:20px;font-size:
 .perc button.active{background:#111;color:#fff}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:20px;z-index:99}
 .modalBox{background:#fff;border-radius:20px;padding:20px;width:100%;max-width:340px;text-align:center}
-.live{font-size:11px;background:#00d9a5;color:#fff;padding:2px 8px;border-radius:8px;margin-left:6px}
+.live{font-size:11px;background:#00d9a5;color:#fff;padding:2px 8px;border-radius:8px}
 </style>
 </head>
 <body>
@@ -57,7 +57,7 @@ select{background:#111;color:#fff;padding:8px 12px;border-radius:20px;font-size:
 
   <div style="padding:16px">
     <div class="big" id="totalUsd">$0.00</div>
-    <div class="small"><span class="green" id="priceChange">Precios en vivo</span> <span class="live">LIVE</span></div>
+    <div class="small"><span class="green">Precios en vivo</span> <span class="live">LIVE</span></div>
   </div>
 
   <div class="btns">
@@ -68,7 +68,7 @@ select{background:#111;color:#fff;padding:8px 12px;border-radius:20px;font-size:
   </div>
 
   <div class="tokens">
-    <div style="font-weight:800;margin:12px 0 8px">World Chain - precios en vivo</div>
+    <div style="font-weight:800;margin:10px 0 6px">World Chain</div>
 
     <div class="tok" onclick="openToken('WLD')">
       <div style="display:flex;gap:12px;align-items:center">
@@ -86,30 +86,52 @@ select{background:#111;color:#fff;padding:8px 12px;border-radius:20px;font-size:
 
     <div class="tok">
       <div style="display:flex;gap:12px;align-items:center">
+        <div class="tIcon" style="background:#ffcc00;color:#000">D</div>
+        <div><b>DNA</b><div class="small">Hélice</div></div>
+      </div>
+      <div style="text-align:right"><b id="dnaUsd">$0.00</b><div class="small" id="dnaChange">—</div></div>
+    </div>
+
+    <div class="tok">
+      <div style="display:flex;gap:12px;align-items:center">
+        <div class="tIcon" style="background:#ff7a00">H</div>
+        <div><b>HUB</b><div class="small">Hub</div></div>
+      </div>
+      <div style="text-align:right"><b id="hubUsd">$0.00</b><div class="small" id="hubChange">—</div></div>
+    </div>
+
+    <div class="tok">
+      <div style="display:flex;gap:12px;align-items:center">
+        <div class="tIcon" style="background:#ffd700;color:#000">O</div>
+        <div><b>ORO</b><div class="small">Oro</div></div>
+      </div>
+      <div style="text-align:right"><b id="oroUsd">$0.00</b><div class="small" id="oroChange">—</div></div>
+    </div>
+
+    <div style="font-weight:800;margin:18px 0 6px">Polygon</div>
+
+    <div class="tok">
+      <div style="display:flex;gap:12px;align-items:center">
         <div class="tIcon" style="background:#7b3cff">P</div>
-        <div>
-          <b>POL</b>
-          <div class="small">Polygon</div>
-        </div>
+        <div><b>POL</b><div class="small">Polygon</div></div>
       </div>
-      <div style="text-align:right">
-        <b id="polUsd">$0.00</b>
-        <div class="small" id="polChange">—</div>
-      </div>
+      <div style="text-align:right"><b id="polUsd">$0.00</b><div class="small" id="polChange">—</div></div>
     </div>
 
     <div class="tok">
       <div style="display:flex;gap:12px;align-items:center">
         <div class="tIcon" style="background:#2775ca">$</div>
-        <div>
-          <b>USDC</b>
-          <div class="small">Stablecoin</div>
-        </div>
+        <div><b>USDC</b><div class="small">USD Coin</div></div>
       </div>
-      <div style="text-align:right">
-        <b id="usdcUsd">$1.00</b>
-        <div class="small green">0.00%</div>
+      <div style="text-align:right"><b id="usdcUsd">$1.00</b><div class="small green">0.00%</div></div>
+    </div>
+
+    <div class="tok">
+      <div style="display:flex;gap:12px;align-items:center">
+        <div class="tIcon" style="background:#00a87e">T</div>
+        <div><b>USDT</b><div class="small">Tether</div></div>
       </div>
+      <div style="text-align:right"><b id="usdtUsd">$1.00</b><div class="small green">0.00%</div></div>
     </div>
   </div>
 </div>
@@ -118,7 +140,7 @@ select{background:#111;color:#fff;padding:8px 12px;border-radius:20px;font-size:
 <div id="swap" style="display:none">
   <div class="main">
     <h3 style="text-align:center;margin-bottom:4px">Swap - 0.5% + gas</h3>
-    <div class="small" style="text-align:center;margin-bottom:12px">Precios en vivo • World Chain ↔ Polygon</div>
+    <div class="small" style="text-align:center;margin-bottom:12px">World Chain ↔ Polygon • Precios en vivo</div>
 
     <div class="box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px">
@@ -141,7 +163,7 @@ select{background:#111;color:#fff;padding:8px 12px;border-radius:20px;font-size:
       </div>
     </div>
 
-    <div style="text-align:center;margin:10px 0;cursor:pointer;font-size:22px" onclick="swapNets()">↕️</div>
+    <div style="text-align:center;margin:12px 0;font-size:22px;cursor:pointer" onclick="swapNets()">↕️ Cambiar red</div>
 
     <div class="box">
       <div class="small" style="margin-bottom:8px">Recibes <b id="bT">POL</b></div>
@@ -156,8 +178,11 @@ select{background:#111;color:#fff;padding:8px 12px;border-radius:20px;font-size:
     </div>
 
     <div class="box" style="font-size:13px">
-      <div style="display:flex;justify-content:space-between"><span>Comisión 0.5%:</span><b id="feeUno">$0.00</b></div>
-      <div style="display:flex;justify-content:space-between;margin-top:4px"><span>Total comisión:</span><b id="totalCommission">$0.00</b></div>
+      <div style="display:flex;justify-content:space-between"><span>Comisión plataforma (0.5%):</span><b id="feeUno">$0.00</b></div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px"><span>Fee puente (si aplica):</span><b id="feeBridge">$0.00</b></div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;font-weight:800;border-top:1px dashed #ccc;padding-top:6px">
+        <span>Total comisión:</span><b id="totalCommission">$0.00</b>
+      </div>
     </div>
 
     <button class="btnY" onclick="doSwap()">Intercambiar Ahora</button>
@@ -165,8 +190,8 @@ select{background:#111;color:#fff;padding:8px 12px;border-radius:20px;font-size:
   </div>
 </div>
 
-<div id="earn" style="display:none"><div class="main"><h3 style="text-align:center">Ganar</h3><p class="small" style="text-align:center;margin:30px 0">Próximamente</p><button onclick="go('home')" class="btnY" style="background:#eee">← Volver</button></div></div>
-<div id="send" style="display:none"><div class="main"><h3 style="text-align:center">Enviar</h3><p class="small" style="text-align:center;margin:30px 0">Próximamente</p><button onclick="go('home')" class="btnY" style="background:#eee">← Volver</button></div></div>
+<div id="earn" style="display:none"><div class="main"><h3 style="text-align:center">Ganar</h3><p class="small" style="text-align:center;margin:40px 0">Próximamente</p><button onclick="go('home')" class="btnY" style="background:#eee">← Volver</button></div></div>
+<div id="send" style="display:none"><div class="main"><h3 style="text-align:center">Enviar</h3><p class="small" style="text-align:center;margin:40px 0">Próximamente</p><button onclick="go('home')" class="btnY" style="background:#eee">← Volver</button></div></div>
 
 <div id="recv" style="display:none">
   <div class="main">
@@ -187,7 +212,7 @@ select{background:#111;color:#fff;padding:8px 12px;border-radius:20px;font-size:
       <h2 style="margin:12px 0 4px">WLD</h2>
       <div class="small" id="dSym">0 WLD</div>
       <div style="font-size:32px;font-weight:900;margin-top:12px" id="dPrice">$0.00</div>
-      <div id="dChange" class="small green">—</div>
+      <div id="dChange" class="small">—</div>
       <div class="box" style="margin-top:20px;display:flex;justify-content:space-between;font-weight:800;font-size:18px">
         <span id="dBal">0 WLD</span>
         <span id="dUsd">$0.00</span>
@@ -214,35 +239,24 @@ select{background:#111;color:#fff;padding:8px 12px;border-radius:20px;font-size:
 <script>
 const WLD_CONTRACT = '0x2cFc85d8E48F8EAB294be644d9E25C3030863003';
 const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
+const BRIDGE_FEE_RATE = 0.02; // 2% extra si cruzas redes
 
-// Precios en vivo (se actualizan solos)
-let prices = {
-  WLD: 0.33,
-  POL: 0.45,
-  USDC: 1.00,
-  USDT: 1.00,
-  WETH: 3000
-};
-
-let changes = {
-  WLD: 0,
-  POL: 0,
-  USDC: 0,
-  USDT: 0,
-  WETH: 0
-};
+let prices = { WLD: 0.33, DNA: 0.00005, HUB: 0.000003, ORO: 0.015, POL: 0.45, USDC: 1, USDT: 1, WETH: 3000 };
+let changes = { WLD: 0, DNA: 0, HUB: 0, ORO: 0, POL: 0, USDC: 0, USDT: 0, WETH: 0 };
 
 const TOKENS = {
   world: [
-    {s:'WLD', p:0.33},
-    {s:'USDC', p:1},
-    {s:'WETH', p:3000}
+    {s: 'WLD', p: 0.33},
+    {s: 'DNA', p: 0.00005},
+    {s: 'HUB', p: 0.000003},
+    {s: 'ORO', p: 0.015},
+    {s: 'USDC', p: 1}
   ],
   polygon: [
-    {s:'POL', p:0.45},
-    {s:'USDC', p:1},
-    {s:'USDT', p:1},
-    {s:'WETH', p:3000}
+    {s: 'POL', p: 0.45},
+    {s: 'USDC', p: 1},
+    {s: 'USDT', p: 1},
+    {s: 'WETH', p: 3000}
   ]
 };
 
@@ -250,11 +264,13 @@ let currentAccount = null;
 let realWldBalance = 0;
 
 function go(page) {
-  ['home','swap','earn','send','recv','tokenDetail'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = id === page ? 'block' : 'none';
-  });
-  document.querySelectorAll('.nav div').forEach(d => d.classList.remove('active'));
+  var pages = ['home','swap','earn','send','recv','tokenDetail'];
+  for (var i = 0; i < pages.length; i++) {
+    var el = document.getElementById(pages[i]);
+    if (el) el.style.display = (pages[i] === page) ? 'block' : 'none';
+  }
+  var navs = document.querySelectorAll('.nav div');
+  for (var j = 0; j < navs.length; j++) navs[j].classList.remove('active');
   if (page === 'home') document.getElementById('navHome').classList.add('active');
   if (page === 'recv' && currentAccount) document.getElementById('recvAddr').innerText = currentAccount;
   if (page === 'swap') { upd(); calc(); }
@@ -267,74 +283,98 @@ function openToken(s) {
   document.getElementById('dBal').innerText = realWldBalance.toFixed(4) + ' WLD';
   document.getElementById('dUsd').innerText = '$' + (realWldBalance * prices.WLD).toFixed(2);
   document.getElementById('dPrice').innerText = '$' + prices.WLD.toFixed(4);
-  const ch = changes.WLD;
-  const el = document.getElementById('dChange');
+  var ch = changes.WLD;
+  var el = document.getElementById('dChange');
   el.innerText = (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '% hoy';
   el.className = 'small ' + (ch >= 0 ? 'green' : 'red');
 }
 
 function upd() {
-  const fNet = document.getElementById('fNet').value;
-  const tNet = document.getElementById('tNet').value;
-  let fHtml = '', tHtml = '';
-  TOKENS[fNet].forEach(t => fHtml += `<option value="\( {t.s}"> \){t.s}</option>`);
-  TOKENS[tNet].forEach(t => tHtml += `<option value="\( {t.s}"> \){t.s}</option>`);
-  document.getElementById('fSel').innerHTML = fHtml;
-  document.getElementById('tSel').innerHTML = tHtml;
+  var fNet = document.getElementById('fNet').value;
+  var tNet = document.getElementById('tNet').value;
+  var fSel = document.getElementById('fSel');
+  var tSel = document.getElementById('tSel');
+
+  var fHtml = '';
+  for (var i = 0; i < TOKENS[fNet].length; i++) {
+    fHtml += '<option value="' + TOKENS[fNet][i].s + '">' + TOKENS[fNet][i].s + '</option>';
+  }
+  fSel.innerHTML = fHtml;
+
+  var tHtml = '';
+  for (var j = 0; j < TOKENS[tNet].length; j++) {
+    tHtml += '<option value="' + TOKENS[tNet][j].s + '">' + TOKENS[tNet][j].s + '</option>';
+  }
+  tSel.innerHTML = tHtml;
+
   calc();
 }
 
 function setPerc(p) {
-  document.querySelectorAll('.perc button').forEach(b => b.classList.remove('active'));
+  var btns = document.querySelectorAll('.perc button');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
   event.target.classList.add('active');
-  const fNet = document.getElementById('fNet').value;
-  const fSel = document.getElementById('fSel').value;
-  let bal = (fNet === 'world' && fSel === 'WLD') ? realWldBalance : 0;
+
+  var fNet = document.getElementById('fNet').value;
+  var fSel = document.getElementById('fSel').value;
+  var bal = (fNet === 'world' && fSel === 'WLD') ? realWldBalance : 0;
   document.getElementById('fAmt').value = (bal * p / 100).toFixed(4);
   calc();
 }
 
 function calc() {
-  const fNet = document.getElementById('fNet').value;
-  const tNet = document.getElementById('tNet').value;
-  const fSel = document.getElementById('fSel').value;
-  const tSel = document.getElementById('tSel').value;
-  const fAmt = parseFloat(document.getElementById('fAmt').value) || 0;
+  var fNet = document.getElementById('fNet').value;
+  var tNet = document.getElementById('tNet').value;
+  var fSel = document.getElementById('fSel').value;
+  var tSel = document.getElementById('tSel').value;
+  var fAmt = parseFloat(document.getElementById('fAmt').value) || 0;
 
-  const fd = TOKENS[fNet].find(t => t.s === fSel) || TOKENS.world[0];
-  const td = TOKENS[tNet].find(t => t.s === tSel) || TOKENS.polygon[0];
+  var fd = null, td = null;
+  for (var i = 0; i < TOKENS[fNet].length; i++) {
+    if (TOKENS[fNet][i].s === fSel) fd = TOKENS[fNet][i];
+  }
+  for (var j = 0; j < TOKENS[tNet].length; j++) {
+    if (TOKENS[tNet][j].s === tSel) td = TOKENS[tNet][j];
+  }
+  if (!fd) fd = TOKENS.world[0];
+  if (!td) td = TOKENS.polygon[0];
 
-  // Usar precios en vivo
-  const fromPrice = prices[fd.s] || fd.p;
-  const toPrice = prices[td.s] || td.p;
+  var fromPrice = prices[fd.s] || fd.p;
+  var toPrice = prices[td.s] || td.p;
 
-  const usd = fAmt * fromPrice;
-  const fee = usd * 0.005;
-  const out = (usd - fee) / toPrice;
+  var usd = fAmt * fromPrice;
+  var feeUno = usd * 0.005;
+  var bridgeFee = (fNet !== tNet) ? (usd * BRIDGE_FEE_RATE) : 0;
+  var out = (usd - feeUno - bridgeFee) / toPrice;
 
   document.getElementById('bF').innerText = fd.s;
   document.getElementById('bT').innerText = td.s;
   document.getElementById('tAmt').value = out > 0 ? out.toFixed(6) : '0';
-  document.getElementById('feeUno').innerText = '$' + fee.toFixed(4);
-  document.getElementById('totalCommission').innerText = '$' + fee.toFixed(4);
+  document.getElementById('feeUno').innerText = '$' + feeUno.toFixed(4);
+  document.getElementById('feeBridge').innerText = '$' + bridgeFee.toFixed(4);
+  document.getElementById('totalCommission').innerText = '$' + (feeUno + bridgeFee).toFixed(4);
   document.getElementById('saldoTxt').innerText = (fNet === 'world' && fSel === 'WLD') ? realWldBalance.toFixed(4) : '0';
 }
 
 function swapNets() {
-  const f = document.getElementById('fNet');
-  const t = document.getElementById('tNet');
-  const temp = f.value;
+  var f = document.getElementById('fNet');
+  var t = document.getElementById('tNet');
+  var temp = f.value;
   f.value = t.value;
   t.value = temp;
   upd();
 }
 
 function doSwap() {
-  if (!currentAccount) return alert('Conecta tu wallet primero');
-  const amt = document.getElementById('fAmt').value;
-  const from = document.getElementById('fSel').value;
-  const to = document.getElementById('tSel').value;
-  showOk(`Swap solicitado:\n${amt} ${from} → ${to}\n\nComisión 0.5%\n(Transacción real próximamente)`);
+  if (!currentAccount) {
+    alert('Conecta tu wallet primero');
+    return;
+  }
+  var amt = document.getElementById('fAmt').value;
+  var from = document.getElementById('fSel').value;
+  var to = document.getElementById('tSel').value;
+  var total = document.getElementById('totalCommission').innerText;
+  showOk('Swap solicitado:\n' + amt + ' ' + from + ' → ' + to + '\n\nComisión total: ' + total + '\n(Transacción real próximamente)');
 }
 
 function showOk(msg) {
@@ -349,12 +389,11 @@ function copyAddr() {
   }
 }
 
-// ========== PRECIOS EN VIVO ==========
+// Precios en vivo
 async function fetchLivePrices() {
   try {
-    // CoinGecko free API
-    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=worldcoin-wld,polygon-ecosystem-token,usd-coin,tether,weth&vs_currencies=usd&include_24hr_change=true');
-    const data = await res.json();
+    var res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=worldcoin-wld,polygon-ecosystem-token,usd-coin,tether,weth&vs_currencies=usd&include_24hr_change=true');
+    var data = await res.json();
 
     if (data['worldcoin-wld']) {
       prices.WLD = data['worldcoin-wld'].usd || prices.WLD;
@@ -377,44 +416,40 @@ async function fetchLivePrices() {
       changes.WETH = data['weth'].usd_24h_change || 0;
     }
 
-    // Actualizar UI
     updatePriceUI();
-    calc(); // recalcular swap con nuevos precios
+    calc();
   } catch (e) {
-    console.log('Error precios:', e);
+    console.log('Error precios', e);
   }
 }
 
 function updatePriceUI() {
-  // WLD
   document.getElementById('wldUsd').innerText = '$' + (realWldBalance * prices.WLD).toFixed(2);
-  const wldCh = document.getElementById('wldChange');
+  var wldCh = document.getElementById('wldChange');
   wldCh.innerText = (changes.WLD >= 0 ? '▲ +' : '▼ ') + Math.abs(changes.WLD).toFixed(2) + '%';
   wldCh.className = 'small ' + (changes.WLD >= 0 ? 'green' : 'red');
 
-  // POL
   document.getElementById('polUsd').innerText = '$' + prices.POL.toFixed(4);
-  const polCh = document.getElementById('polChange');
+  var polCh = document.getElementById('polChange');
   polCh.innerText = (changes.POL >= 0 ? '▲ +' : '▼ ') + Math.abs(changes.POL).toFixed(2) + '%';
   polCh.className = 'small ' + (changes.POL >= 0 ? 'green' : 'red');
 
-  // USDC
   document.getElementById('usdcUsd').innerText = '$' + prices.USDC.toFixed(2);
+  document.getElementById('usdtUsd').innerText = '$' + prices.USDT.toFixed(2);
 
-  // Total
   document.getElementById('totalUsd').innerText = '$' + (realWldBalance * prices.WLD).toFixed(2);
 }
 
-// ===== CONEXIÓN =====
+// Conexión
 async function connectWallet() {
   if (window.MiniKit) {
     try {
       MiniKit.install();
-      const result = await MiniKit.walletAuth({
+      var result = await MiniKit.walletAuth({
         nonce: Math.random().toString(36).substring(2, 12),
         statement: 'Conectar Uno Intercambio'
       });
-      if (result?.data?.address) {
+      if (result && result.data && result.data.address) {
         currentAccount = result.data.address;
         updateUI(currentAccount);
         await loadRealBalances();
@@ -425,7 +460,7 @@ async function connectWallet() {
 
   if (window.ethereum) {
     try {
-      const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      var accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
       if (accs[0]) {
         currentAccount = accs[0];
         updateUI(currentAccount);
@@ -441,7 +476,7 @@ async function connectWallet() {
 
 function updateUI(addr) {
   document.getElementById('walletInfo').innerHTML = addr.slice(0,6) + '...' + addr.slice(-4) + ' • World Chain';
-  const btn = document.getElementById('btnConnect');
+  var btn = document.getElementById('btnConnect');
   btn.innerText = 'Desconectar';
   btn.onclick = disconnectWallet;
   btn.style.background = '#111';
@@ -455,7 +490,7 @@ function disconnectWallet() {
   document.getElementById('wldBalanceText').innerText = '0 WLD';
   document.getElementById('wldUsd').innerText = '$0.00';
   document.getElementById('totalUsd').innerText = '$0.00';
-  const btn = document.getElementById('btnConnect');
+  var btn = document.getElementById('btnConnect');
   btn.innerText = 'Conectar';
   btn.onclick = connectWallet;
   btn.style.background = '#f3ba2f';
@@ -465,17 +500,17 @@ function disconnectWallet() {
 async function loadRealBalances() {
   if (!currentAccount) return;
   try {
-    const data = '0x70a08231' + currentAccount.slice(2).padStart(64, '0');
-    const res = await fetch(WORLD_RPC, {
+    var data = '0x70a08231' + currentAccount.slice(2).padStart(64, '0');
+    var res = await fetch(WORLD_RPC, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
         jsonrpc: '2.0', id: 1,
         method: 'eth_call',
-        params: [{to: WLD_CONTRACT, data}, 'latest']
+        params: [{to: WLD_CONTRACT, data: data}, 'latest']
       })
     });
-    const json = await res.json();
+    var json = await res.json();
     if (json.result) {
       realWldBalance = Number(BigInt(json.result)) / 1e18;
       document.getElementById('wldBalanceText').innerText = realWldBalance.toFixed(4) + ' WLD';
@@ -484,12 +519,11 @@ async function loadRealBalances() {
   } catch (e) { console.error(e); }
 }
 
-// Iniciar
-window.addEventListener('load', () => {
+window.addEventListener('load', function() {
   if (window.MiniKit) try { MiniKit.install(); } catch(e){}
-  fetchLivePrices();                 // cargar precios al inicio
-  setInterval(fetchLivePrices, 60000); // actualizar cada 60 segundos
+  fetchLivePrices();
+  setInterval(fetchLivePrices, 60000);
 });
 </script>
 </body>
-</html>
+  </html>

@@ -190,11 +190,22 @@ const CONTRACTS = {
   HUB:  { address: '0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals: 18, color: '#ff7a00', letter: 'H' },
   ORO:  { address: '0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals: 18, color: '#ffd700', letter: 'O' },
   USDC: { address: '0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals: 6,  color: '#2775ca', letter: '$' },
-  WETH: { address: '0x4200000000000000000000000000000000000006', decimals: 18, color: '#627eea', letter: 'Ξ' }
+  WETH: { address: '0x4200000000000000000000000000000000000006', decimals: 18, color: '#627eea', letter: 'Ξ' },
+  SUSHI: { address: '0xab09A728E53d3d6BC438BE95eeD46Da0Bbe7FB38', decimals: 18, color: '#fa52a0', letter: 'S' },
+  DIAMANTE: { address: '0x2ba918fec90Ca7AaC5753a2551593470815866e6', decimals: 18, color: '#b9f2ff', letter: '◆' },
+  PVPB: { address: '0xBC69990A060cC5AF40942f579BdF82A69A9CFf93', decimals: 18, color: '#9b59b6', letter: 'P' },
+  TPF:  { address: '0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45', decimals: 18, color: '#1abc9c', letter: 'T' },
+  AXO:  { address: '0x249820C0479D0A7feE6A2A3a14583267550F3caF', decimals: 18, color: '#e67e22', letter: 'A' }
 };
 
-let prices = { WLD: 0.40, DNA: 0.00000045, HUB: 0.0000008, ORO: 0.002, USDC: 1, WETH: 3400 };
-let changes = { WLD: 0, DNA: 0, HUB: 0, ORO: 0, USDC: 0, WETH: 0 };
+let prices = { 
+  WLD: 0.40, DNA: 0.00000045, HUB: 0.0000008, ORO: 0.002, 
+  USDC: 1, WETH: 3400, SUSHI: 0, DIAMANTE: 0, PVPB: 0, TPF: 0, AXO: 0 
+};
+let changes = { 
+  WLD: 0, DNA: 0, HUB: 0, ORO: 0, USDC: 0, WETH: 0, 
+  SUSHI: 0, DIAMANTE: 0, PVPB: 0, TPF: 0, AXO: 0 
+};
 let balances = {};
 let currentAccount = null;
 let selectedToken = 'WLD';
@@ -227,7 +238,7 @@ function openToken(sym) {
   var price = prices[sym] || 0;
   var ch = changes[sym] || 0;
   document.getElementById('dIcon').style.background = t.color;
-  document.getElementById('dIcon').style.color = (sym === 'DNA' || sym === 'ORO') ? '#000' : '#fff';
+  document.getElementById('dIcon').style.color = (sym === 'DNA' || sym === 'ORO' || sym === 'DIAMANTE') ? '#000' : '#fff';
   document.getElementById('dIcon').innerText = t.letter;
   document.getElementById('dName').innerText = sym;
   document.getElementById('dBalText').innerText = bal.toFixed(bal > 1 ? 4 : 6) + ' ' + sym;
@@ -332,7 +343,7 @@ function renderTokenList() {
     var ch = changes[sym] || 0;
     var chText = (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%';
     var chClass = ch >= 0 ? 'green' : 'red';
-    var txtColor = (sym === 'DNA' || sym === 'ORO') ? '#000' : '#fff';
+    var txtColor = (sym === 'DNA' || sym === 'ORO' || sym === 'DIAMANTE') ? '#000' : '#fff';
     html += '<div class="tok" onclick="openToken(\'' + sym + '\')">' +
       '<div style="display:flex;gap:12px;align-items:center">' +
         '<div class="tIcon" style="background:' + t.color + ';color:' + txtColor + '">' + t.letter + '</div>' +
@@ -523,4 +534,4 @@ window.addEventListener('load', function() {
 });
 </script>
 </body>
-  </html>
+</html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Uno intercambio</title>
+<title>Uno Intercambio</title>
 
 <script type="module">
   import { MiniKit } from 'https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@latest/+esm';
@@ -14,7 +14,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;padding-bottom:100px}
 .top{padding:14px 16px;display:flex;gap:12px;align-items:center;border-bottom:1px solid #f0f0f0}
-.avatar{width:48px;height:48px;border-radius:50%;background:#0B0E11;display:flex;align-items:center;justify-content:center;border:2px solid #f3ba2f}
+.avatar{width:48px;height:48px;border-radius:50%;background:#0B0E11;display:flex;align-items:center;justify-content:center;border:2px solid #f3ba2f;color:#f3ba2f;font-weight:900}
 .big{font-size:34px;font-weight:900}
 .small{font-size:12px;opacity:.65}
 .green{color:#00b15c}
@@ -23,506 +23,439 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;p
 .btn{flex:1;background:#ffe6f4;color:#ff3ab2;border-radius:16px;padding:12px 4px;font-weight:700;text-align:center;font-size:13px;cursor:pointer}
 .tokens{padding:0 16px 20px}
 .tok{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid #f1f1f1;align-items:center}
-.tIcon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0}
-.nav{position:fixed;bottom:12px;left:16px;right:16px;background:#fff;border:1px solid #eee;border-radius:28px;display:flex;justify-content:space-around;padding:8px;z-index:20;box-shadow:0 4px 20px rgba(0,0,0,.08)}
-.nav div{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px}
-.nav div.active{background:#111;color:#fff}
-.main{margin:12px;padding:16px;border:2px solid #ffe6f4;border-radius:20px;min-height:55vh}
-.box{background:#f7f7f7;border-radius:14px;padding:14px;margin:10px 0}
-input{border:0;background:transparent;font-size:20px;font-weight:800;outline:none;width:100%}
-select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;font-size:12px;font-weight:700}
-.btnY{width:100%;padding:14px;border-radius:14px;border:0;background:#f3ba2f;font-weight:900;font-size:15px;cursor:pointer;margin-top:10px}
-.btnConnect{background:#f3ba2f;border:0;padding:9px 16px;border-radius:20px;font-weight:800;font-size:13px;cursor:pointer}
-.perc{display:flex;gap:6px;margin-top:10px}
-.perc button{flex:1;padding:9px;border-radius:20px;border:1px solid #111;background:#fff;font-weight:800;font-size:12px;cursor:pointer}
-.perc button.active{background:#111;color:#fff}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:20px;z-index:99}
-.modalBox{background:#fff;border-radius:20px;padding:20px;width:100%;max-width:340px;text-align:center}
-.live{font-size:11px;background:#00d9a5;color:#fff;padding:2px 8px;border-radius:8px}
+.tIcon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:14px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;display:flex;padding:10px 0;z-index:50}
+.nav div{flex:1;text-align:center;font-size:11px;color:#888;cursor:pointer}
+.nav .active{color:#111;font-weight:700}
+.screen{display:none;padding:16px}
+.screen.active{display:block}
+.card{background:#f8f8f8;border-radius:18px;padding:16px;margin-bottom:14px}
+input,select{width:100%;padding:14px;border-radius:14px;border:1px solid #ddd;font-size:16px;margin:8px 0}
+.primary{background:#111;color:#fff;border:none;border-radius:16px;padding:16px;width:100%;font-weight:700;font-size:16px;cursor:pointer;margin-top:12px}
+.primary:disabled{opacity:.5}
+.row{display:flex;justify-content:space-between;align-items:center;margin:8px 0}
+.badge{background:#f3ba2f;color:#000;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}
+.modal.show{display:flex}
+.modal-box{background:#fff;border-radius:20px;padding:24px;width:90%;max-width:360px;text-align:center}
 </style>
 </head>
 <body>
 
-<div id="home">
+<!-- HOME -->
+<div id="home" class="screen active">
   <div class="top">
-    <div class="avatar">
-      <svg viewBox="0 0 32 32" width="26" height="26"><path d="M16 7.5 L19.5 11 L16 14.5 L12.5 11 Z M11 12.5 L14.5 16 L11 19.5 L7.5 16 Z M21 12.5 L24.5 16 L21 19.5 L17.5 16 Z M16 17.5 L19.5 21 L16 24.5 L12.5 21 Z" fill="#F3BA2F"/></svg>
-    </div>
+    <div class="avatar">U</div>
     <div style="flex:1">
-      <b style="font-size:16px">Uno intercambio</b>
+      <div style="font-weight:700">Uno Intercambio</div>
       <div class="small" id="walletInfo">No conectado • World Chain</div>
     </div>
-    <button class="btnConnect" id="btnConnect" onclick="connectWallet()">Conectar</button>
+    <button id="btnConnect" onclick="connectWallet()" style="background:#f3ba2f;border:none;padding:10px 16px;border-radius:12px;font-weight:700;cursor:pointer">Conectar</button>
   </div>
 
-  <div style="padding:16px">
+  <div style="padding:20px 16px">
+    <div class="small">Balance total</div>
     <div class="big" id="totalUsd">$0.00</div>
-    <div class="small"><span class="green">Precios en vivo</span> <span class="live">LIVE</span></div>
+    <div class="small" id="wldBalanceText">0 WLD</div>
   </div>
 
   <div class="btns">
-    <div class="btn" onclick="go('swap')">⇆ Swap</div>
-    <div class="btn" onclick="go('earn')">↗ Ganar</div>
-    <div class="btn" onclick="go('send')">↗ Enviar</div>
-    <div class="btn" onclick="go('recv')">↓ Recibir</div>
+    <div class="btn" onclick="showScreen('swap')">Swap</div>
+    <div class="btn" onclick="showScreen('send')">Enviar</div>
+    <div class="btn" onclick="loadRealBalances()">Actualizar</div>
   </div>
 
-  <div class="tokens">
-    <div style="font-weight:800;margin:10px 0 6px">World Chain</div>
-
-    <div class="tok" onclick="openToken('WLD')">
-      <div style="display:flex;gap:12px;align-items:center">
-        <div class="tIcon" style="background:#000">W</div>
-        <div>
-          <b>WLD</b>
-          <div class="small" id="wldBalanceText">0 WLD</div>
-        </div>
-      </div>
-      <div style="text-align:right">
-        <b id="wldUsd">$0.00</b>
-        <div class="small" id="wldChange">—</div>
-      </div>
-    </div>
-
-    <div class="tok">
-      <div style="display:flex;gap:12px;align-items:center">
-        <div class="tIcon" style="background:#ffcc00;color:#000">D</div>
-        <div><b>DNA</b><div class="small">Hélice</div></div>
-      </div>
-      <div style="text-align:right"><b id="dnaUsd">$0.00</b><div class="small" id="dnaChange">—</div></div>
-    </div>
-
-    <div class="tok">
-      <div style="display:flex;gap:12px;align-items:center">
-        <div class="tIcon" style="background:#ff7a00">H</div>
-        <div><b>HUB</b><div class="small">Hub</div></div>
-      </div>
-      <div style="text-align:right"><b id="hubUsd">$0.00</b><div class="small" id="hubChange">—</div></div>
-    </div>
-
-    <div class="tok">
-      <div style="display:flex;gap:12px;align-items:center">
-        <div class="tIcon" style="background:#ffd700;color:#000">O</div>
-        <div><b>ORO</b><div class="small">Oro</div></div>
-      </div>
-      <div style="text-align:right"><b id="oroUsd">$0.00</b><div class="small" id="oroChange">—</div></div>
-    </div>
-
-    <div style="font-weight:800;margin:18px 0 6px">Polygon</div>
-
-    <div class="tok">
-      <div style="display:flex;gap:12px;align-items:center">
-        <div class="tIcon" style="background:#7b3cff">P</div>
-        <div><b>POL</b><div class="small">Polygon</div></div>
-      </div>
-      <div style="text-align:right"><b id="polUsd">$0.00</b><div class="small" id="polChange">—</div></div>
-    </div>
-
-    <div class="tok">
-      <div style="display:flex;gap:12px;align-items:center">
-        <div class="tIcon" style="background:#2775ca">$</div>
-        <div><b>USDC</b><div class="small">USD Coin</div></div>
-      </div>
-      <div style="text-align:right"><b id="usdcUsd">$1.00</b><div class="small green">0.00%</div></div>
-    </div>
-
-    <div class="tok">
-      <div style="display:flex;gap:12px;align-items:center">
-        <div class="tIcon" style="background:#00a87e">T</div>
-        <div><b>USDT</b><div class="small">Tether</div></div>
-      </div>
-      <div style="text-align:right"><b id="usdtUsd">$1.00</b><div class="small green">0.00%</div></div>
-    </div>
-  </div>
+  <div class="tokens" id="tokenList"></div>
 </div>
 
 <!-- SWAP -->
-<div id="swap" style="display:none">
-  <div class="main">
-    <h3 style="text-align:center;margin-bottom:4px">Swap - 0.5% + gas</h3>
-    <div class="small" style="text-align:center;margin-bottom:12px">World Chain ↔ Polygon • Precios en vivo</div>
-
-    <div class="box">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-        <span class="small">Vendes <b id="bF">WLD</b></span>
-        <span class="small">Saldo: <span id="saldoTxt">0</span></span>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input id="fAmt" type="number" value="0" style="flex:1" oninput="calc()">
-        <select id="fNet" onchange="upd()">
-          <option value="world">World Chain</option>
-          <option value="polygon">Polygon</option>
-        </select>
-        <select id="fSel" onchange="calc()"></select>
-      </div>
-      <div class="perc">
-        <button onclick="setPerc(25)">25%</button>
-        <button onclick="setPerc(50)">50%</button>
-        <button onclick="setPerc(75)">75%</button>
-        <button onclick="setPerc(100)" class="active">100%</button>
-      </div>
-    </div>
-
-    <div style="text-align:center;margin:12px 0;font-size:22px;cursor:pointer" onclick="swapNets()">↕️ Cambiar red</div>
-
-    <div class="box">
-      <div class="small" style="margin-bottom:8px">Recibes <b id="bT">POL</b></div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input id="tAmt" readonly style="flex:1">
-        <select id="tNet" onchange="upd()">
-          <option value="world">World Chain</option>
-          <option value="polygon" selected>Polygon</option>
-        </select>
-        <select id="tSel" onchange="calc()"></select>
-      </div>
-    </div>
-
-    <div class="box" style="font-size:13px">
-      <div style="display:flex;justify-content:space-between"><span>Comisión plataforma (0.5%):</span><b id="feeUno">$0.00</b></div>
-      <div style="display:flex;justify-content:space-between;margin-top:4px"><span>Fee puente (si aplica):</span><b id="feeBridge">$0.00</b></div>
-      <div style="display:flex;justify-content:space-between;margin-top:6px;font-weight:800;border-top:1px dashed #ccc;padding-top:6px">
-        <span>Total comisión:</span><b id="totalCommission">$0.00</b>
-      </div>
-    </div>
-
-    <button class="btnY" onclick="doSwap()">Intercambiar Ahora</button>
-    <button onclick="go('home')" style="width:100%;border:0;background:transparent;margin-top:10px;cursor:pointer">← Volver</button>
+<div id="swap" class="screen">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+    <div onclick="showScreen('home')" style="font-size:22px;cursor:pointer">←</div>
+    <div style="font-weight:800;font-size:18px">Intercambiar</div>
   </div>
+
+  <div class="card">
+    <div class="small">De</div>
+    <select id="fromToken" onchange="calcSwap()"></select>
+    <input type="number" id="fromAmount" placeholder="0.0" oninput="calcSwap()">
+    <div class="row">
+      <div class="small">Saldo: <span id="fromBal">0</span></div>
+      <div>
+        <span class="badge" onclick="setPerc(25)">25%</span>
+        <span class="badge" onclick="setPerc(50)">50%</span>
+        <span class="badge" onclick="setPerc(100)">MAX</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin:8px 0;font-size:22px">↓</div>
+
+  <div class="card">
+    <div class="small">A</div>
+    <select id="toToken" onchange="calcSwap()"></select>
+    <input type="number" id="toAmount" placeholder="0.0" readonly>
+  </div>
+
+  <div class="card" style="font-size:13px">
+    <div class="row"><span>Comisión</span><span>0.5%</span></div>
+    <div class="row"><span>Red</span><span>World Chain</span></div>
+  </div>
+
+  <button class="primary" id="btnSwap" onclick="doSwap()">Intercambiar</button>
 </div>
 
-<div id="earn" style="display:none"><div class="main"><h3 style="text-align:center">Ganar</h3><p class="small" style="text-align:center;margin:40px 0">Próximamente</p><button onclick="go('home')" class="btnY" style="background:#eee">← Volver</button></div></div>
-<div id="send" style="display:none"><div class="main"><h3 style="text-align:center">Enviar</h3><p class="small" style="text-align:center;margin:40px 0">Próximamente</p><button onclick="go('home')" class="btnY" style="background:#eee">← Volver</button></div></div>
-
-<div id="recv" style="display:none">
-  <div class="main">
-    <h3 style="text-align:center">Recibir</h3>
-    <div style="text-align:center;margin-top:20px">
-      <div style="font-size:12px;font-weight:700;background:#f5f5f5;padding:14px;border-radius:12px;word-break:break-all" id="recvAddr">—</div>
-      <button class="btnY" onclick="copyAddr()">📋 Copiar dirección</button>
-    </div>
-    <button onclick="go('home')" class="btnY" style="background:#eee;margin-top:12px">← Volver</button>
+<!-- SEND -->
+<div id="send" class="screen">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+    <div onclick="showScreen('home')" style="font-size:22px;cursor:pointer">←</div>
+    <div style="font-weight:800;font-size:18px">Enviar</div>
   </div>
+
+  <div class="card">
+    <div class="small">Token</div>
+    <select id="sendToken"></select>
+    <div class="small">Destinatario</div>
+    <input type="text" id="sendTo" placeholder="0x...">
+    <div class="small">Cantidad</div>
+    <input type="number" id="sendAmount" placeholder="0.0">
+    <div class="small">Saldo: <span id="sendBal">0</span></div>
+  </div>
+
+  <button class="primary" onclick="doSend()">Enviar</button>
 </div>
 
-<div id="tokenDetail" style="display:none">
-  <div class="main">
-    <button onclick="go('home')" style="border:0;background:#f0f0f0;padding:8px 14px;border-radius:20px;font-weight:700">← Volver</button>
-    <div style="text-align:center;margin-top:24px">
-      <div class="tIcon" style="width:64px;height:64px;font-size:28px;margin:0 auto;background:#000">W</div>
-      <h2 style="margin:12px 0 4px">WLD</h2>
-      <div class="small" id="dSym">0 WLD</div>
-      <div style="font-size:32px;font-weight:900;margin-top:12px" id="dPrice">$0.00</div>
-      <div id="dChange" class="small">—</div>
-      <div class="box" style="margin-top:20px;display:flex;justify-content:space-between;font-weight:800;font-size:18px">
-        <span id="dBal">0 WLD</span>
-        <span id="dUsd">$0.00</span>
-      </div>
-    </div>
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <div id="modalMsg" style="font-size:16px;margin-bottom:16px"></div>
+    <button class="primary" onclick="closeModal()">OK</button>
   </div>
 </div>
 
 <div class="nav">
-  <div id="navHome" class="active" onclick="go('home')">🏠</div>
-  <div onclick="go('swap')">⇆</div>
-  <div onclick="go('earn')">💰</div>
-  <div style="background:#ff3ab2;color:#fff" onclick="go('recv')">↓</div>
-</div>
-
-<div id="modal" class="modal" onclick="this.style.display='none'">
-  <div class="modalBox">
-    <div style="font-size:32px">✅</div>
-    <div id="modalTxt" style="font-weight:800;margin:12px 0"></div>
-    <button class="btnY" onclick="document.getElementById('modal').style.display='none'">Cerrar</button>
-  </div>
+  <div class="active" onclick="showScreen('home')">Inicio</div>
+  <div onclick="showScreen('swap')">Swap</div>
+  <div onclick="showScreen('send')">Enviar</div>
 </div>
 
 <script>
-const WLD_CONTRACT = '0x2cFc85d8E48F8EAB294be644d9E25C3030863003';
 const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
-const BRIDGE_FEE_RATE = 0.02; // 2% extra si cruzas redes
-
-let prices = { WLD: 0.33, DNA: 0.00005, HUB: 0.000003, ORO: 0.015, POL: 0.45, USDC: 1, USDT: 1, WETH: 3000 };
-let changes = { WLD: 0, DNA: 0, HUB: 0, ORO: 0, POL: 0, USDC: 0, USDT: 0, WETH: 0 };
+const CHAIN_ID = 480;
 
 const TOKENS = {
-  world: [
-    {s: 'WLD', p: 0.33},
-    {s: 'DNA', p: 0.00005},
-    {s: 'HUB', p: 0.000003},
-    {s: 'ORO', p: 0.015},
-    {s: 'USDC', p: 1}
-  ],
-  polygon: [
-    {s: 'POL', p: 0.45},
-    {s: 'USDC', p: 1},
-    {s: 'USDT', p: 1},
-    {s: 'WETH', p: 3000}
-  ]
+  WLD:  { address: '0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals: 18, symbol: 'WLD',  color: '#000' },
+  DNA:  { address: '0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals: 18, symbol: 'DNA',  color: '#6366f1' },
+  HUB:  { address: '0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals: 18, symbol: 'HUB',  color: '#0ea5e9' },
+  ORO:  { address: '0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals: 18, symbol: 'ORO',  color: '#f59e0b' },
+  USDC: { address: '0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals: 6,  symbol: 'USDC', color: '#2775ca' },
+  WETH: { address: '0x4200000000000000000000000000000000000006', decimals: 18, symbol: 'WETH', color: '#627eea' }
 };
 
+const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
+const PERMIT2     = '0x000000000022D473030F116dDEE9F6B43aC78BA3';
+
 let currentAccount = null;
-let realWldBalance = 0;
+let balances = {};
+let prices = { WLD: 0.40, DNA: 0.00000045, HUB: 0.0000008, ORO: 0.002, USDC: 1, WETH: 3400 };
 
-function go(page) {
-  var pages = ['home','swap','earn','send','recv','tokenDetail'];
-  for (var i = 0; i < pages.length; i++) {
-    var el = document.getElementById(pages[i]);
-    if (el) el.style.display = (pages[i] === page) ? 'block' : 'none';
-  }
-  var navs = document.querySelectorAll('.nav div');
-  for (var j = 0; j < navs.length; j++) navs[j].classList.remove('active');
-  if (page === 'home') document.getElementById('navHome').classList.add('active');
-  if (page === 'recv' && currentAccount) document.getElementById('recvAddr').innerText = currentAccount;
-  if (page === 'swap') { upd(); calc(); }
+// ========== UI ==========
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav div').forEach(d => d.classList.remove('active'));
+  if (id === 'home') document.querySelectorAll('.nav div')[0].classList.add('active');
+  if (id === 'swap') document.querySelectorAll('.nav div')[1].classList.add('active');
+  if (id === 'send') document.querySelectorAll('.nav div')[2].classList.add('active');
+  if (id === 'swap' || id === 'send') fillSelects();
 }
 
-function openToken(s) {
-  if (s !== 'WLD') return;
-  go('tokenDetail');
-  document.getElementById('dSym').innerText = realWldBalance.toFixed(4) + ' WLD';
-  document.getElementById('dBal').innerText = realWldBalance.toFixed(4) + ' WLD';
-  document.getElementById('dUsd').innerText = '$' + (realWldBalance * prices.WLD).toFixed(2);
-  document.getElementById('dPrice').innerText = '$' + prices.WLD.toFixed(4);
-  var ch = changes.WLD;
-  var el = document.getElementById('dChange');
-  el.innerText = (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '% hoy';
-  el.className = 'small ' + (ch >= 0 ? 'green' : 'red');
+function showModal(msg) {
+  document.getElementById('modalMsg').innerText = msg;
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
 }
 
-function upd() {
-  var fNet = document.getElementById('fNet').value;
-  var tNet = document.getElementById('tNet').value;
-  var fSel = document.getElementById('fSel');
-  var tSel = document.getElementById('tSel');
-
-  var fHtml = '';
-  for (var i = 0; i < TOKENS[fNet].length; i++) {
-    fHtml += '<option value="' + TOKENS[fNet][i].s + '">' + TOKENS[fNet][i].s + '</option>';
-  }
-  fSel.innerHTML = fHtml;
-
-  var tHtml = '';
-  for (var j = 0; j < TOKENS[tNet].length; j++) {
-    tHtml += '<option value="' + TOKENS[tNet][j].s + '">' + TOKENS[tNet][j].s + '</option>';
-  }
-  tSel.innerHTML = tHtml;
-
-  calc();
-}
-
-function setPerc(p) {
-  var btns = document.querySelectorAll('.perc button');
-  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
-  event.target.classList.add('active');
-
-  var fNet = document.getElementById('fNet').value;
-  var fSel = document.getElementById('fSel').value;
-  var bal = (fNet === 'world' && fSel === 'WLD') ? realWldBalance : 0;
-  document.getElementById('fAmt').value = (bal * p / 100).toFixed(4);
-  calc();
-}
-
-function calc() {
-  var fNet = document.getElementById('fNet').value;
-  var tNet = document.getElementById('tNet').value;
-  var fSel = document.getElementById('fSel').value;
-  var tSel = document.getElementById('tSel').value;
-  var fAmt = parseFloat(document.getElementById('fAmt').value) || 0;
-
-  var fd = null, td = null;
-  for (var i = 0; i < TOKENS[fNet].length; i++) {
-    if (TOKENS[fNet][i].s === fSel) fd = TOKENS[fNet][i];
-  }
-  for (var j = 0; j < TOKENS[tNet].length; j++) {
-    if (TOKENS[tNet][j].s === tSel) td = TOKENS[tNet][j];
-  }
-  if (!fd) fd = TOKENS.world[0];
-  if (!td) td = TOKENS.polygon[0];
-
-  var fromPrice = prices[fd.s] || fd.p;
-  var toPrice = prices[td.s] || td.p;
-
-  var usd = fAmt * fromPrice;
-  var feeUno = usd * 0.005;
-  var bridgeFee = (fNet !== tNet) ? (usd * BRIDGE_FEE_RATE) : 0;
-  var out = (usd - feeUno - bridgeFee) / toPrice;
-
-  document.getElementById('bF').innerText = fd.s;
-  document.getElementById('bT').innerText = td.s;
-  document.getElementById('tAmt').value = out > 0 ? out.toFixed(6) : '0';
-  document.getElementById('feeUno').innerText = '$' + feeUno.toFixed(4);
-  document.getElementById('feeBridge').innerText = '$' + bridgeFee.toFixed(4);
-  document.getElementById('totalCommission').innerText = '$' + (feeUno + bridgeFee).toFixed(4);
-  document.getElementById('saldoTxt').innerText = (fNet === 'world' && fSel === 'WLD') ? realWldBalance.toFixed(4) : '0';
-}
-
-function swapNets() {
-  var f = document.getElementById('fNet');
-  var t = document.getElementById('tNet');
-  var temp = f.value;
-  f.value = t.value;
-  t.value = temp;
-  upd();
-}
-
-function doSwap() {
-  if (!currentAccount) {
-    alert('Conecta tu wallet primero');
-    return;
-  }
-  var amt = document.getElementById('fAmt').value;
-  var from = document.getElementById('fSel').value;
-  var to = document.getElementById('tSel').value;
-  var total = document.getElementById('totalCommission').innerText;
-  showOk('Swap solicitado:\n' + amt + ' ' + from + ' → ' + to + '\n\nComisión total: ' + total + '\n(Transacción real próximamente)');
-}
-
-function showOk(msg) {
-  document.getElementById('modalTxt').innerText = msg;
-  document.getElementById('modal').style.display = 'flex';
-}
-
-function copyAddr() {
-  if (currentAccount) {
-    navigator.clipboard.writeText(currentAccount);
-    showOk('Dirección copiada');
-  }
-}
-
-// Precios en vivo
-async function fetchLivePrices() {
-  try {
-    var res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=worldcoin-wld,polygon-ecosystem-token,usd-coin,tether,weth&vs_currencies=usd&include_24hr_change=true');
-    var data = await res.json();
-
-    if (data['worldcoin-wld']) {
-      prices.WLD = data['worldcoin-wld'].usd || prices.WLD;
-      changes.WLD = data['worldcoin-wld'].usd_24h_change || 0;
-    }
-    if (data['polygon-ecosystem-token']) {
-      prices.POL = data['polygon-ecosystem-token'].usd || prices.POL;
-      changes.POL = data['polygon-ecosystem-token'].usd_24h_change || 0;
-    }
-    if (data['usd-coin']) {
-      prices.USDC = data['usd-coin'].usd || 1;
-      changes.USDC = data['usd-coin'].usd_24h_change || 0;
-    }
-    if (data['tether']) {
-      prices.USDT = data['tether'].usd || 1;
-      changes.USDT = data['tether'].usd_24h_change || 0;
-    }
-    if (data['weth']) {
-      prices.WETH = data['weth'].usd || prices.WETH;
-      changes.WETH = data['weth'].usd_24h_change || 0;
-    }
-
-    updatePriceUI();
-    calc();
-  } catch (e) {
-    console.log('Error precios', e);
-  }
-}
-
-function updatePriceUI() {
-  document.getElementById('wldUsd').innerText = '$' + (realWldBalance * prices.WLD).toFixed(2);
-  var wldCh = document.getElementById('wldChange');
-  wldCh.innerText = (changes.WLD >= 0 ? '▲ +' : '▼ ') + Math.abs(changes.WLD).toFixed(2) + '%';
-  wldCh.className = 'small ' + (changes.WLD >= 0 ? 'green' : 'red');
-
-  document.getElementById('polUsd').innerText = '$' + prices.POL.toFixed(4);
-  var polCh = document.getElementById('polChange');
-  polCh.innerText = (changes.POL >= 0 ? '▲ +' : '▼ ') + Math.abs(changes.POL).toFixed(2) + '%';
-  polCh.className = 'small ' + (changes.POL >= 0 ? 'green' : 'red');
-
-  document.getElementById('usdcUsd').innerText = '$' + prices.USDC.toFixed(2);
-  document.getElementById('usdtUsd').innerText = '$' + prices.USDT.toFixed(2);
-
-  document.getElementById('totalUsd').innerText = '$' + (realWldBalance * prices.WLD).toFixed(2);
-}
-
-// Conexión
+// ========== WALLET ==========
 async function connectWallet() {
-  if (window.MiniKit) {
-    try {
-      MiniKit.install();
-      var result = await MiniKit.walletAuth({
-        nonce: Math.random().toString(36).substring(2, 12),
-        statement: 'Conectar Uno Intercambio'
-      });
-      if (result && result.data && result.data.address) {
-        currentAccount = result.data.address;
-        updateUI(currentAccount);
-        await loadRealBalances();
-        return;
-      }
-    } catch (e) { console.log(e); }
-  }
-
-  if (window.ethereum) {
-    try {
-      var accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      if (accs[0]) {
-        currentAccount = accs[0];
-        updateUI(currentAccount);
-        await loadRealBalances();
-      }
-    } catch (e) {
-      alert('Error: ' + e.message);
+  try {
+    if (!window.MiniKit) {
+      showModal('Abre esta app dentro de World App');
+      return;
     }
-  } else {
-    alert('Abre esta página dentro de World App');
+    await MiniKit.install();
+    const { finalPayload } = await MiniKit.commandsAsync.walletAuth({
+      nonce: Math.random().toString(36).slice(2),
+      requestId: '0',
+      expirationTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      notBefore: new Date(Date.now() - 24 * 60 * 60 * 1000),
+      statement: 'Conectar Uno Intercambio'
+    });
+    if (finalPayload.status === 'success') {
+      currentAccount = finalPayload.address;
+      document.getElementById('walletInfo').innerText = currentAccount.slice(0,6) + '...' + currentAccount.slice(-4) + ' • World Chain';
+      document.getElementById('btnConnect').innerText = 'Desconectar';
+      document.getElementById('btnConnect').onclick = disconnectWallet;
+      document.getElementById('btnConnect').style.background = '#111';
+      document.getElementById('btnConnect').style.color = '#fff';
+      await loadRealBalances();
+    }
+  } catch (e) {
+    console.error(e);
+    showModal('Error al conectar: ' + (e.message || e));
   }
-}
-
-function updateUI(addr) {
-  document.getElementById('walletInfo').innerHTML = addr.slice(0,6) + '...' + addr.slice(-4) + ' • World Chain';
-  var btn = document.getElementById('btnConnect');
-  btn.innerText = 'Desconectar';
-  btn.onclick = disconnectWallet;
-  btn.style.background = '#111';
-  btn.style.color = '#fff';
 }
 
 function disconnectWallet() {
   currentAccount = null;
-  realWldBalance = 0;
-  document.getElementById('walletInfo').innerHTML = 'No conectado • World Chain';
-  document.getElementById('wldBalanceText').innerText = '0 WLD';
-  document.getElementById('wldUsd').innerText = '$0.00';
+  balances = {};
+  document.getElementById('walletInfo').innerText = 'No conectado • World Chain';
+  document.getElementById('btnConnect').innerText = 'Conectar';
+  document.getElementById('btnConnect').onclick = connectWallet;
+  document.getElementById('btnConnect').style.background = '#f3ba2f';
+  document.getElementById('btnConnect').style.color = '#000';
   document.getElementById('totalUsd').innerText = '$0.00';
-  var btn = document.getElementById('btnConnect');
-  btn.innerText = 'Conectar';
-  btn.onclick = connectWallet;
-  btn.style.background = '#f3ba2f';
-  btn.style.color = '#000';
+  document.getElementById('wldBalanceText').innerText = '0 WLD';
+  renderTokenList();
+}
+
+// ========== BALANCES REALES ==========
+async function rpcCall(method, params) {
+  const res = await fetch(WORLD_RPC, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params })
+  });
+  const json = await res.json();
+  return json.result;
+}
+
+async function getERC20Balance(tokenAddr, decimals) {
+  if (!currentAccount) return 0;
+  try {
+    const data = '0x70a08231' + currentAccount.slice(2).padStart(64, '0');
+    const result = await rpcCall('eth_call', [{ to: tokenAddr, data }, 'latest']);
+    if (!result || result === '0x') return 0;
+    return Number(BigInt(result)) / (10 ** decimals);
+  } catch (e) {
+    console.error(e);
+    return 0;
+  }
 }
 
 async function loadRealBalances() {
-  if (!currentAccount) return;
-  try {
-    var data = '0x70a08231' + currentAccount.slice(2).padStart(64, '0');
-    var res = await fetch(WORLD_RPC, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        jsonrpc: '2.0', id: 1,
-        method: 'eth_call',
-        params: [{to: WLD_CONTRACT, data: data}, 'latest']
-      })
-    });
-    var json = await res.json();
-    if (json.result) {
-      realWldBalance = Number(BigInt(json.result)) / 1e18;
-      document.getElementById('wldBalanceText').innerText = realWldBalance.toFixed(4) + ' WLD';
-      updatePriceUI();
-    }
-  } catch (e) { console.error(e); }
+  if (!currentAccount) {
+    showModal('Conecta tu wallet primero');
+    return;
+  }
+  showModal('Cargando saldos reales...');
+  for (const [sym, t] of Object.entries(TOKENS)) {
+    balances[sym] = await getERC20Balance(t.address, t.decimals);
+  }
+  closeModal();
+  updateUI();
+  renderTokenList();
 }
 
-window.addEventListener('load', function() {
-  if (window.MiniKit) try { MiniKit.install(); } catch(e){}
-  fetchLivePrices();
-  setInterval(fetchLivePrices, 60000);
+function updateUI() {
+  let total = 0;
+  for (const [sym, bal] of Object.entries(balances)) {
+    total += bal * (prices[sym] || 0);
+  }
+  document.getElementById('totalUsd').innerText = '$' + total.toFixed(2);
+  document.getElementById('wldBalanceText').innerText = (balances.WLD || 0).toFixed(4) + ' WLD';
+}
+
+function renderTokenList() {
+  const list = document.getElementById('tokenList');
+  list.innerHTML = '';
+  for (const [sym, t] of Object.entries(TOKENS)) {
+    const bal = balances[sym] || 0;
+    const usd = bal * (prices[sym] || 0);
+    list.innerHTML += `
+      <div class="tok">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="tIcon" style="background:\( {t.color}"> \){sym.slice(0,2)}</div>
+          <div>
+            <div style="font-weight:700">${sym}</div>
+            <div class="small">World Chain</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-weight:700">${bal.toFixed(bal > 1 ? 2 : 6)}</div>
+          <div class="small">$${usd.toFixed(2)}</div>
+        </div>
+      </div>`;
+  }
+}
+
+// ========== SELECTS ==========
+function fillSelects() {
+  const opts = Object.keys(TOKENS).map(s => `<option value="\( {s}"> \){s}</option>`).join('');
+  document.getElementById('fromToken').innerHTML = opts;
+  document.getElementById('toToken').innerHTML = opts;
+  document.getElementById('sendToken').innerHTML = opts;
+  document.getElementById('fromToken').value = 'WLD';
+  document.getElementById('toToken').value = 'USDC';
+  calcSwap();
+  updateSendBal();
+}
+
+function updateSendBal() {
+  const sym = document.getElementById('sendToken').value;
+  document.getElementById('sendBal').innerText = (balances[sym] || 0).toFixed(6) + ' ' + sym;
+}
+document.getElementById('sendToken')?.addEventListener('change', updateSendBal);
+
+// ========== CALC ==========
+function calcSwap() {
+  const from = document.getElementById('fromToken').value;
+  const to = document.getElementById('toToken').value;
+  const amount = parseFloat(document.getElementById('fromAmount').value) || 0;
+  document.getElementById('fromBal').innerText = (balances[from] || 0).toFixed(6) + ' ' + from;
+
+  if (amount <= 0 || !prices[from] || !prices[to]) {
+    document.getElementById('toAmount').value = '';
+    return;
+  }
+  const usd = amount * prices[from];
+  const received = (usd / prices[to]) * 0.995; // 0.5% fee
+  document.getElementById('toAmount').value = received.toFixed(6);
+}
+
+function setPerc(p) {
+  const from = document.getElementById('fromToken').value;
+  const bal = balances[from] || 0;
+  document.getElementById('fromAmount').value = (bal * p / 100).toFixed(6);
+  calcSwap();
+}
+
+// ========== REAL SWAP ==========
+function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn, amountOutMinimum) {
+  // exactInputSingle((address,address,uint24,address,uint256,uint256,uint160))
+  const selector = '0x04e45aaf';
+  const params = [
+    tokenIn.slice(2).padStart(64, '0'),
+    tokenOut.slice(2).padStart(64, '0'),
+    fee.toString(16).padStart(64, '0'),
+    recipient.slice(2).padStart(64, '0'),
+    BigInt(amountIn).toString(16).padStart(64, '0'),
+    BigInt(amountOutMinimum).toString(16).padStart(64, '0'),
+    '0'.padStart(64, '0') // sqrtPriceLimitX96 = 0
+  ].join('');
+  return selector + params;
+}
+
+function encodeApprove(spender, amount) {
+  // approve(address,uint256)
+  return '0x095ea7b3' +
+    spender.slice(2).padStart(64, '0') +
+    BigInt(amount).toString(16).padStart(64, '0');
+}
+
+async function doSwap() {
+  if (!currentAccount) return showModal('Conecta tu wallet primero');
+  const fromSym = document.getElementById('fromToken').value;
+  const toSym = document.getElementById('toToken').value;
+  const amount = parseFloat(document.getElementById('fromAmount').value);
+
+  if (!amount || amount <= 0) return showModal('Ingresa una cantidad válida');
+  if (fromSym === toSym) return showModal('Elige tokens diferentes');
+  if ((balances[fromSym] || 0) < amount) return showModal('Saldo insuficiente');
+
+  const from = TOKENS[fromSym];
+  const to = TOKENS[toSym];
+  const amountIn = BigInt(Math.floor(amount * (10 ** from.decimals)));
+
+  try {
+    showModal('Confirmando en World App...');
+
+    // 1) Approve
+    // 2) exactInputSingle (fee 3000 = 0.3%)
+    const txs = [
+      {
+        address: from.address,
+        data: encodeApprove(SWAP_ROUTER, amountIn)
+      },
+      {
+        address: SWAP_ROUTER,
+        data: encodeExactInputSingle(
+          from.address,
+          to.address,
+          3000,
+          currentAccount,
+          amountIn,
+          0n // amountOutMinimum = 0 (puedes mejorar con quote real)
+        )
+      }
+    ];
+
+    const result = await MiniKit.commandsAsync.sendTransaction({
+      transaction: txs
+    });
+
+    if (result.finalPayload?.status === 'success') {
+      showModal('¡Swap enviado!\nUserOp: ' + (result.finalPayload.userOpHash || '').slice(0, 18) + '...');
+      setTimeout(loadRealBalances, 4000);
+    } else {
+      showModal('Swap cancelado o falló');
+    }
+  } catch (e) {
+    console.error(e);
+    showModal('Error en swap: ' + (e.message || e));
+  }
+}
+
+// ========== REAL SEND ==========
+function encodeTransfer(to, amount) {
+  return '0xa9059cbb' +
+    to.slice(2).padStart(64, '0') +
+    BigInt(amount).toString(16).padStart(64, '0');
+}
+
+async function doSend() {
+  if (!currentAccount) return showModal('Conecta tu wallet primero');
+  const sym = document.getElementById('sendToken').value;
+  const to = document.getElementById('sendTo').value.trim();
+  const amount = parseFloat(document.getElementById('sendAmount').value);
+
+  if (!to || !to.startsWith('0x') || to.length !== 42) return showModal('Dirección inválida');
+  if (!amount || amount <= 0) return showModal('Cantidad inválida');
+  if ((balances[sym] || 0) < amount) return showModal('Saldo insuficiente');
+
+  const token = TOKENS[sym];
+  const amountRaw = BigInt(Math.floor(amount * (10 ** token.decimals)));
+
+  try {
+    showModal('Confirmando envío...');
+    const result = await MiniKit.commandsAsync.sendTransaction({
+      transaction: [{
+        address: token.address,
+        data: encodeTransfer(to, amountRaw)
+      }]
+    });
+
+    if (result.finalPayload?.status === 'success') {
+      showModal('¡Envío enviado correctamente!');
+      setTimeout(loadRealBalances, 4000);
+    } else {
+      showModal('Envío cancelado');
+    }
+  } catch (e) {
+    console.error(e);
+    showModal('Error: ' + (e.message || e));
+  }
+}
+
+// ========== INIT ==========
+window.addEventListener('load', async () => {
+  if (window.MiniKit) {
+    try { await MiniKit.install(); } catch(e) {}
+  }
+  renderTokenList();
+  fillSelects();
 });
 </script>
 </body>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Uno Intercambio</title>
+<title>Uno intercambio</title>
 
 <script type="module">
   import { MiniKit } from 'https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@latest/+esm';
@@ -14,7 +14,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;padding-bottom:100px}
 .top{padding:14px 16px;display:flex;gap:12px;align-items:center;border-bottom:1px solid #f0f0f0}
-.avatar{width:48px;height:48px;border-radius:50%;background:#0B0E11;display:flex;align-items:center;justify-content:center;border:2px solid #f3ba2f;color:#f3ba2f;font-weight:900}
+.avatar{width:48px;height:48px;border-radius:50%;background:#0B0E11;display:flex;align-items:center;justify-content:center;border:2px solid #f3ba2f}
 .big{font-size:34px;font-weight:900}
 .small{font-size:12px;opacity:.65}
 .green{color:#00b15c}
@@ -23,222 +23,249 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;p
 .btn{flex:1;background:#ffe6f4;color:#ff3ab2;border-radius:16px;padding:12px 4px;font-weight:700;text-align:center;font-size:13px;cursor:pointer}
 .tokens{padding:0 16px 20px}
 .tok{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid #f1f1f1;align-items:center}
-.tIcon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:14px}
-.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;display:flex;padding:10px 0;z-index:50}
-.nav div{flex:1;text-align:center;font-size:11px;color:#888;cursor:pointer}
-.nav .active{color:#111;font-weight:700}
-.screen{display:none;padding:16px}
-.screen.active{display:block}
-.card{background:#f8f8f8;border-radius:18px;padding:16px;margin-bottom:14px}
-input,select{width:100%;padding:14px;border-radius:14px;border:1px solid #ddd;font-size:16px;margin:8px 0}
-.primary{background:#111;color:#fff;border:none;border-radius:16px;padding:16px;width:100%;font-weight:700;font-size:16px;cursor:pointer;margin-top:12px}
-.primary:disabled{opacity:.5}
-.row{display:flex;justify-content:space-between;align-items:center;margin:8px 0}
-.badge{background:#f3ba2f;color:#000;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}
-.modal.show{display:flex}
-.modal-box{background:#fff;border-radius:20px;padding:24px;width:90%;max-width:360px;text-align:center}
+.tIcon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0}
+.nav{position:fixed;bottom:12px;left:16px;right:16px;background:#fff;border:1px solid #eee;border-radius:28px;display:flex;justify-content:space-around;padding:8px;z-index:20;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.nav div{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px}
+.nav div.active{background:#111;color:#fff}
+.main{margin:12px;padding:16px;border:2px solid #ffe6f4;border-radius:20px;min-height:55vh}
+.box{background:#f7f7f7;border-radius:14px;padding:14px;margin:10px 0}
+input{border:0;background:transparent;font-size:20px;font-weight:800;outline:none;width:100%}
+select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;font-size:12px;font-weight:700}
+.btnY{width:100%;padding:14px;border-radius:14px;border:0;background:#f3ba2f;font-weight:900;font-size:15px;cursor:pointer;margin-top:10px}
+.btnConnect{background:#f3ba2f;border:0;padding:9px 16px;border-radius:20px;font-weight:800;font-size:13px;cursor:pointer}
+.perc{display:flex;gap:6px;margin-top:10px}
+.perc button{flex:1;padding:9px;border-radius:20px;border:1px solid #111;background:#fff;font-weight:800;font-size:12px;cursor:pointer}
+.perc button.active{background:#111;color:#fff}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:20px;z-index:99}
+.modalBox{background:#fff;border-radius:20px;padding:20px;width:100%;max-width:340px;text-align:center}
+.live{font-size:11px;background:#00d9a5;color:#fff;padding:2px 8px;border-radius:8px}
 </style>
 </head>
 <body>
 
-<!-- HOME -->
-<div id="home" class="screen active">
+<div id="home">
   <div class="top">
-    <div class="avatar">U</div>
+    <div class="avatar">
+      <svg viewBox="0 0 32 32" width="26" height="26"><path d="M16 7.5 L19.5 11 L16 14.5 L12.5 11 Z M11 12.5 L14.5 16 L11 19.5 L7.5 16 Z M21 12.5 L24.5 16 L21 19.5 L17.5 16 Z M16 17.5 L19.5 21 L16 24.5 L12.5 21 Z" fill="#F3BA2F"/></svg>
+    </div>
     <div style="flex:1">
-      <div style="font-weight:700">Uno Intercambio</div>
+      <b style="font-size:16px">Uno intercambio</b>
       <div class="small" id="walletInfo">No conectado • World Chain</div>
     </div>
-    <button id="btnConnect" onclick="connectWallet()" style="background:#f3ba2f;border:none;padding:10px 16px;border-radius:12px;font-weight:700;cursor:pointer">Conectar</button>
+    <button class="btnConnect" id="btnConnect" onclick="connectWallet()">Conectar</button>
   </div>
 
-  <div style="padding:20px 16px">
-    <div class="small">Balance total</div>
+  <div style="padding:16px">
     <div class="big" id="totalUsd">$0.00</div>
-    <div class="small" id="wldBalanceText">0 WLD</div>
+    <div class="small"><span class="green">Precios en vivo</span> <span class="live">LIVE</span></div>
   </div>
 
   <div class="btns">
-    <div class="btn" onclick="showScreen('swap')">Swap</div>
-    <div class="btn" onclick="showScreen('send')">Enviar</div>
-    <div class="btn" onclick="loadRealBalances()">Actualizar</div>
+    <div class="btn" onclick="go('swap')">⇆ Swap</div>
+    <div class="btn" onclick="go('earn')">↗ Ganar</div>
+    <div class="btn" onclick="go('send')">↗ Enviar</div>
+    <div class="btn" onclick="go('recv')">↓ Recibir</div>
   </div>
 
-  <div class="tokens" id="tokenList"></div>
+  <div class="tokens" id="tokenList">
+    <!-- se llena con JS -->
+  </div>
 </div>
 
 <!-- SWAP -->
-<div id="swap" class="screen">
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-    <div onclick="showScreen('home')" style="font-size:22px;cursor:pointer">←</div>
-    <div style="font-weight:800;font-size:18px">Intercambiar</div>
-  </div>
+<div id="swap" style="display:none">
+  <div class="main">
+    <h3 style="text-align:center;margin-bottom:4px">Swap - World Chain</h3>
+    <div class="small" style="text-align:center;margin-bottom:12px">Solo tokens de World Chain • Transacciones reales</div>
 
-  <div class="card">
-    <div class="small">De</div>
-    <select id="fromToken" onchange="calcSwap()"></select>
-    <input type="number" id="fromAmount" placeholder="0.0" oninput="calcSwap()">
-    <div class="row">
-      <div class="small">Saldo: <span id="fromBal">0</span></div>
-      <div>
-        <span class="badge" onclick="setPerc(25)">25%</span>
-        <span class="badge" onclick="setPerc(50)">50%</span>
-        <span class="badge" onclick="setPerc(100)">MAX</span>
+    <div class="box">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span class="small">Vendes <b id="bF">WLD</b></span>
+        <span class="small">Saldo: <span id="saldoTxt">0</span></span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="fAmt" type="number" value="0" style="flex:1" oninput="calc()">
+        <select id="fSel" onchange="calc()"></select>
+      </div>
+      <div class="perc">
+        <button onclick="setPerc(25)">25%</button>
+        <button onclick="setPerc(50)">50%</button>
+        <button onclick="setPerc(75)">75%</button>
+        <button onclick="setPerc(100)" class="active">100%</button>
       </div>
     </div>
+
+    <div style="text-align:center;margin:12px 0;font-size:22px">↕️</div>
+
+    <div class="box">
+      <div class="small" style="margin-bottom:8px">Recibes <b id="bT">USDC</b></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="tAmt" readonly style="flex:1">
+        <select id="tSel" onchange="calc()"></select>
+      </div>
+    </div>
+
+    <div class="box" style="font-size:13px">
+      <div style="display:flex;justify-content:space-between"><span>Comisión plataforma (0.5%):</span><b id="feeUno">$0.00</b></div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;font-weight:800;border-top:1px dashed #ccc;padding-top:6px">
+        <span>Total comisión:</span><b id="totalCommission">$0.00</b>
+      </div>
+    </div>
+
+    <button class="btnY" onclick="doSwap()">Intercambiar Ahora</button>
+    <button onclick="go('home')" style="width:100%;border:0;background:transparent;margin-top:10px;cursor:pointer">← Volver</button>
   </div>
-
-  <div style="text-align:center;margin:8px 0;font-size:22px">↓</div>
-
-  <div class="card">
-    <div class="small">A</div>
-    <select id="toToken" onchange="calcSwap()"></select>
-    <input type="number" id="toAmount" placeholder="0.0" readonly>
-  </div>
-
-  <div class="card" style="font-size:13px">
-    <div class="row"><span>Comisión</span><span>0.5%</span></div>
-    <div class="row"><span>Red</span><span>World Chain</span></div>
-  </div>
-
-  <button class="primary" id="btnSwap" onclick="doSwap()">Intercambiar</button>
 </div>
 
 <!-- SEND -->
-<div id="send" class="screen">
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-    <div onclick="showScreen('home')" style="font-size:22px;cursor:pointer">←</div>
-    <div style="font-weight:800;font-size:18px">Enviar</div>
+<div id="send" style="display:none">
+  <div class="main">
+    <h3 style="text-align:center">Enviar</h3>
+    <div class="box">
+      <div class="small">Token</div>
+      <select id="sendToken" onchange="updateSendBal()" style="width:100%;margin:8px 0"></select>
+      <div class="small">Destinatario (0x...)</div>
+      <input id="sendTo" type="text" placeholder="0x..." style="font-size:14px;margin:8px 0;background:#fff;border:1px solid #ddd;border-radius:10px;padding:10px">
+      <div class="small">Cantidad</div>
+      <input id="sendAmount" type="number" placeholder="0.0" style="font-size:16px;margin:8px 0;background:#fff;border:1px solid #ddd;border-radius:10px;padding:10px">
+      <div class="small">Saldo: <span id="sendBal">0</span></div>
+    </div>
+    <button class="btnY" onclick="doSend()">Enviar ahora</button>
+    <button onclick="go('home')" class="btnY" style="background:#eee;margin-top:10px">← Volver</button>
   </div>
-
-  <div class="card">
-    <div class="small">Token</div>
-    <select id="sendToken"></select>
-    <div class="small">Destinatario</div>
-    <input type="text" id="sendTo" placeholder="0x...">
-    <div class="small">Cantidad</div>
-    <input type="number" id="sendAmount" placeholder="0.0">
-    <div class="small">Saldo: <span id="sendBal">0</span></div>
-  </div>
-
-  <button class="primary" onclick="doSend()">Enviar</button>
 </div>
 
-<!-- MODAL -->
-<div class="modal" id="modal">
-  <div class="modal-box">
-    <div id="modalMsg" style="font-size:16px;margin-bottom:16px"></div>
-    <button class="primary" onclick="closeModal()">OK</button>
+<div id="earn" style="display:none"><div class="main"><h3 style="text-align:center">Ganar</h3><p class="small" style="text-align:center;margin:40px 0">Próximamente</p><button onclick="go('home')" class="btnY" style="background:#eee">← Volver</button></div></div>
+
+<div id="recv" style="display:none">
+  <div class="main">
+    <h3 style="text-align:center">Recibir</h3>
+    <div style="text-align:center;margin-top:20px">
+      <div style="font-size:12px;font-weight:700;background:#f5f5f5;padding:14px;border-radius:12px;word-break:break-all" id="recvAddr">—</div>
+      <button class="btnY" onclick="copyAddr()">📋 Copiar dirección</button>
+    </div>
+    <button onclick="go('home')" class="btnY" style="background:#eee;margin-top:12px">← Volver</button>
   </div>
 </div>
 
 <div class="nav">
-  <div class="active" onclick="showScreen('home')">Inicio</div>
-  <div onclick="showScreen('swap')">Swap</div>
-  <div onclick="showScreen('send')">Enviar</div>
+  <div id="navHome" class="active" onclick="go('home')">🏠</div>
+  <div onclick="go('swap')">⇆</div>
+  <div onclick="go('earn')">💰</div>
+  <div style="background:#ff3ab2;color:#fff" onclick="go('recv')">↓</div>
+</div>
+
+<div id="modal" class="modal" onclick="this.style.display='none'">
+  <div class="modalBox">
+    <div style="font-size:32px" id="modalIcon">✅</div>
+    <div id="modalTxt" style="font-weight:800;margin:12px 0"></div>
+    <button class="btnY" onclick="document.getElementById('modal').style.display='none'">Cerrar</button>
+  </div>
 </div>
 
 <script>
 const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
-const CHAIN_ID = 480;
+const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 
-const TOKENS = {
-  WLD:  { address: '0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals: 18, symbol: 'WLD',  color: '#000' },
-  DNA:  { address: '0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals: 18, symbol: 'DNA',  color: '#6366f1' },
-  HUB:  { address: '0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals: 18, symbol: 'HUB',  color: '#0ea5e9' },
-  ORO:  { address: '0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals: 18, symbol: 'ORO',  color: '#f59e0b' },
-  USDC: { address: '0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals: 6,  symbol: 'USDC', color: '#2775ca' },
-  WETH: { address: '0x4200000000000000000000000000000000000006', decimals: 18, symbol: 'WETH', color: '#627eea' }
+const CONTRACTS = {
+  WLD:  { address: '0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals: 18, color: '#000',    name: 'WLD' },
+  DNA:  { address: '0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals: 18, color: '#ffcc00', name: 'DNA' },
+  HUB:  { address: '0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals: 18, color: '#ff7a00', name: 'HUB' },
+  ORO:  { address: '0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals: 18, color: '#ffd700', name: 'ORO' },
+  USDC: { address: '0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals: 6,  color: '#2775ca', name: 'USDC' },
+  WETH: { address: '0x4200000000000000000000000000000000000006', decimals: 18, color: '#627eea', name: 'WETH' }
 };
 
-const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
-const PERMIT2     = '0x000000000022D473030F116dDEE9F6B43aC78BA3';
-
-let currentAccount = null;
-let balances = {};
 let prices = { WLD: 0.40, DNA: 0.00000045, HUB: 0.0000008, ORO: 0.002, USDC: 1, WETH: 3400 };
+let changes = { WLD: 0, DNA: 0, HUB: 0, ORO: 0, USDC: 0, WETH: 0 };
+let balances = {};
+let currentAccount = null;
 
-// ========== UI ==========
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+function showOk(msg, icon = '✅') {
+  document.getElementById('modalIcon').innerText = icon;
+  document.getElementById('modalTxt').innerText = msg;
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function go(page) {
+  ['home','swap','earn','send','recv'].forEach(p => {
+    const el = document.getElementById(p);
+    if (el) el.style.display = (p === page) ? 'block' : 'none';
+  });
   document.querySelectorAll('.nav div').forEach(d => d.classList.remove('active'));
-  if (id === 'home') document.querySelectorAll('.nav div')[0].classList.add('active');
-  if (id === 'swap') document.querySelectorAll('.nav div')[1].classList.add('active');
-  if (id === 'send') document.querySelectorAll('.nav div')[2].classList.add('active');
-  if (id === 'swap' || id === 'send') fillSelects();
+  if (page === 'home') document.getElementById('navHome').classList.add('active');
+  if (page === 'recv' && currentAccount) document.getElementById('recvAddr').innerText = currentAccount;
+  if (page === 'swap') { fillSelects(); calc(); }
+  if (page === 'send') { fillSendSelect(); updateSendBal(); }
 }
 
-function showModal(msg) {
-  document.getElementById('modalMsg').innerText = msg;
-  document.getElementById('modal').classList.add('show');
-}
-function closeModal() {
-  document.getElementById('modal').classList.remove('show');
-}
-
-// ========== WALLET ==========
+// ========== CONEXIÓN (MiniKit v2) ==========
 async function connectWallet() {
   try {
     if (!window.MiniKit) {
-      showModal('Abre esta app dentro de World App');
+      showOk('Abre esta app dentro de World App', '⚠️');
       return;
     }
-    await MiniKit.install();
-    const { finalPayload } = await MiniKit.commandsAsync.walletAuth({
-      nonce: Math.random().toString(36).slice(2),
-      requestId: '0',
-      expirationTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      notBefore: new Date(Date.now() - 24 * 60 * 60 * 1000),
+    MiniKit.install();
+
+    const nonce = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    const result = await MiniKit.walletAuth({
+      nonce: nonce,
       statement: 'Conectar Uno Intercambio'
     });
-    if (finalPayload.status === 'success') {
-      currentAccount = finalPayload.address;
-      document.getElementById('walletInfo').innerText = currentAccount.slice(0,6) + '...' + currentAccount.slice(-4) + ' • World Chain';
-      document.getElementById('btnConnect').innerText = 'Desconectar';
-      document.getElementById('btnConnect').onclick = disconnectWallet;
-      document.getElementById('btnConnect').style.background = '#111';
-      document.getElementById('btnConnect').style.color = '#fff';
+
+    if (result && result.data && result.data.address) {
+      currentAccount = result.data.address;
+      updateUI(currentAccount);
       await loadRealBalances();
+    } else {
+      showOk('No se pudo conectar', '❌');
     }
   } catch (e) {
     console.error(e);
-    showModal('Error al conectar: ' + (e.message || e));
+    showOk('Error: ' + (e.message || e), '❌');
   }
+}
+
+function updateUI(addr) {
+  document.getElementById('walletInfo').innerHTML = addr.slice(0,6) + '...' + addr.slice(-4) + ' • World Chain';
+  const btn = document.getElementById('btnConnect');
+  btn.innerText = 'Desconectar';
+  btn.onclick = disconnectWallet;
+  btn.style.background = '#111';
+  btn.style.color = '#fff';
 }
 
 function disconnectWallet() {
   currentAccount = null;
   balances = {};
-  document.getElementById('walletInfo').innerText = 'No conectado • World Chain';
-  document.getElementById('btnConnect').innerText = 'Conectar';
-  document.getElementById('btnConnect').onclick = connectWallet;
-  document.getElementById('btnConnect').style.background = '#f3ba2f';
-  document.getElementById('btnConnect').style.color = '#000';
+  document.getElementById('walletInfo').innerHTML = 'No conectado • World Chain';
   document.getElementById('totalUsd').innerText = '$0.00';
-  document.getElementById('wldBalanceText').innerText = '0 WLD';
+  const btn = document.getElementById('btnConnect');
+  btn.innerText = 'Conectar';
+  btn.onclick = connectWallet;
+  btn.style.background = '#f3ba2f';
+  btn.style.color = '#000';
   renderTokenList();
 }
 
-// ========== BALANCES REALES ==========
-async function rpcCall(method, params) {
-  const res = await fetch(WORLD_RPC, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params })
-  });
-  const json = await res.json();
-  return json.result;
-}
-
-async function getERC20Balance(tokenAddr, decimals) {
+// ========== SALDOS REALES ==========
+async function getBalance(tokenAddr, decimals) {
   if (!currentAccount) return 0;
   try {
     const data = '0x70a08231' + currentAccount.slice(2).padStart(64, '0');
-    const result = await rpcCall('eth_call', [{ to: tokenAddr, data }, 'latest']);
-    if (!result || result === '0x') return 0;
-    return Number(BigInt(result)) / (10 ** decimals);
+    const res = await fetch(WORLD_RPC, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0', id: 1,
+        method: 'eth_call',
+        params: [{ to: tokenAddr, data }, 'latest']
+      })
+    });
+    const json = await res.json();
+    if (!json.result || json.result === '0x') return 0;
+    return Number(BigInt(json.result)) / (10 ** decimals);
   } catch (e) {
     console.error(e);
     return 0;
@@ -246,217 +273,242 @@ async function getERC20Balance(tokenAddr, decimals) {
 }
 
 async function loadRealBalances() {
-  if (!currentAccount) {
-    showModal('Conecta tu wallet primero');
-    return;
+  if (!currentAccount) return;
+  showOk('Cargando saldos reales...', '⏳');
+  for (const [sym, t] of Object.entries(CONTRACTS)) {
+    balances[sym] = await getBalance(t.address, t.decimals);
   }
-  showModal('Cargando saldos reales...');
-  for (const [sym, t] of Object.entries(TOKENS)) {
-    balances[sym] = await getERC20Balance(t.address, t.decimals);
-  }
-  closeModal();
-  updateUI();
+  document.getElementById('modal').style.display = 'none';
   renderTokenList();
+  updateTotal();
 }
 
-function updateUI() {
+function updateTotal() {
   let total = 0;
   for (const [sym, bal] of Object.entries(balances)) {
-    total += bal * (prices[sym] || 0);
+    total += (bal || 0) * (prices[sym] || 0);
   }
   document.getElementById('totalUsd').innerText = '$' + total.toFixed(2);
-  document.getElementById('wldBalanceText').innerText = (balances.WLD || 0).toFixed(4) + ' WLD';
 }
 
 function renderTokenList() {
   const list = document.getElementById('tokenList');
-  list.innerHTML = '';
-  for (const [sym, t] of Object.entries(TOKENS)) {
+  let html = '<div style="font-weight:800;margin:10px 0 6px">World Chain</div>';
+  for (const [sym, t] of Object.entries(CONTRACTS)) {
     const bal = balances[sym] || 0;
     const usd = bal * (prices[sym] || 0);
-    list.innerHTML += `
+    const ch = changes[sym] || 0;
+    html += `
       <div class="tok">
-        <div style="display:flex;align-items:center;gap:12px">
-          <div class="tIcon" style="background:\( {t.color}"> \){sym.slice(0,2)}</div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <div class="tIcon" style="background:\( {t.color};color: \){sym==='DNA'||sym==='ORO'?'#000':'#fff'}">${sym[0]}</div>
           <div>
-            <div style="font-weight:700">${sym}</div>
-            <div class="small">World Chain</div>
+            <b>${sym}</b>
+            <div class="small">${bal.toFixed(bal > 1 ? 4 : 6)} ${sym}</div>
           </div>
         </div>
         <div style="text-align:right">
-          <div style="font-weight:700">${bal.toFixed(bal > 1 ? 2 : 6)}</div>
-          <div class="small">$${usd.toFixed(2)}</div>
+          <b>$${usd.toFixed(2)}</b>
+          <div class="small \( {ch >= 0 ? 'green' : 'red'}"> \){ch >= 0 ? '▲ +' : '▼ '}${Math.abs(ch).toFixed(2)}%</div>
         </div>
       </div>`;
   }
+  list.innerHTML = html;
 }
 
 // ========== SELECTS ==========
 function fillSelects() {
-  const opts = Object.keys(TOKENS).map(s => `<option value="\( {s}"> \){s}</option>`).join('');
-  document.getElementById('fromToken').innerHTML = opts;
-  document.getElementById('toToken').innerHTML = opts;
+  const opts = Object.keys(CONTRACTS).map(s => `<option value="\( {s}"> \){s}</option>`).join('');
+  document.getElementById('fSel').innerHTML = opts;
+  document.getElementById('tSel').innerHTML = opts;
+  document.getElementById('fSel').value = 'WLD';
+  document.getElementById('tSel').value = 'USDC';
+}
+
+function fillSendSelect() {
+  const opts = Object.keys(CONTRACTS).map(s => `<option value="\( {s}"> \){s}</option>`).join('');
   document.getElementById('sendToken').innerHTML = opts;
-  document.getElementById('fromToken').value = 'WLD';
-  document.getElementById('toToken').value = 'USDC';
-  calcSwap();
-  updateSendBal();
 }
 
 function updateSendBal() {
   const sym = document.getElementById('sendToken').value;
   document.getElementById('sendBal').innerText = (balances[sym] || 0).toFixed(6) + ' ' + sym;
 }
-document.getElementById('sendToken')?.addEventListener('change', updateSendBal);
 
 // ========== CALC ==========
-function calcSwap() {
-  const from = document.getElementById('fromToken').value;
-  const to = document.getElementById('toToken').value;
-  const amount = parseFloat(document.getElementById('fromAmount').value) || 0;
-  document.getElementById('fromBal').innerText = (balances[from] || 0).toFixed(6) + ' ' + from;
+function calc() {
+  const from = document.getElementById('fSel').value;
+  const to = document.getElementById('tSel').value;
+  const amt = parseFloat(document.getElementById('fAmt').value) || 0;
 
-  if (amount <= 0 || !prices[from] || !prices[to]) {
-    document.getElementById('toAmount').value = '';
+  document.getElementById('bF').innerText = from;
+  document.getElementById('bT').innerText = to;
+  document.getElementById('saldoTxt').innerText = (balances[from] || 0).toFixed(6);
+
+  if (amt <= 0 || !prices[from] || !prices[to]) {
+    document.getElementById('tAmt').value = '0';
+    document.getElementById('feeUno').innerText = '$0.00';
+    document.getElementById('totalCommission').innerText = '$0.00';
     return;
   }
-  const usd = amount * prices[from];
-  const received = (usd / prices[to]) * 0.995; // 0.5% fee
-  document.getElementById('toAmount').value = received.toFixed(6);
+  const usd = amt * prices[from];
+  const fee = usd * 0.005;
+  const out = (usd - fee) / prices[to];
+  document.getElementById('tAmt').value = out.toFixed(6);
+  document.getElementById('feeUno').innerText = '$' + fee.toFixed(4);
+  document.getElementById('totalCommission').innerText = '$' + fee.toFixed(4);
 }
 
 function setPerc(p) {
-  const from = document.getElementById('fromToken').value;
+  document.querySelectorAll('.perc button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  const from = document.getElementById('fSel').value;
   const bal = balances[from] || 0;
-  document.getElementById('fromAmount').value = (bal * p / 100).toFixed(6);
-  calcSwap();
+  document.getElementById('fAmt').value = (bal * p / 100).toFixed(6);
+  calc();
 }
 
-// ========== REAL SWAP ==========
-function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn, amountOutMinimum) {
-  // exactInputSingle((address,address,uint24,address,uint256,uint256,uint160))
-  const selector = '0x04e45aaf';
-  const params = [
-    tokenIn.slice(2).padStart(64, '0'),
-    tokenOut.slice(2).padStart(64, '0'),
-    fee.toString(16).padStart(64, '0'),
-    recipient.slice(2).padStart(64, '0'),
-    BigInt(amountIn).toString(16).padStart(64, '0'),
-    BigInt(amountOutMinimum).toString(16).padStart(64, '0'),
-    '0'.padStart(64, '0') // sqrtPriceLimitX96 = 0
-  ].join('');
-  return selector + params;
-}
-
+// ========== HELPERS ENCODE ==========
 function encodeApprove(spender, amount) {
-  // approve(address,uint256)
-  return '0x095ea7b3' +
-    spender.slice(2).padStart(64, '0') +
-    BigInt(amount).toString(16).padStart(64, '0');
+  return '0x095ea7b3' + spender.slice(2).padStart(64, '0') + BigInt(amount).toString(16).padStart(64, '0');
 }
 
+function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn) {
+  // exactInputSingle
+  return '0x04e45aaf' +
+    tokenIn.slice(2).padStart(64, '0') +
+    tokenOut.slice(2).padStart(64, '0') +
+    fee.toString(16).padStart(64, '0') +
+    recipient.slice(2).padStart(64, '0') +
+    BigInt(amountIn).toString(16).padStart(64, '0') +
+    '0'.padStart(64, '0') + // amountOutMinimum
+    '0'.padStart(64, '0');  // sqrtPriceLimitX96
+}
+
+function encodeTransfer(to, amount) {
+  return '0xa9059cbb' + to.slice(2).padStart(64, '0') + BigInt(amount).toString(16).padStart(64, '0');
+}
+
+// ========== SWAP REAL ==========
 async function doSwap() {
-  if (!currentAccount) return showModal('Conecta tu wallet primero');
-  const fromSym = document.getElementById('fromToken').value;
-  const toSym = document.getElementById('toToken').value;
-  const amount = parseFloat(document.getElementById('fromAmount').value);
+  if (!currentAccount) return showOk('Conecta tu wallet primero', '⚠️');
 
-  if (!amount || amount <= 0) return showModal('Ingresa una cantidad válida');
-  if (fromSym === toSym) return showModal('Elige tokens diferentes');
-  if ((balances[fromSym] || 0) < amount) return showModal('Saldo insuficiente');
+  const fromSym = document.getElementById('fSel').value;
+  const toSym = document.getElementById('tSel').value;
+  const amount = parseFloat(document.getElementById('fAmt').value);
 
-  const from = TOKENS[fromSym];
-  const to = TOKENS[toSym];
+  if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
+  if (fromSym === toSym) return showOk('Elige tokens diferentes', '⚠️');
+  if ((balances[fromSym] || 0) < amount) return showOk('Saldo insuficiente', '⚠️');
+
+  const from = CONTRACTS[fromSym];
+  const to = CONTRACTS[toSym];
   const amountIn = BigInt(Math.floor(amount * (10 ** from.decimals)));
 
   try {
-    showModal('Confirmando en World App...');
+    showOk('Confirma en World App...', '⏳');
 
-    // 1) Approve
-    // 2) exactInputSingle (fee 3000 = 0.3%)
-    const txs = [
-      {
-        address: from.address,
-        data: encodeApprove(SWAP_ROUTER, amountIn)
-      },
-      {
-        address: SWAP_ROUTER,
-        data: encodeExactInputSingle(
-          from.address,
-          to.address,
-          3000,
-          currentAccount,
-          amountIn,
-          0n // amountOutMinimum = 0 (puedes mejorar con quote real)
-        )
-      }
-    ];
-
-    const result = await MiniKit.commandsAsync.sendTransaction({
-      transaction: txs
+    const result = await MiniKit.sendTransaction({
+      chainId: 480,
+      transactions: [
+        {
+          to: from.address,
+          data: encodeApprove(SWAP_ROUTER, amountIn)
+        },
+        {
+          to: SWAP_ROUTER,
+          data: encodeExactInputSingle(from.address, to.address, 3000, currentAccount, amountIn)
+        }
+      ]
     });
 
-    if (result.finalPayload?.status === 'success') {
-      showModal('¡Swap enviado!\nUserOp: ' + (result.finalPayload.userOpHash || '').slice(0, 18) + '...');
-      setTimeout(loadRealBalances, 4000);
+    if (result && result.data && result.data.userOpHash) {
+      showOk('¡Swap enviado!\n' + result.data.userOpHash.slice(0, 20) + '...');
+      setTimeout(loadRealBalances, 5000);
     } else {
-      showModal('Swap cancelado o falló');
+      showOk('Swap cancelado o falló', '❌');
     }
   } catch (e) {
     console.error(e);
-    showModal('Error en swap: ' + (e.message || e));
+    showOk('Error: ' + (e.message || e), '❌');
   }
 }
 
-// ========== REAL SEND ==========
-function encodeTransfer(to, amount) {
-  return '0xa9059cbb' +
-    to.slice(2).padStart(64, '0') +
-    BigInt(amount).toString(16).padStart(64, '0');
-}
-
+// ========== ENVÍO REAL ==========
 async function doSend() {
-  if (!currentAccount) return showModal('Conecta tu wallet primero');
+  if (!currentAccount) return showOk('Conecta tu wallet primero', '⚠️');
+
   const sym = document.getElementById('sendToken').value;
   const to = document.getElementById('sendTo').value.trim();
   const amount = parseFloat(document.getElementById('sendAmount').value);
 
-  if (!to || !to.startsWith('0x') || to.length !== 42) return showModal('Dirección inválida');
-  if (!amount || amount <= 0) return showModal('Cantidad inválida');
-  if ((balances[sym] || 0) < amount) return showModal('Saldo insuficiente');
+  if (!to || !to.startsWith('0x') || to.length !== 42) return showOk('Dirección inválida', '⚠️');
+  if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
+  if ((balances[sym] || 0) < amount) return showOk('Saldo insuficiente', '⚠️');
 
-  const token = TOKENS[sym];
+  const token = CONTRACTS[sym];
   const amountRaw = BigInt(Math.floor(amount * (10 ** token.decimals)));
 
   try {
-    showModal('Confirmando envío...');
-    const result = await MiniKit.commandsAsync.sendTransaction({
-      transaction: [{
-        address: token.address,
+    showOk('Confirma el envío...', '⏳');
+
+    const result = await MiniKit.sendTransaction({
+      chainId: 480,
+      transactions: [{
+        to: token.address,
         data: encodeTransfer(to, amountRaw)
       }]
     });
 
-    if (result.finalPayload?.status === 'success') {
-      showModal('¡Envío enviado correctamente!');
-      setTimeout(loadRealBalances, 4000);
+    if (result && result.data && result.data.userOpHash) {
+      showOk('¡Envío enviado correctamente!');
+      setTimeout(loadRealBalances, 5000);
     } else {
-      showModal('Envío cancelado');
+      showOk('Envío cancelado', '❌');
     }
   } catch (e) {
     console.error(e);
-    showModal('Error: ' + (e.message || e));
+    showOk('Error: ' + (e.message || e), '❌');
   }
 }
 
-// ========== INIT ==========
-window.addEventListener('load', async () => {
-  if (window.MiniKit) {
-    try { await MiniKit.install(); } catch(e) {}
+function copyAddr() {
+  if (currentAccount) {
+    navigator.clipboard.writeText(currentAccount);
+    showOk('Dirección copiada');
   }
+}
+
+// ========== PRECIOS ==========
+async function fetchLivePrices() {
+  try {
+    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=worldcoin-wld,usd-coin,weth&vs_currencies=usd&include_24hr_change=true');
+    const data = await res.json();
+    if (data['worldcoin-wld']) {
+      prices.WLD = data['worldcoin-wld'].usd || prices.WLD;
+      changes.WLD = data['worldcoin-wld'].usd_24h_change || 0;
+    }
+    if (data['usd-coin']) {
+      prices.USDC = data['usd-coin'].usd || 1;
+      changes.USDC = data['usd-coin'].usd_24h_change || 0;
+    }
+    if (data['weth']) {
+      prices.WETH = data['weth'].usd || prices.WETH;
+      changes.WETH = data['weth'].usd_24h_change || 0;
+    }
+    updateTotal();
+    renderTokenList();
+    calc();
+  } catch (e) {}
+}
+
+// ========== INIT ==========
+window.addEventListener('load', function() {
+  if (window.MiniKit) try { MiniKit.install(); } catch(e){}
   renderTokenList();
-  fillSelects();
+  fetchLivePrices();
+  setInterval(fetchLivePrices, 60000);
 });
 </script>
 </body>
-  </html>
+</html>

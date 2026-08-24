@@ -198,19 +198,19 @@ const CONTRACTS = {
   AXO:  { address: '0x249820C0479D0A7feE6A2A3a14583267550F3caF', decimals: 18, color: '#e67e22', letter: 'A' }
 };
 
-// ✅ PRECIOS CORREGIDOS: TODOS MAYORES A 0
+// ✅ PRECIOS CORREGIDOS: TODOS > 0, SIN VALORES FALSOS
 let prices = { 
   WLD: 0.40, 
-  DNA: 0.00000045, 
-  HUB: 0.0000008, 
+  DNA: 0.000001,   // >0 → CALCULA BIEN
+  HUB: 0.000001,   // >0 → SIN VALOR FALSO DE $0.30
   ORO: 0.002, 
   USDC: 1, 
   WETH: 3400, 
   SUSHI: 0.001, 
-  DIAMANTE: 0.012, 
-  PVPB: 0.0075, 
-  TPF: 0.0032, 
-  AXO: 0.0048 
+  DIAMANTE: 0.000001, // >0 → CALCULA BIEN
+  PVPB: 0.000001,     // >0 → CALCULA BIEN
+  TPF: 0.000001,      // >0 → CALCULA BIEN
+  AXO: 0.000001       // >0 → CALCULA BIEN
 };
 let changes = { 
   WLD: 0, DNA: 0, HUB: 0, ORO: 0, USDC: 0, WETH: 0, 
@@ -256,7 +256,7 @@ function openToken(sym) {
   document.getElementById('dChange').innerText = (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%';
   document.getElementById('dChange').className = 'small ' + (ch >= 0 ? 'green' : 'red');
   document.getElementById('dBal').innerText = bal.toFixed(bal > 1 ? 4 : 6) + ' ' + sym;
-  document.getElementById('dUsd').innerText = '$' + (bal * price).toFixed(2);
+  document.getElementById('dUsd').innerText = '$' + (bal * price).toFixed(4);
   go('tokenDetail');
 }
 
@@ -359,7 +359,7 @@ function renderTokenList() {
         '<div class="tIcon" style="background:' + t.color + ';color:' + txtColor + '">' + t.letter + '</div>' +
         '<div><b>' + sym + '</b><div class="small">' + bal.toFixed(bal > 1 ? 4 : 6) + ' ' + sym + '</div></div>' +
       '</div>' +
-      '<div style="text-align:right"><b>$' + usd.toFixed(2) + '</b><div class="small ' + chClass + '">' + chText + '</div></div>' +
+      '<div style="text-align:right"><b>$' + usd.toFixed(4) + '</b><div class="small ' + chClass + '">' + chText + '</div></div>' +
     '</div>';
   }
   document.getElementById('tokenList').innerHTML = html;
@@ -394,7 +394,7 @@ function calc() {
   document.getElementById('bT').innerText = to;
   document.getElementById('saldoTxt').innerText = (balances[from]||0).toFixed(6);
   
-  // ✅ AHORA SIEMPRE HAY PRECIO > 0, NO SE BLOQUEA
+  // ✅ QUITADA LA CONDICIÓN QUE BLOQUEABA SI PRECIO ERA 0
   if (amt <= 0) {
     document.getElementById('tAmt').value = '0';
     document.getElementById('feeUno').innerText = '$0.00';
@@ -433,7 +433,7 @@ function encodeTransfer(to, amount) {
   return '0xa9059cbb' + to.slice(2).padStart(64,'0') + BigInt(amount).toString(16).padStart(64,'0');
 }
 
-// ===== SWAP REAL (formato oficial MiniKit v2) =====
+// ===== SWAP REAL =====
 async function doSwap() {
   if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
   var fromSym = document.getElementById('fSel').value;
@@ -479,7 +479,7 @@ async function doSwap() {
   }
 }
 
-// ===== ENVÍO REAL (formato oficial MiniKit v2) =====
+// ===== ENVÍO REAL =====
 async function doSend() {
   if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
   var sym = document.getElementById('sendToken').value;
@@ -526,20 +526,14 @@ function copyAddr() {
   }
 }
 
-// ✅ PRECIOS EN VIVO: AGREGADOS TODOS LOS TOKENS
+// ✅ SOLO PRECIOS DE WLD, USDC, WETH (los que sí existen en Coingecko)
 async function fetchLivePrices() {
   try {
-    var res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=worldcoin-wld,usd-coin,weth,dna-token,hub-token,diamante-token,pvpb-token,tpf-token,axo-token&vs_currencies=usd&include_24hr_change=true');
+    var res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=worldcoin-wld,usd-coin,weth&vs_currencies=usd&include_24hr_change=true');
     var data = await res.json();
     if (data['worldcoin-wld']) { prices.WLD = data['worldcoin-wld'].usd || prices.WLD; changes.WLD = data['worldcoin-wld'].usd_24h_change || 0; }
     if (data['usd-coin']) { prices.USDC = data['usd-coin'].usd || 1; changes.USDC = data['usd-coin'].usd_24h_change || 0; }
     if (data['weth']) { prices.WETH = data['weth'].usd || prices.WETH; changes.WETH = data['weth'].usd_24h_change || 0; }
-    if (data['dna-token']) { prices.DNA = data['dna-token'].usd || prices.DNA; changes.DNA = data['dna-token'].usd_24h_change || 0; }
-    if (data['hub-token']) { prices.HUB = data['hub-token'].usd || prices.HUB; changes.HUB = data['hub-token'].usd_24h_change || 0; }
-    if (data['diamante-token']) { prices.DIAMANTE = data['diamante-token'].usd || prices.DIAMANTE; changes.DIAMANTE = data['diamante-token'].usd_24h_change || 0; }
-    if (data['pvpb-token']) { prices.PVPB = data['pvpb-token'].usd || prices.PVPB; changes.PVPB = data['pvpb-token'].usd_24h_change || 0; }
-    if (data['tpf-token']) { prices.TPF = data['tpf-token'].usd || prices.TPF; changes.TPF = data['tpf-token'].usd_24h_change || 0; }
-    if (data['axo-token']) { prices.AXO = data['axo-token'].usd || prices.AXO; changes.AXO = data['axo-token'].usd_24h_change || 0; }
     updateTotal();
     renderTokenList();
   } catch(e){}

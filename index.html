@@ -185,35 +185,35 @@ const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 
 const CONTRACTS = {
-  WLD:  { address: '0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals: 18, color: '#000000', letter: 'W' },
-  DNA:  { address: '0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals: 18, color: '#ffcc00', letter: 'D' },
-  HUB:  { address: '0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals: 18, color: '#ff7a00', letter: 'H' },
-  ORO:  { address: '0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals: 18, color: '#ffd700', letter: 'O' },
-  USDC: { address: '0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals: 6,  color: '#2775ca', letter: '$' },
-  WETH: { address: '0x4200000000000000000000000000000000000006', decimals: 18, color: '#627eea', letter: 'Ξ' },
-  SUSHI: { address: '0xab09A728E53d3d6BC438BE95eeD46Da0Bbe7FB38', decimals: 18, color: '#fa52a0', letter: 'S' },
-  DIAMANTE: { address: '0x2ba918fec90Ca7AaC5753a2551593470815866e6', decimals: 18, color: '#b9f2ff', letter: '◆' },
-  PVPB: { address: '0xBC69990A060cC5AF40942f579BdF82A69A9CFf93', decimals: 18, color: '#9b59b6', letter: 'P' },
-  TPF:  { address: '0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45', decimals: 18, color: '#1abc9c', letter: 'T' },
-  AXO:  { address: '0x249820C0479D0A7feE6A2A3a14583267550F3caF', decimals: 18, color: '#e67e22', letter: 'A' }
+  WLD:  { address: '0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals: 18, color: '#000000', letter: 'W', swapEnabled: true },
+  DNA:  { address: '0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals: 18, color: '#ffcc00', letter: 'D', swapEnabled: true },
+  HUB:  { address: '0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals: 18, color: '#ff7a00', letter: 'H', swapEnabled: true },
+  ORO:  { address: '0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals: 18, color: '#ffd700', letter: 'O', swapEnabled: true },
+  USDC: { address: '0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals: 6,  color: '#2775ca', letter: '$', swapEnabled: true },
+  WETH: { address: '0x4200000000000000000000000000000000000006', decimals: 18, color: '#627eea', letter: 'Ξ', swapEnabled: true },
+  SUSHI: { address: '0xab09A728E53d3d6BC438BE95eeD46Da0Bbe7FB38', decimals: 18, color: '#fa52a0', letter: 'S', swapEnabled: true },
+  DIAMANTE: { address: '0x2ba918fec90Ca7AaC5753a2551593470815866e6', decimals: 18, color: '#b9f2ff', letter: '◆', swapEnabled: true },
+  PVPB: { address: '0xBC69990A060cC5AF40942f579BdF82A69A9CFf93', decimals: 18, color: '#9b59b6', letter: 'P', swapEnabled: true },
+  TPF:  { address: '0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45', decimals: 18, color: '#1abc9c', letter: 'T', swapEnabled: true },
+  AXO:  { address: '0x249820C0479D0A7feE6A2A3a14583267550F3caF', decimals: 18, color: '#e67e22', letter: 'A', swapEnabled: true }
 };
 
-// ✅ PRECIOS ARREGLADOS: MAYORES A 0, SIN TANTOS CEROS, IGUAL QUE TUS OTROS TOKENS
+// ✅ PRECIOS IGUAL QUE TU CÓDIGO ORIGINAL
 let prices = { 
-  WLD: 0.40, 
-  DNA: 0.00045,   // ↓ MENOS CEROS → SE VE $0.00 PERO >0 → DEJA INTERCAMBIAR
-  HUB: 0.0008,    // ↓ MENOS CEROS → SE VE $0.00 PERO >0 → DEJA INTERCAMBIAR
-  ORO: 0.002, 
-  USDC: 1, 
-  WETH: 3400, 
-  SUSHI: 0.001,   // ✅ >0 → DEJA INTERCAMBIAR
-  DIAMANTE: 0.001,// ✅ >0 → DEJA INTERCAMBIAR
-  PVPB: 0.001,    // ✅ >0 → DEJA INTERCAMBIAR
-  TPF: 0.001,     // ✅ >0 → DEJA INTERCAMBIAR
-  AXO: 0.001      // ✅ >0 → DEJA INTERCAMBIAR
+  WLD: 0.21, 
+  DNA: 0.0006, 
+  HUB: 0.0035, 
+  ORO: 0.051, 
+  USDC: 1.00, 
+  WETH: 0.0146, 
+  SUSHI: 3.0040, 
+  DIAMANTE: 0.001, 
+  PVPB: 0.001, 
+  TPF: 0.001, 
+  AXO: 0.001 
 };
 let changes = { 
-  WLD: 0, DNA: 0, HUB: 0, ORO: 0, USDC: 0, WETH: 0, 
+  WLD: -1.80, DNA: 0, HUB: 0, ORO: 0, USDC: 0, WETH: +1.25, 
   SUSHI: 0, DIAMANTE: 0, PVPB: 0, TPF: 0, AXO: 0 
 };
 let balances = {};
@@ -252,7 +252,7 @@ function openToken(sym) {
   document.getElementById('dIcon').innerText = t.letter;
   document.getElementById('dName').innerText = sym;
   document.getElementById('dBalText').innerText = bal.toFixed(bal > 1 ? 4 : 6) + ' ' + sym;
-  document.getElementById('dPrice').innerText = '$' + price.toFixed(price < 0.01 ? 8 : 4);
+  document.getElementById('dPrice').innerText = '$' + price.toFixed(price < 0.01 ? 6 : 4);
   document.getElementById('dChange').innerText = (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%';
   document.getElementById('dChange').className = 'small ' + (ch >= 0 ? 'green' : 'red');
   document.getElementById('dBal').innerText = bal.toFixed(bal > 1 ? 4 : 6) + ' ' + sym;
@@ -349,7 +349,8 @@ function renderTokenList() {
   for (var sym in CONTRACTS) {
     var t = CONTRACTS[sym];
     var bal = balances[sym] || 0;
-    var usd = bal * (prices[sym] || 0);
+    var price = prices[sym] || 0;
+    var usd = bal * price;
     var ch = changes[sym] || 0;
     var chText = (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%';
     var chClass = ch >= 0 ? 'green' : 'red';
@@ -371,7 +372,7 @@ function fillSelects() {
   for (var sym in CONTRACTS) opts += '<option value="' + sym + '">' + sym + '</option>';
   document.getElementById('fSel').innerHTML = opts;
   document.getElementById('tSel').innerHTML = opts;
-  document.getElementById('fSel').value = selectedToken || 'WLD';
+  document.getElementById('fSel').value = 'WLD';
   document.getElementById('tSel').value = 'USDC';
 }
 function fillSendSelect() {
@@ -394,7 +395,6 @@ function calc() {
   document.getElementById('bT').innerText = to;
   document.getElementById('saldoTxt').innerText = (balances[from]||0).toFixed(6);
   
-  // ✅ QUITADA LA CONDICIÓN QUE BLOQUEABA SI PRECIO ERA 0
   if (amt <= 0) {
     document.getElementById('tAmt').value = '0';
     document.getElementById('feeUno').innerText = '$0.00';
@@ -433,7 +433,7 @@ function encodeTransfer(to, amount) {
   return '0xa9059cbb' + to.slice(2).padStart(64,'0') + BigInt(amount).toString(16).padStart(64,'0');
 }
 
-// ===== SWAP REAL (formato oficial MiniKit v2) =====
+// ===== SWAP REAL (TODOS HABILITADOS) =====
 async function doSwap() {
   if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
   var fromSym = document.getElementById('fSel').value;
@@ -475,11 +475,11 @@ async function doSwap() {
     }
   } catch (e) {
     console.error(e);
-    showOk('Error: ' + (e.message || e), '❌');
+    showOk('❌ Error: ' + (e.message || 'No se pudo realizar el intercambio'), '❌');
   }
 }
 
-// ===== ENVÍO REAL (formato oficial MiniKit v2) =====
+// ===== ENVÍO REAL =====
 async function doSend() {
   if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
   var sym = document.getElementById('sendToken').value;

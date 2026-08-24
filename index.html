@@ -410,7 +410,7 @@ function encodeTransfer(to, amount) {
   return '0xa9059cbb' + to.slice(2).padStart(64,'0') + BigInt(amount).toString(16).padStart(64,'0');
 }
 
-// ===== SWAP REAL (CORREGIDO) =====
+// ===== SWAP REAL (formato oficial MiniKit v2) =====
 async function doSwap() {
   if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
   var fromSym = document.getElementById('fSel').value;
@@ -420,11 +420,6 @@ async function doSwap() {
   if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
   if (fromSym === toSym) return showOk('Elige tokens diferentes', '⚠️');
   if ((balances[fromSym] || 0) < amount) return showOk('Saldo insuficiente', '⚠️');
-
-  // Aviso si es un token con poca liquidez
-  if (fromSym === 'ORO' || fromSym === 'DNA' || fromSym === 'HUB' || toSym === 'ORO' || toSym === 'DNA' || toSym === 'HUB') {
-    showOk('Este par tiene poca liquidez.\nPrueba primero WLD → USDC', '⚠️');
-  }
 
   var from = CONTRACTS[fromSym];
   var to = CONTRACTS[toSym];
@@ -437,12 +432,12 @@ async function doSwap() {
       chainId: 480,
       transactions: [
         {
-          address: from.address,
+          to: from.address,
           data: encodeApprove(SWAP_ROUTER, amountIn),
           value: '0x0'
         },
         {
-          address: SWAP_ROUTER,
+          to: SWAP_ROUTER,
           data: encodeExactInputSingle(from.address, to.address, 3000, currentAccount, amountIn),
           value: '0x0'
         }
@@ -461,7 +456,7 @@ async function doSwap() {
   }
 }
 
-// ===== ENVÍO REAL (CORREGIDO) =====
+// ===== ENVÍO REAL (formato oficial MiniKit v2) =====
 async function doSend() {
   if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
   var sym = document.getElementById('sendToken').value;
@@ -482,7 +477,7 @@ async function doSend() {
       chainId: 480,
       transactions: [
         {
-          address: token.address,
+          to: token.address,
           data: encodeTransfer(toAddr, amountRaw),
           value: '0x0'
         }
@@ -528,4 +523,4 @@ window.addEventListener('load', function() {
 });
 </script>
 </body>
-</html>
+  </html>

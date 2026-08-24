@@ -410,15 +410,21 @@ function encodeTransfer(to, amount) {
   return '0xa9059cbb' + to.slice(2).padStart(64,'0') + BigInt(amount).toString(16).padStart(64,'0');
 }
 
-// ===== SWAP =====
+// ===== SWAP REAL (CORREGIDO) =====
 async function doSwap() {
   if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
   var fromSym = document.getElementById('fSel').value;
   var toSym = document.getElementById('tSel').value;
   var amount = parseFloat(document.getElementById('fAmt').value);
+
   if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
   if (fromSym === toSym) return showOk('Elige tokens diferentes', '⚠️');
-  if ((balances[fromSym]||0) < amount) return showOk('Saldo insuficiente', '⚠️');
+  if ((balances[fromSym] || 0) < amount) return showOk('Saldo insuficiente', '⚠️');
+
+  // Aviso si es un token con poca liquidez
+  if (fromSym === 'ORO' || fromSym === 'DNA' || fromSym === 'HUB' || toSym === 'ORO' || toSym === 'DNA' || toSym === 'HUB') {
+    showOk('Este par tiene poca liquidez.\nPrueba primero WLD → USDC', '⚠️');
+  }
 
   var from = CONTRACTS[fromSym];
   var to = CONTRACTS[toSym];
@@ -426,45 +432,71 @@ async function doSwap() {
 
   try {
     showOk('Confirma en World App...', '⏳');
+
     var result = await MiniKit.sendTransaction({
       chainId: 480,
       transactions: [
-        { to: from.address, data: encodeApprove(SWAP_ROUTER, amountIn) },
-        { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, 3000, currentAccount, amountIn) }
+        {
+          address: from.address,
+          data: encodeApprove(SWAP_ROUTER, amountIn),
+          value: '0x0'
+        },
+        {
+          address: SWAP_ROUTER,
+          data: encodeExactInputSingle(from.address, to.address, 3000, currentAccount, amountIn),
+          value: '0x0'
+        }
       ]
     });
+
     if (result && result.data && result.data.userOpHash) {
-      showOk('¡Swap enviado!\n' + result.data.userOpHash.slice(0,18) + '...');
+      showOk('¡Swap enviado!\n' + result.data.userOpHash.slice(0, 18) + '...');
       setTimeout(loadRealBalances, 5000);
-    } else showOk('Swap cancelado', '❌');
-  } catch(e) {
+    } else {
+      showOk('Swap cancelado', '❌');
+    }
+  } catch (e) {
+    console.error(e);
     showOk('Error: ' + (e.message || e), '❌');
   }
 }
 
-// ===== SEND =====
+// ===== ENVÍO REAL (CORREGIDO) =====
 async function doSend() {
   if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
   var sym = document.getElementById('sendToken').value;
-  var to = document.getElementById('sendTo').value.trim();
+  var toAddr = document.getElementById('sendTo').value.trim();
   var amount = parseFloat(document.getElementById('sendAmount').value);
-  if (!to || !to.startsWith('0x') || to.length !== 42) return showOk('Dirección inválida', '⚠️');
+
+  if (!toAddr || !toAddr.startsWith('0x') || toAddr.length !== 42) return showOk('Dirección inválida', '⚠️');
   if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
-  if ((balances[sym]||0) < amount) return showOk('Saldo insuficiente', '⚠️');
+  if ((balances[sym] || 0) < amount) return showOk('Saldo insuficiente', '⚠️');
 
   var token = CONTRACTS[sym];
   var amountRaw = BigInt(Math.floor(amount * Math.pow(10, token.decimals)));
+
   try {
     showOk('Confirma el envío...', '⏳');
+
     var result = await MiniKit.sendTransaction({
       chainId: 480,
-      transactions: [{ to: token.address, data: encodeTransfer(to, amountRaw) }]
+      transactions: [
+        {
+          address: token.address,
+          data: encodeTransfer(toAddr, amountRaw),
+          value: '0x0'
+        }
+      ]
     });
+
     if (result && result.data && result.data.userOpHash) {
       showOk('¡Envío enviado!');
       setTimeout(loadRealBalances, 5000);
-    } else showOk('Envío cancelado', '❌');
-  } catch(e) {
+    } else {
+      showOk('Envío cancelado', '❌');
+    }
+  } catch (e) {
+    console.error(e);
     showOk('Error: ' + (e.message || e), '❌');
   }
 }
@@ -496,4 +528,4 @@ window.addEventListener('load', function() {
 });
 </script>
 </body>
-                                                                   </html>
+</html>

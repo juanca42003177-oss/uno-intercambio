@@ -198,19 +198,19 @@ const CONTRACTS = {
   AXO:  { address: '0x249820C0479D0A7feE6A2A3a14583267550F3caF', decimals: 18, color: '#e67e22', letter: 'A' }
 };
 
-// ✅ PRECIOS CORREGIDOS: TODOS > 0, SIN VALORES FALSOS
+// ✅ PRECIOS ARREGLADOS: MAYORES A 0, SIN TANTOS CEROS, IGUAL QUE TUS OTROS TOKENS
 let prices = { 
   WLD: 0.40, 
-  DNA: 0.000001,   // >0 → CALCULA BIEN
-  HUB: 0.000001,   // >0 → SIN VALOR FALSO DE $0.30
+  DNA: 0.00045,   // ↓ MENOS CEROS → SE VE $0.00 PERO >0 → DEJA INTERCAMBIAR
+  HUB: 0.0008,    // ↓ MENOS CEROS → SE VE $0.00 PERO >0 → DEJA INTERCAMBIAR
   ORO: 0.002, 
   USDC: 1, 
   WETH: 3400, 
-  SUSHI: 0.001, 
-  DIAMANTE: 0.000001, // >0 → CALCULA BIEN
-  PVPB: 0.000001,     // >0 → CALCULA BIEN
-  TPF: 0.000001,      // >0 → CALCULA BIEN
-  AXO: 0.000001       // >0 → CALCULA BIEN
+  SUSHI: 0.001,   // ✅ >0 → DEJA INTERCAMBIAR
+  DIAMANTE: 0.001,// ✅ >0 → DEJA INTERCAMBIAR
+  PVPB: 0.001,    // ✅ >0 → DEJA INTERCAMBIAR
+  TPF: 0.001,     // ✅ >0 → DEJA INTERCAMBIAR
+  AXO: 0.001      // ✅ >0 → DEJA INTERCAMBIAR
 };
 let changes = { 
   WLD: 0, DNA: 0, HUB: 0, ORO: 0, USDC: 0, WETH: 0, 
@@ -256,7 +256,7 @@ function openToken(sym) {
   document.getElementById('dChange').innerText = (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%';
   document.getElementById('dChange').className = 'small ' + (ch >= 0 ? 'green' : 'red');
   document.getElementById('dBal').innerText = bal.toFixed(bal > 1 ? 4 : 6) + ' ' + sym;
-  document.getElementById('dUsd').innerText = '$' + (bal * price).toFixed(4);
+  document.getElementById('dUsd').innerText = '$' + (bal * price).toFixed(2);
   go('tokenDetail');
 }
 
@@ -359,7 +359,7 @@ function renderTokenList() {
         '<div class="tIcon" style="background:' + t.color + ';color:' + txtColor + '">' + t.letter + '</div>' +
         '<div><b>' + sym + '</b><div class="small">' + bal.toFixed(bal > 1 ? 4 : 6) + ' ' + sym + '</div></div>' +
       '</div>' +
-      '<div style="text-align:right"><b>$' + usd.toFixed(4) + '</b><div class="small ' + chClass + '">' + chText + '</div></div>' +
+      '<div style="text-align:right"><b>$' + usd.toFixed(2) + '</b><div class="small ' + chClass + '">' + chText + '</div></div>' +
     '</div>';
   }
   document.getElementById('tokenList').innerHTML = html;
@@ -433,7 +433,7 @@ function encodeTransfer(to, amount) {
   return '0xa9059cbb' + to.slice(2).padStart(64,'0') + BigInt(amount).toString(16).padStart(64,'0');
 }
 
-// ===== SWAP REAL =====
+// ===== SWAP REAL (formato oficial MiniKit v2) =====
 async function doSwap() {
   if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
   var fromSym = document.getElementById('fSel').value;
@@ -479,7 +479,7 @@ async function doSwap() {
   }
 }
 
-// ===== ENVÍO REAL =====
+// ===== ENVÍO REAL (formato oficial MiniKit v2) =====
 async function doSend() {
   if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
   var sym = document.getElementById('sendToken').value;
@@ -526,7 +526,6 @@ function copyAddr() {
   }
 }
 
-// ✅ SOLO PRECIOS DE WLD, USDC, WETH (los que sí existen en Coingecko)
 async function fetchLivePrices() {
   try {
     var res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=worldcoin-wld,usd-coin,weth&vs_currencies=usd&include_24hr_change=true');

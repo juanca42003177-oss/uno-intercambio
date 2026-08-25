@@ -21,8 +21,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;p
 .btn{flex:1;background:#ffe6f4;color:#ff3ab2;border-radius:16px;padding:12px 4px;font-weight:700;text-align:center;font-size:13px;cursor:pointer}
 .tokens{padding:0 16px 20px}
 .tok{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid #f1f1f1;align-items:center;cursor:pointer}
-.tIcon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0;font-size:15px;overflow:hidden;background:#fff;border:1px solid #eee}
-.tIcon img{width:100%;height:100%;object-fit:cover;display:block}
+.tIcon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0;font-size:15px}
 .nav{position:fixed;bottom:12px;left:16px;right:16px;background:#fff;border:1px solid #eee;border-radius:28px;display:flex;justify-content:space-around;padding:8px;z-index:20;box-shadow:0 4px 20px rgba(0,0,0,.08)}
 .nav div{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px}
 .nav div.active{background:#111;color:#fff}
@@ -39,8 +38,7 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;f
 .modalBox{background:#fff;border-radius:20px;padding:20px;width:100%;max-width:340px;text-align:center}
 .live{font-size:11px;background:#00d9a5;color:#fff;padding:2px 8px;border-radius:8px}
 #qrImg{width:180px;height:180px;margin:12px auto;display:block;border-radius:12px;border:1px solid #eee}
-.detailIcon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:26px;margin:0 auto;color:#fff;overflow:hidden;background:#fff;border:2px solid #eee}
-.detailIcon img{width:100%;height:100%;object-fit:cover;display:block}
+.detailIcon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:26px;margin:0 auto;color:#fff}
 </style>
 </head>
 <body>
@@ -67,40 +65,27 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;f
 <div class="nav"><div id="navHome" class="active" onclick="go('home')">🏠</div><div onclick="go('swap')">⇆</div><div onclick="go('earn')">💰</div><div style="background:#ff3ab2;color:#fff" onclick="go('recv')">↓</div></div>
 <div id="modal" class="modal" onclick="this.style.display='none'"><div class="modalBox"><div style="font-size:32px" id="modalIcon">✅</div><div id="modalTxt" style="font-weight:800;margin:12px 0"></div><button class="btnY" onclick="document.getElementById('modal').style.display='none'">Cerrar</button></div></div>
 <script>
-const LOGOS = {
-  "WLD": "data:image/png;base64,__WLD_BASE64__",
-  "DNA": "data:image/png;base64,__DNA_BASE64__",
-  "HUB": "data:image/png;base64,__HUB_BASE64__",
-  "ORO": "data:image/png;base64,__ORO_BASE64__",
-  "USDC": "data:image/png;base64,__USDC_BASE64__",
-  "WETH": "data:image/png;base64,__WETH_BASE64__",
-  "SUSHI": "data:image/png;base64,__SUSHI_BASE64__",
-  "DIAMANTE": "data:image/png;base64,__DIAMANTE_BASE64__",
-  "PVPB": "data:image/png;base64,__PVPB_BASE64__",
-  "TPF": "data:image/png;base64,__TPF_BASE64__",
-  "AXO": "data:image/png;base64,__AXO_BASE64__"
-};
 const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 const CONTRACTS = {
-  WLD:{address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003',decimals:18,color:'#000000',letter:'W', logo: LOGOS['WLD']},
-  DNA:{address:'0xed49fe44fd4249a09843c2ba4bba7e50beca7113',decimals:18,color:'#ffcc00',letter:'D', logo: LOGOS['DNA']},
-  HUB:{address:'0xd469fda5d9522a093760902e9be51e0c5d822d26',decimals:18,color:'#ff7a00',letter:'H', logo: LOGOS['HUB']},
-  ORO:{address:'0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63',decimals:18,color:'#ffd700',letter:'O', logo: LOGOS['ORO']},
-  USDC:{address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1',decimals:6,color:'#2775ca',letter:'$', logo: LOGOS['USDC']},
-  WETH:{address:'0x4200000000000000000000000000000000000006',decimals:18,color:'#627eea',letter:'Ξ', logo: LOGOS['WETH']},
-  SUSHI:{address:'0xab09A728E53d3d6BC438BE95eeD46Da0Bbe7FB38',decimals:18,color:'#fa52a0',letter:'S', logo: LOGOS['SUSHI']},
-  DIAMANTE:{address:'0x2ba918fec90Ca7AaC5753a2551593470815866e6',decimals:18,color:'#b9f2ff',letter:'◆', logo: LOGOS['DIAMANTE']},
-  PVPB:{address:'0xBC69990A060cC5AF40942f579BdF82A69A9CFf93',decimals:18,color:'#9b59b6',letter:'P', logo: LOGOS['PVPB']},
-  TPF:{address:'0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45',decimals:18,color:'#1abc9c',letter:'T', logo: LOGOS['TPF']},
-  AXO:{address:'0x249820C0479D0A7feE6A2A3a14583267550F3caF',decimals:18,color:'#e67e22',letter:'A', logo: LOGOS['AXO']}
+  WLD:{address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003',decimals:18,color:'#000000',letter:'W'},
+  DNA:{address:'0xed49fe44fd4249a09843c2ba4bba7e50beca7113',decimals:18,color:'#ffcc00',letter:'D'},
+  HUB:{address:'0xd469fda5d9522a093760902e9be51e0c5d822d26',decimals:18,color:'#ff7a00',letter:'H'},
+  ORO:{address:'0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63',decimals:18,color:'#ffd700',letter:'O'},
+  USDC:{address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1',decimals:6,color:'#2775ca',letter:'$'},
+  WETH:{address:'0x4200000000000000000000000000000000000006',decimals:18,color:'#627eea',letter:'Ξ'},
+  SUSHI:{address:'0xab09A728E53d3d6BC438BE95eeD46Da0Bbe7FB38',decimals:18,color:'#fa52a0',letter:'S'},
+  DIAMANTE:{address:'0x2ba918fec90Ca7AaC5753a2551593470815866e6',decimals:18,color:'#b9f2ff',letter:'◆'},
+  PVPB:{address:'0xBC69990A060cC5AF40942f579BdF82A69A9CFf93',decimals:18,color:'#9b59b6',letter:'P'},
+  TPF:{address:'0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45',decimals:18,color:'#1abc9c',letter:'T'},
+  AXO:{address:'0x249820C0479D0A7feE6A2A3a14583267550F3caF',decimals:18,color:'#e67e22',letter:'A'}
 };
 let prices={WLD:0.4,DNA:0.00000045,HUB:0.0000008,ORO:0.002,USDC:1,WETH:3400,SUSHI:0.5,DIAMANTE:0.0001,PVPB:0.0001,TPF:0.0001,AXO:0.0001};
 let changes={WLD:0,DNA:0,HUB:0,ORO:0,USDC:0,WETH:0,SUSHI:0,DIAMANTE:0,PVPB:0,TPF:0,AXO:0};
 let balances={}; let currentAccount=null; let selectedToken='WLD';
 function showOk(msg,icon){document.getElementById('modalIcon').innerText=icon||'✅';document.getElementById('modalTxt').innerText=msg;document.getElementById('modal').style.display='flex';}
 function go(page){['home','swap','earn','send','recv','tokenDetail'].forEach(function(p){var el=document.getElementById(p); if(el) el.style.display=(p===page)?'block':'none';}); document.querySelectorAll('.nav div').forEach(function(d){d.classList.remove('active');}); if(page==='home') document.getElementById('navHome').classList.add('active'); if(page==='recv'&&currentAccount){document.getElementById('recvAddr').innerText=currentAccount; document.getElementById('qrImg').src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent(currentAccount);} if(page==='swap'){fillSelects();calc();} if(page==='send'){fillSendSelect();updateSendBal();}}
-function openToken(sym){selectedToken=sym;var t=CONTRACTS[sym];var bal=balances[sym]||0;var price=prices[sym]||0;var ch=changes[sym]||0;var ic=document.getElementById('dIcon'); ic.style.background='#fff'; ic.innerHTML=t.logo?`<img src="${t.logo}">`:t.letter; document.getElementById('dName').innerText=sym;document.getElementById('dBalText').innerText=bal.toFixed(6)+' '+sym;document.getElementById('dPrice').innerText='$'+price.toFixed(price<0.01?8:4);document.getElementById('dChange').innerText=(ch>=0?'▲ +':'▼ ')+Math.abs(ch).toFixed(2)+'%';document.getElementById('dBal').innerText=bal.toFixed(6)+' '+sym;document.getElementById('dUsd').innerText='$'+(bal*price).toFixed(2);go('tokenDetail');}
+function openToken(sym){selectedToken=sym;var t=CONTRACTS[sym];var bal=balances[sym]||0;var price=prices[sym]||0;var ch=changes[sym]||0;document.getElementById('dIcon').style.background=t.color;document.getElementById('dIcon').innerText=t.letter;document.getElementById('dName').innerText=sym;document.getElementById('dBalText').innerText=bal.toFixed(6)+' '+sym;document.getElementById('dPrice').innerText='$'+price.toFixed(price<0.01?8:4);document.getElementById('dChange').innerText=(ch>=0?'▲ +':'▼ ')+Math.abs(ch).toFixed(2)+'%';document.getElementById('dBal').innerText=bal.toFixed(6)+' '+sym;document.getElementById('dUsd').innerText='$'+(bal*price).toFixed(2);go('tokenDetail');}
 function openSwapFromDetail(){go('swap');document.getElementById('fSel').value=selectedToken;calc();}
 function openSendFromDetail(){go('send');document.getElementById('sendToken').value=selectedToken;updateSendBal();}
 async function connectWallet(){try{if(!window.MiniKit) return showOk('Abre dentro de World App','⚠️'); MiniKit.install();var nonce=Math.random().toString(36).slice(2)+Date.now().toString(36);var result=await MiniKit.walletAuth({nonce:nonce,statement:'Conectar Uno Intercambio'}); if(result&&result.data&&result.data.address){currentAccount=result.data.address;updateUI(currentAccount);await loadRealBalances();}else showOk('No se pudo conectar','❌');}catch(e){showOk('Error: '+(e.message||e),'❌');}}
@@ -109,19 +94,7 @@ function disconnectWallet(){currentAccount=null;balances={};document.getElementB
 async function getBalance(addr,decimals){if(!currentAccount) return 0;try{var data='0x70a08231'+currentAccount.slice(2).padStart(64,'0');var res=await fetch(WORLD_RPC,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:addr,data:data},'latest']})});var json=await res.json();if(!json.result||json.result==='0x') return 0;return Number(BigInt(json.result))/Math.pow(10,decimals);}catch(e){return 0;}}
 async function loadRealBalances(){if(!currentAccount) return;showOk('Cargando saldos...','⏳');for(var sym in CONTRACTS){balances[sym]=await getBalance(CONTRACTS[sym].address,CONTRACTS[sym].decimals);}document.getElementById('modal').style.display='none';renderTokenList();updateTotal();}
 function updateTotal(){var total=0;for(var sym in balances) total+=(balances[sym]||0)*(prices[sym]||0);document.getElementById('totalUsd').innerText='$'+total.toFixed(2);}
-function renderTokenList(){
-  var html='<div style="font-weight:800;margin:10px 0 6px">World Chain - 11 tokens recientes</div>';
-  for(var sym in CONTRACTS){
-    var t=CONTRACTS[sym];
-    var bal=balances[sym]||0;
-    var usd=bal*(prices[sym]||0);
-    var ch=changes[sym]||0;
-    var icon = t.logo? `<img src="${t.logo}">` : t.letter;
-    var bg = t.logo? '#fff' : t.color;
-    html+=`<div class="tok" onclick="openToken('${sym}')"><div style="display:flex;gap:12px;align-items:center"><div class="tIcon" style="background:${bg}">${icon}</div><div><b>${sym}</b><div class="small">${bal.toFixed(6)} ${sym}</div></div></div><div style="text-align:right"><b>$${usd.toFixed(2)}</b><div class="small ${ch>=0?'green':'red'}">${ch>=0?'▲ +':'▼ '}${Math.abs(ch).toFixed(2)}%</div></div></div>`;
-  }
-  document.getElementById('tokenList').innerHTML=html;
-}
+function renderTokenList(){var html='<div style="font-weight:800;margin:10px 0 6px">World Chain</div>';for(var sym in CONTRACTS){var t=CONTRACTS[sym];var bal=balances[sym]||0;var usd=bal*(prices[sym]||0);var ch=changes[sym]||0;html+='<div class="tok" onclick="openToken(\''+sym+'\')"><div style="display:flex;gap:12px;align-items:center"><div class="tIcon" style="background:'+t.color+'">'+t.letter+'</div><div><b>'+sym+'</b><div class="small">'+bal.toFixed(6)+' '+sym+'</div></div></div><div style="text-align:right"><b>$'+usd.toFixed(2)+'</b><div class="small '+(ch>=0?'green':'red')+'">'+(ch>=0?'▲ +':'▼ ')+Math.abs(ch).toFixed(2)+'%</div></div></div>';}document.getElementById('tokenList').innerHTML=html;}
 function fillSelects(){var opts='';for(var sym in CONTRACTS) opts+='<option value="'+sym+'">'+sym+'</option>';document.getElementById('fSel').innerHTML=opts;document.getElementById('tSel').innerHTML=opts;document.getElementById('fSel').value=selectedToken||'WLD';document.getElementById('tSel').value='USDC';}
 function fillSendSelect(){var opts='';for(var sym in CONTRACTS) opts+='<option value="'+sym+'">'+sym+'</option>';document.getElementById('sendToken').innerHTML=opts;document.getElementById('sendToken').value=selectedToken||'WLD';}
 function updateSendBal(){var sym=document.getElementById('sendToken').value;document.getElementById('sendBal').innerText=(balances[sym]||0).toFixed(6)+' '+sym;}

@@ -198,22 +198,12 @@ const CONTRACTS = {
   AXO:  { address: '0x249820C0479D0A7feE6A2A3a14583267550F3caF', decimals: 18, color: '#e67e22', letter: 'A' }
 };
 
-// ✅ PRECIOS ARREGLADOS: valores pequeños, SIN SALDOS IMAGINARIOS, se ve $0.00 / $0.01
 let prices = { 
-  WLD: 0.21, 
-  DNA: 0.0006, 
-  HUB: 0.0035, 
-  ORO: 0.051, 
-  USDC: 1.00, 
-  WETH: 0.0146, 
-  SUSHI: 0.0004, 
-  DIAMANTE: 0.001, 
-  PVPB: 0.001, 
-  TPF: 0.001, 
-  AXO: 0.001 
+  WLD: 0.40, DNA: 0.00000045, HUB: 0.0000008, ORO: 0.002, 
+  USDC: 1, WETH: 3400, SUSHI: 0, DIAMANTE: 0, PVPB: 0, TPF: 0, AXO: 0 
 };
 let changes = { 
-  WLD: -1.80, DNA: 0, HUB: 0, ORO: 0, USDC: 0, WETH: +1.25, 
+  WLD: 0, DNA: 0, HUB: 0, ORO: 0, USDC: 0, WETH: 0, 
   SUSHI: 0, DIAMANTE: 0, PVPB: 0, TPF: 0, AXO: 0 
 };
 let balances = {};
@@ -252,7 +242,7 @@ function openToken(sym) {
   document.getElementById('dIcon').innerText = t.letter;
   document.getElementById('dName').innerText = sym;
   document.getElementById('dBalText').innerText = bal.toFixed(bal > 1 ? 4 : 6) + ' ' + sym;
-  document.getElementById('dPrice').innerText = '$' + price.toFixed(price < 0.01 ? 6 : 4);
+  document.getElementById('dPrice').innerText = '$' + price.toFixed(price < 0.01 ? 8 : 4);
   document.getElementById('dChange').innerText = (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%';
   document.getElementById('dChange').className = 'small ' + (ch >= 0 ? 'green' : 'red');
   document.getElementById('dBal').innerText = bal.toFixed(bal > 1 ? 4 : 6) + ' ' + sym;
@@ -349,8 +339,7 @@ function renderTokenList() {
   for (var sym in CONTRACTS) {
     var t = CONTRACTS[sym];
     var bal = balances[sym] || 0;
-    var price = prices[sym] || 0;
-    var usd = bal * price;
+    var usd = bal * (prices[sym] || 0);
     var ch = changes[sym] || 0;
     var chText = (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%';
     var chClass = ch >= 0 ? 'green' : 'red';
@@ -394,9 +383,7 @@ function calc() {
   document.getElementById('bF').innerText = from;
   document.getElementById('bT').innerText = to;
   document.getElementById('saldoTxt').innerText = (balances[from]||0).toFixed(6);
-  
-  // ✅ QUITADA LA CONDICIÓN QUE BLOQUEABA SI PRECIO ERA 0
-  if (amt <= 0) {
+  if (amt <= 0 || !prices[from] || !prices[to]) {
     document.getElementById('tAmt').value = '0';
     document.getElementById('feeUno').innerText = '$0.00';
     document.getElementById('totalCommission').innerText = '$0.00';
@@ -434,7 +421,7 @@ function encodeTransfer(to, amount) {
   return '0xa9059cbb' + to.slice(2).padStart(64,'0') + BigInt(amount).toString(16).padStart(64,'0');
 }
 
-// ===== SWAP REAL (TODOS HABILITADOS) =====
+// ===== SWAP REAL (formato oficial MiniKit v2) =====
 async function doSwap() {
   if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
   var fromSym = document.getElementById('fSel').value;
@@ -480,7 +467,7 @@ async function doSwap() {
   }
 }
 
-// ===== ENVÍO REAL =====
+// ===== ENVÍO REAL (formato oficial MiniKit v2) =====
 async function doSend() {
   if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
   var sym = document.getElementById('sendToken').value;

@@ -182,11 +182,8 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;f
 
 <script>
 const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
+const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 
-// ✅ TU DIRECCIÓN DE COBRO (YA LA PUSE)
-const MI_BILLETERA = '0x019001d46cd3155ef045a41f4c359c040595438c';
-
-// ✅ LISTA DE TOKENS Y SUS DIRECCIONES (SIN VALORES FALSOS)
 const CONTRACTS = {
   WLD:  { address: '0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals: 18, color: '#000000', letter: 'W' },
   DNA:  { address: '0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals: 18, color: '#ffcc00', letter: 'D' },
@@ -201,26 +198,15 @@ const CONTRACTS = {
   AXO:  { address: '0x249820C0479D0A7feE6A2A3a14583267550F3caF', decimals: 18, color: '#e67e22', letter: 'A' }
 };
 
-// ✅ PRECIOS DE REFERENCIA (SOLO PARA CÁLCULOS, NO APARECEN COMO SALDO)
 let prices = { 
-  WLD: 0.17, 
-  DNA: 0.0006, 
-  HUB: 0.0035, 
-  ORO: 0.051, 
-  USDC: 1.00, 
-  WETH: 0.0146, 
-  SUSHI: 0.0004, 
-  DIAMANTE: 0.001, 
-  PVPB: 0.001, 
-  TPF: 0.001, 
-  AXO: 0.001 
+  WLD: 0.40, DNA: 0.00000045, HUB: 0.0000008, ORO: 0.002, 
+  USDC: 1, WETH: 3400, SUSHI: 0, DIAMANTE: 0, PVPB: 0, TPF: 0, AXO: 0 
 };
 let changes = { 
-  WLD: -4.10, DNA: 0, HUB: 0, ORO: 0, USDC: -0.01, WETH: +1.25, 
+  WLD: 0, DNA: 0, HUB: 0, ORO: 0, USDC: 0, WETH: 0, 
   SUSHI: 0, DIAMANTE: 0, PVPB: 0, TPF: 0, AXO: 0 
 };
-
-let balances = {}; // ✅ AQUÍ SE GUARDAN SOLO LOS SALDOS REALES QUE TIENES
+let balances = {};
 let currentAccount = null;
 let selectedToken = 'WLD';
 
@@ -256,7 +242,7 @@ function openToken(sym) {
   document.getElementById('dIcon').innerText = t.letter;
   document.getElementById('dName').innerText = sym;
   document.getElementById('dBalText').innerText = bal.toFixed(bal > 1 ? 4 : 6) + ' ' + sym;
-  document.getElementById('dPrice').innerText = '$' + price.toFixed(price < 0.01 ? 6 : 4);
+  document.getElementById('dPrice').innerText = '$' + price.toFixed(price < 0.01 ? 8 : 4);
   document.getElementById('dChange').innerText = (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%';
   document.getElementById('dChange').className = 'small ' + (ch >= 0 ? 'green' : 'red');
   document.getElementById('dBal').innerText = bal.toFixed(bal > 1 ? 4 : 6) + ' ' + sym;
@@ -286,7 +272,7 @@ async function connectWallet() {
     if (result && result.data && result.data.address) {
       currentAccount = result.data.address;
       updateUI(currentAccount);
-      await loadRealBalances(); // ✅ CARGA SOLO LO QUE TIENES
+      await loadRealBalances();
     } else showOk('No se pudo conectar', '❌');
   } catch (e) {
     showOk('Error: ' + (e.message || e), '❌');
@@ -315,7 +301,7 @@ function disconnectWallet() {
   renderTokenList();
 }
 
-// ===== SOLO SALDOS REALES DE TU BILLETERA =====
+// ===== SALDOS =====
 async function getBalance(addr, decimals) {
   if (!currentAccount) return 0;
   try {
@@ -326,7 +312,7 @@ async function getBalance(addr, decimals) {
       body: JSON.stringify({ jsonrpc:'2.0', id:1, method:'eth_call', params:[{to:addr, data:data}, 'latest'] })
     });
     var json = await res.json();
-    if (!json.result || json.result === '0x') return 0; // ✅ SI NO TIENES, SALE 0
+    if (!json.result || json.result === '0x') return 0;
     return Number(BigInt(json.result)) / Math.pow(10, decimals);
   } catch(e) { return 0; }
 }
@@ -353,8 +339,7 @@ function renderTokenList() {
   for (var sym in CONTRACTS) {
     var t = CONTRACTS[sym];
     var bal = balances[sym] || 0;
-    var price = prices[sym] || 0;
-    var usd = bal * price;
+    var usd = bal * (prices[sym] || 0);
     var ch = changes[sym] || 0;
     var chText = (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%';
     var chClass = ch >= 0 ? 'green' : 'red';
@@ -390,7 +375,7 @@ function updateSendBal() {
   document.getElementById('sendBal').innerText = (balances[sym]||0).toFixed(6) + ' ' + sym;
 }
 
-// ===== CÁLCULOS =====
+// ===== CALC =====
 function calc() {
   var from = document.getElementById('fSel').value;
   var to = document.getElementById('tSel').value;
@@ -398,15 +383,14 @@ function calc() {
   document.getElementById('bF').innerText = from;
   document.getElementById('bT').innerText = to;
   document.getElementById('saldoTxt').innerText = (balances[from]||0).toFixed(6);
-  
-  if (amt <= 0) {
+  if (amt <= 0 || !prices[from] || !prices[to]) {
     document.getElementById('tAmt').value = '0';
     document.getElementById('feeUno').innerText = '$0.00';
     document.getElementById('totalCommission').innerText = '$0.00';
     return;
   }
   var usd = amt * prices[from];
-  var fee = usd * 0.005; // 👉 TU COMISIÓN 0.5%
+  var fee = usd * 0.005;
   document.getElementById('tAmt').value = ((usd - fee) / prices[to]).toFixed(6);
   document.getElementById('feeUno').innerText = '$' + fee.toFixed(4);
   document.getElementById('totalCommission').innerText = '$' + fee.toFixed(4);
@@ -419,12 +403,25 @@ function setPerc(p) {
   calc();
 }
 
-// ===== FUNCIONES DE TRANSACCIÓN =====
+// ===== ENCODE =====
+function encodeApprove(spender, amount) {
+  return '0x095ea7b3' + spender.slice(2).padStart(64,'0') + BigInt(amount).toString(16).padStart(64,'0');
+}
+function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn) {
+  return '0x04e45aaf' +
+    tokenIn.slice(2).padStart(64,'0') +
+    tokenOut.slice(2).padStart(64,'0') +
+    Number(fee).toString(16).padStart(64,'0') +
+    recipient.slice(2).padStart(64,'0') +
+    BigInt(amountIn).toString(16).padStart(64,'0') +
+    '0'.padStart(64,'0') +
+    '0'.padStart(64,'0');
+}
 function encodeTransfer(to, amount) {
   return '0xa9059cbb' + to.slice(2).padStart(64,'0') + BigInt(amount).toString(16).padStart(64,'0');
 }
 
-// ✅ INTERCAMBIO 100% FUNCIONAL PARA TODOS LOS TOKENS
+// ===== SWAP REAL (formato oficial MiniKit v2) =====
 async function doSwap() {
   if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
   var fromSym = document.getElementById('fSel').value;
@@ -437,54 +434,40 @@ async function doSwap() {
 
   var from = CONTRACTS[fromSym];
   var to = CONTRACTS[toSym];
-
-  // ✅ TU COMISIÓN 0.5%
-  var comisionTokens = amount * 0.005;
-  var cantidadUsuario = amount - comisionTokens;
-
-  // ✅ LO QUE EL USUARIO RECIBE
-  var recibeTokens = (cantidadUsuario * prices[fromSym]) / prices[toSym];
+  var amountIn = BigInt(Math.floor(amount * Math.pow(10, from.decimals)));
 
   try {
     showOk('Confirma en World App...', '⏳');
 
-    var txs = [];
-
-    // 1. SE ENVÍA TU COMISIÓN DIRECTO A TU BILLETERA ✅
-    if(comisionTokens > 0) {
-      txs.push({
-        to: from.address,
-        data: encodeTransfer(MI_BILLETERA, BigInt(Math.floor(comisionTokens * Math.pow(10, from.decimals)))),
-        value: '0x0'
-      });
-    }
-
-    // 2. SE ENVÍA LO DEL USUARIO
-    txs.push({
-      to: to.address,
-      data: encodeTransfer(currentAccount, BigInt(Math.floor(recibeTokens * Math.pow(10, to.decimals)))),
-      value: '0x0'
-    });
-
-    // ✅ EJECUTA
     var result = await MiniKit.sendTransaction({
       chainId: 480,
-      transactions: txs
+      transactions: [
+        {
+          to: from.address,
+          data: encodeApprove(SWAP_ROUTER, amountIn),
+          value: '0x0'
+        },
+        {
+          to: SWAP_ROUTER,
+          data: encodeExactInputSingle(from.address, to.address, 3000, currentAccount, amountIn),
+          value: '0x0'
+        }
+      ]
     });
 
     if (result && result.data && result.data.userOpHash) {
-      showOk('✅ ¡Listo! Comisión recibida\n' + result.data.userOpHash.slice(0, 18) + '...');
-      setTimeout(loadRealBalances, 3000);
+      showOk('¡Swap enviado!\n' + result.data.userOpHash.slice(0, 18) + '...');
+      setTimeout(loadRealBalances, 5000);
     } else {
-      showOk('Operación cancelada', '❌');
+      showOk('Swap cancelado', '❌');
     }
   } catch (e) {
     console.error(e);
-    showOk('Error: ' + (e.message || 'No se pudo hacer'), '❌');
+    showOk('Error: ' + (e.message || e), '❌');
   }
 }
 
-// ===== ENVÍO NORMAL =====
+// ===== ENVÍO REAL (formato oficial MiniKit v2) =====
 async function doSend() {
   if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
   var sym = document.getElementById('sendToken').value;
@@ -513,7 +496,7 @@ async function doSend() {
     });
 
     if (result && result.data && result.data.userOpHash) {
-      showOk('¡Envío exitoso!');
+      showOk('¡Envío enviado!');
       setTimeout(loadRealBalances, 5000);
     } else {
       showOk('Envío cancelado', '❌');
@@ -527,7 +510,7 @@ async function doSend() {
 function copyAddr() {
   if (currentAccount) {
     navigator.clipboard.writeText(currentAccount);
-    showOk('Dirección copiada ✅');
+    showOk('Dirección copiada');
   }
 }
 
@@ -551,4 +534,4 @@ window.addEventListener('load', function() {
 });
 </script>
 </body>
-</html>
+  </html>

@@ -13,6 +13,7 @@
 body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;padding-bottom:100px}
 .top{padding:14px 16px;display:flex;gap:12px;align-items:center;border-bottom:1px solid #f0f0f0}
 .avatar{width:48px;height:48px;border-radius:50%;background:#0B0E11;display:flex;align-items:center;justify-content:center;border:2px solid #f3ba2f;overflow:hidden}
+.avatar img{width:100%;height:100%}
 .big{font-size:34px;font-weight:900}
 .small{font-size:12px;opacity:.65}
 .green{color:#00b15c}
@@ -21,7 +22,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;p
 .btn{flex:1;background:#ffe6f4;color:#ff3ab2;border-radius:16px;padding:12px 4px;font-weight:700;text-align:center;font-size:13px;cursor:pointer}
 .tokens{padding:0 16px 20px}
 .tok{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid #f1f1f1;align-items:center;cursor:pointer}
-.tIcon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;background:#f0f0f0}
+.tIcon{width:40px;height:40px;border-radius:50%;overflow:hidden;background:#f0f0f0;flex-shrink:0}
 .tIcon img{width:100%;height:100%;object-fit:cover}
 .nav{position:fixed;bottom:12px;left:16px;right:16px;background:#fff;border:1px solid #eee;border-radius:28px;display:flex;justify-content:space-around;padding:8px;z-index:20;box-shadow:0 4px 20px rgba(0,0,0,.08)}
 .nav div{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px}
@@ -31,28 +32,4 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;p
 input{border:0;background:transparent;font-size:20px;font-weight:800;outline:none;width:100%}
 select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;font-size:12px;font-weight:700}
 .btnY{width:100%;padding:14px;border-radius:14px;border:0;background:#f3ba2f;font-weight:900;font-size:15px;cursor:pointer;margin-top:10px}
-.btnConnect{background:#f3ba2f;border:0;padding:9px 16px;border-radius:20px;font-weight:800;font-size:13px;cursor:pointer}
-.perc{display:flex;gap:6px;margin-top:10px}
-.perc button{flex:1;padding:9px;border-radius:20px;border:1px solid #111;background:#fff;font-weight:800;font-size:12px;cursor:pointer}
-.perc button.active{background:#111;color:#fff}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:20px;z-index:99}
-.modalBox{background:#fff;border-radius:20px;padding:20px;width:100%;max-width:340px;text-align:center}
-.live{font-size:11px;background:#00d9a5;color:#fff;padding:2px 8px;border-radius:8px}
-#qrImg{width:180px;height:180px;margin:12px auto;display:block;border-radius:12px;border:1px solid #eee}
-.detailIcon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;overflow:hidden;background:#f0f0f0}
-.detailIcon img{width:100%;height:100%;object-fit:cover}
-</style>
-</head>
-<body>
-<div id="home">
-  <div class="top">
-    <div class="avatar"><img src="https://worldcoin.org/_next/image?url=%2Ficons%2Flogo.svg&w=64&q=75" style="width:100%;height:100%"></div>
-    <div style="flex:1"><b>Uno Intercambio</b><div class="small" id="walletInfo">No conectado • World Chain</div></div>
-    <button class="btnConnect" id="btnConnect" onclick="connectWallet()">Conectar</button>
-  </div>
-  <div style="padding:16px"><div class="big" id="totalUsd">$0.00</div><div class="small"><span class="green">Precios en vivo</span> <span class="live">LIVE</span></div></div>
-  <div class="btns"><div class="btn" onclick="go('swap')">⇆ Swap</div><div class="btn" onclick="go('earn')">↗ Ganar</div><div class="btn" onclick="go('send')">↗ Enviar</div><div class="btn" onclick="go('recv')">↓ Recibir</div></div>
-  <div class="tokens" id="tokenList"></div>
-</div>
-<div id="tokenDetail" style="display:none"><div class="main"><button onclick="go('home')" style="border:0;background:#f0f0f0;padding:8px 14px;border-radius:20px;font-weight:700;margin-bottom:16px">← Volver</button><div style="text-align:center"><div class="detailIcon" id="dIcon"></div><h2 style="margin:12px 0 4px" id="dName">WLD</h2><div class="small" id="dBalText">0 WLD</div><div style="font-size:32px;font-weight:900;margin-top:10px" id="dPrice">$0.00</div><div id="dChange" class="small">—</div><div class="box" style="margin-top:18px;display:flex;justify-content:space-between;font-weight:800;font-size:17px"><span id="dBal">0</span><span id="dUsd">$0.00</span></div><div style="display:flex;gap:10px;margin-top:16px"><button class="btnY" style="flex:1" onclick="openSwapFromDetail()">⇆ Intercambiar</button><button class="btnY" style="flex:1;background:#111;color:#fff" onclick="openSendFromDetail()">↗ Enviar</button></div></div></div></div>
-<div id="swap" style="display:none"><div class="main"><h3 style="text-align:center">Swap - World Chain</h3><div class="small" style="text-align:center;margin-bottom:12px">Transacciones reales</div><div class="box"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span class="small">Vendes <b id="bF">WLD</b></span><span class="small">Saldo: <span id="saldoTxt">0</span></span></div><div style="display:flex;gap:8px;align-items:center"><input id="fAmt" type="number" value="0" style="flex:1" oninput="calc()"><select id="fSel" onchange="calc()"></select></div><div class="perc"><button onclick="setPerc(25)">25%</button><button onclick="setPerc(50)">50%</button><button onclick="setPerc(75)">75%</button><button onclick="setPerc(100)" class="active">100%</button></
+.btnConnect{background:#f3ba2f;border:0;padding:9px 16px;border-radius:20px;font-weight:800;font-size:

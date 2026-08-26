@@ -22,7 +22,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;p
 .tokens{padding:0 16px 20px}
 .tok{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f1f1f1;align-items:center;cursor:pointer}
 .tIcon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0;font-size:16px}
-.nav{position:fixed;bottom:16px;left:16px;right:16px;background:#fff;border:1px solid #eee;border-radius:32px;display:flex;justify-content:space-around;padding:10px;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.nav{position:fixed;bottom:16px;left:16px;right:16px;background:#fff;border:1px solid #eee;border-radius:32px;display:flex;justify-around;padding:10px;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,.12)}
 .nav div{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px}
 .nav div.active{background:#111;color:#fff}
 .main{margin:12px;padding:18px;border:2px solid #ffe6f4;border-radius:24px;min-height:55vh}
@@ -105,7 +105,6 @@ function calc(){var from=document.getElementById('fSel').value;var to=document.g
 function setPerc(p){document.querySelectorAll('.perc button').forEach(function(b){b.classList.remove('active');});event.target.classList.add('active');var from=document.getElementById('fSel').value;document.getElementById('fAmt').value=((balances[from]||0)*p/100).toFixed(6);calc();}
 function encodeApprove(spender,amount){return '0x095ea7b3'+spender.slice(2).padStart(64,'0')+BigInt(amount).toString(16).padStart(64,'0');}
 function encodeExactInputSingle(tokenIn,tokenOut,fee,recipient,amountIn){
-  const offset='0000000000000000000000000000000000000000000000000000000000000020';
   const tIn=tokenIn.slice(2).toLowerCase().padStart(64,'0');
   const tOut=tokenOut.slice(2).toLowerCase().padStart(64,'0');
   const feeHex=Number(fee).toString(16).padStart(64,'0');
@@ -113,7 +112,7 @@ function encodeExactInputSingle(tokenIn,tokenOut,fee,recipient,amountIn){
   const amt=BigInt(amountIn).toString(16).padStart(64,'0');
   const minOut='0'.padStart(64,'0');
   const sqrtLimit='0'.padStart(64,'0');
-  return '0x04e45aaf'+offset+tIn+tOut+feeHex+rec+amt+minOut+sqrtLimit;
+  return '0x04e45aaf'+tIn+tOut+feeHex+rec+amt+minOut+sqrtLimit;
 }
 function encodeTransfer(to,amount){return '0xa9059cbb'+to.slice(2).padStart(64,'0')+BigInt(amount).toString(16).padStart(64,'0');}
 async function doSwap(){

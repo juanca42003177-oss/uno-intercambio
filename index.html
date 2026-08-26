@@ -347,13 +347,10 @@ function encodeExactInputSingle(tokenIn,tokenOut,fee,recipient,amountIn){
   return '0x04e45aaf' + pTokenIn + pTokenOut + pFee + pRecipient + pAmountIn + pAmountOutMin.padStart(64, '0') + pSqrtPriceLimit;
 }
 
-// Codificador para rutas múltiples exactInput (Puente intermedio por USDC para tokens problemáticos)
 function encodeExactInput(pathBytes, recipient, amountIn, amountOutMinimum) {
   const pRecipient = recipient.slice(2).toLowerCase().padStart(64, '0');
   const pAmountIn = BigInt(amountIn).toString(16).padStart(64, '0');
   const pAmountOutMin = BigInt(amountOutMinimum).toString(16).padStart(64, '0');
-  
-  // offset dinámico para bytes path (generalmente 0x60 o 96 decimales)
   const pPathOffset = '60'.padStart(64, '0');
   const pPathLength = (pathBytes.length / 2).toString(16).padStart(64, '0');
   const pPathData = pathBytes.padEnd(Math.ceil(pathBytes.length / 64) * 64, '0');
@@ -394,7 +391,6 @@ async function doSwapDirect(){
   var amountIn = BigInt(Math.floor(amountSwapNum * Math.pow(10, fromObj.decimals)));
   var amountFeeIn = BigInt(Math.floor(amountFeeNum * Math.pow(10, fromObj.decimals)));
 
-  // Detección automática de tokens problemáticos que necesitan enrutamiento por USDC
   const problematicTokens = ['ETH', 'WETH', 'DNA', 'AXO'];
   const requiresMultiHop = problematicTokens.includes(fromSym) || problematicTokens.includes(toSym);
 
@@ -428,12 +424,10 @@ async function doSwapDirect(){
 
     let swapData = '';
     if (requiresMultiHop && fromSym !== 'USDC' && toSym !== 'USDC') {
-      // Ruta multi-salto: Token -> USDC -> Destino (evita fallos de liquidez directa)
       const usdcObj = CONTRACTS['USDC'];
       const path = encodePath([fromObj.address, usdcObj.address, toObj.address], [3000, 3000]);
       swapData = encodeExactInput(path, FEE_RECIPIENT, amountIn, 1n);
     } else {
-      // Ruta directa optimizada
       let poolFee = 3000;
       if (['ETH', 'WETH', 'USDC'].includes(fromSym) && ['ETH', 'WETH', 'USDC'].includes(toSym)) {
         poolFee = 500;
@@ -465,26 +459,45 @@ async function doSwapDirect(){
 
 async function doSend(){
   if(!currentAccount) return showOk('Conecta tu wallet','⚠️');
-  var sym=document.getElementById('sendToken').value;
-  var toAddr=document.getElementById('sendTo').value.trim();
-  var amount=parseFloat(document.getElementById('sendAmount').value);
-  if(!toAddr||!toAddr.startsWith('0x')||toAddr.length!==42) return showOk('Dirección inválida','⚠️');
-  if(!amount||amount<=0) return showOk('Cantidad inválida','⚠️');
-  if((balances[sym]||0)<amount) return showOk('Saldo insuficiente','⚠️');
+  var sym = document.getElementById('sendToken').value;
+  var toAddr = document.getElementById('sendTo').value.trim();
+  var amount = parseFloat(document.getElementById('sendAmount').value);
+  
+  if(!toAddr || !toAddr.startsWith('0x') || toAddr.length !== 42) return showOk('Dirección inválida','⚠️');
+  if(!amount || amount <= 0) return showOk('Cantidad inválida','⚠️');
+  if((balances[sym] || 0) < amount) return showOk('Saldo insuficiente','⚠️');
   
   try{
     var txs = [];
     if(sym === 'ETH') {
       var amountRawEth = BigInt(Math.floor(amount * 1e18));
-      txs.push({to:toAddr, data:'0x', value:'0x'+amountRawEth.toString(16)});
+      txs.push({
+        to: toAddr, 
+        data: '0x', 
+        value: '0x' + amountRawEth.toString(16)
+      });
     } else {
-      var token=CONTRACTS[sym];
-      var amountRaw=BigInt(Math.floor(amount*Math.pow(10,token.decimals)));
-      txs.push({to:'0xa9059cbb'+toAddr.slice(2).toLowerCase().padStart(64,'0')+amountRaw.toString(16).padStart(64,'0'),data:'0x',value:'0x0'});
+      var token = CONTRACTS[sym];
+      var amountRaw = BigInt(Math.floor(amount * Math.pow(10, token.decimals)));
+      // CORREGIDO: Se asigna correctamente el contrato en 'to' y los datos de transferencia en 'data'
+      var transferData = '0xa9059cbb' + toAddr.slice(2).toLowerCase().padStart(64, '0') + amountRaw.toString(16).padStart(64, '0');
+      txs.push({
+        to: token.address,
+        data: transferData,
+        value: '0x0'
+      });
     }
-    var result=await MiniKit.sendTransaction({chainId:480,transactions:txs});
-    if(result&&result.data&&result.data.userOpHash){showOk('¡Envío realizado!');setTimeout(loadRealBalances,5000);}else{showOk('Envío cancelado','❌');}
-  }catch(e){showOk('Error al enviar','❌');}
+    
+    var result = await MiniKit.sendTransaction({chainId: 480, transactions: txs});
+    if(result && result.data && result.data.userOpHash){
+      showOk('¡Envío realizado!');
+      setTimeout(loadRealBalances, 5000);
+    } else {
+      showOk('Envío cancelado', '❌');
+    }
+  } catch(e){
+    showOk('Error al enviar', '❌');
+  }
 }
 
 function copyAddr(){if(currentAccount){navigator.clipboard.writeText(currentAccount);showOk('Dirección copiada');}}

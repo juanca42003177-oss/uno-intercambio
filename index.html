@@ -150,7 +150,6 @@ const CONTRACTS = {
   ETH:{address:'NATIVE',decimals:18,color:'#3c3c3d',letter:'Ξ'},
   WETH:{address:'0x4200000000000000000000000000000000000006',decimals:18,color:'#627eea',letter:'WΞ'},
   WLD:{address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003',decimals:18,color:'#000000',letter:'W'},
-  DNA:{address:'0xed49fe44fd4249a09843c2ba4bba7e50beca7113',decimals:18,color:'#ffcc00',letter:'D'},
   HUB:{address:'0xd469fda5d9522a093760902e9be51e0c5d822d26',decimals:18,color:'#ff7a00',letter:'H'},
   ORO:{address:'0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63',decimals:18,color:'#ffd700',letter:'O'},
   USDC:{address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1',decimals:6,color:'#2775ca',letter:'$'},
@@ -161,8 +160,8 @@ const CONTRACTS = {
   AXO:{address:'0x249820C0479D0A7feE6A2A3a14583267550F3caF',decimals:18,color:'#e67e22',letter:'A'}
 };
 
-let prices={ETH:3400,WETH:3400,WLD:0.4,DNA:0.00000045,HUB:0.0000008,ORO:0.002,USDC:1,SUSHI:0.5,DIAMANTE:0.0001,PVPB:0.0001,TPF:0.0001,AXO:0.0001};
-let changes={ETH:0,WETH:0,WLD:0,DNA:0,HUB:0,ORO:0,USDC:0,SUSHI:0,DIAMANTE:0,PVPB:0,TPF:0,AXO:0};
+let prices={ETH:3400,WETH:3400,WLD:0.4,HUB:0.0000008,ORO:0.002,USDC:1,SUSHI:0.5,DIAMANTE:0.0001,PVPB:0.0001,TPF:0.0001,AXO:0.0001};
+let changes={ETH:0,WETH:0,WLD:0,HUB:0,ORO:0,USDC:0,SUSHI:0,DIAMANTE:0,PVPB:0,TPF:0,AXO:0};
 let balances={}; let currentAccount=null; let selectedToken='WLD';
 
 function showOk(msg,icon){
@@ -336,36 +335,15 @@ function encodeApprove(spender,amount){
   return '0x095ea7b3'+spender.slice(2).toLowerCase().padStart(64,'0')+BigInt(amount).toString(16).padStart(64,'0');
 }
 
-function encodeExactInputSingle(tokenIn,tokenOut,fee,recipient,amountIn){
+function encodeExactInputSingle(tokenIn,tokenOut,fee,recipient,amountIn,amountOutMinimum){
   const pTokenIn = tokenIn.slice(2).toLowerCase().padStart(64, '0');
   const pTokenOut = tokenOut.slice(2).toLowerCase().padStart(64, '0');
   const pFee = Number(fee).toString(16).padStart(64, '0');
   const pRecipient = recipient.slice(2).toLowerCase().padStart(64, '0');
   const pAmountIn = BigInt(amountIn).toString(16).padStart(64, '0');
-  const pAmountOutMin = '1'; 
+  const pAmountOutMin = BigInt(amountOutMinimum).toString(16).padStart(64, '0'); 
   const pSqrtPriceLimit = '0'.padStart(64, '0');
-  return '0x04e45aaf' + pTokenIn + pTokenOut + pFee + pRecipient + pAmountIn + pAmountOutMin.padStart(64, '0') + pSqrtPriceLimit;
-}
-
-function encodeExactInput(pathBytes, recipient, amountIn, amountOutMinimum) {
-  const pRecipient = recipient.slice(2).toLowerCase().padStart(64, '0');
-  const pAmountIn = BigInt(amountIn).toString(16).padStart(64, '0');
-  const pAmountOutMin = BigInt(amountOutMinimum).toString(16).padStart(64, '0');
-  const pPathOffset = '60'.padStart(64, '0');
-  const pPathLength = (pathBytes.length / 2).toString(16).padStart(64, '0');
-  const pPathData = pathBytes.padEnd(Math.ceil(pathBytes.length / 64) * 64, '0');
-
-  return '0xb858183f' + pRecipient + pAmountIn + pAmountOutMin + pPathOffset + pPathLength + pPathData;
-}
-
-function encodePath(tokens, fees) {
-  let encoded = '';
-  for (let i = 0; i < fees.length; i++) {
-    encoded += tokens[i].slice(2).toLowerCase();
-    encoded += Number(fees[i]).toString(16).padStart(6, '0');
-  }
-  encoded += tokens[tokens.length - 1].slice(2).toLowerCase();
-  return encoded;
+  return '0x04e45aaf' + pTokenIn + pTokenOut + pFee + pRecipient + pAmountIn + pAmountOutMin + pSqrtPriceLimit;
 }
 
 async function doSwapDirect(){
@@ -391,8 +369,10 @@ async function doSwapDirect(){
   var amountIn = BigInt(Math.floor(amountSwapNum * Math.pow(10, fromObj.decimals)));
   var amountFeeIn = BigInt(Math.floor(amountFeeNum * Math.pow(10, fromObj.decimals)));
 
-  const problematicTokens = ['ETH', 'WETH', 'DNA', 'AXO'];
-  const requiresMultiHop = problematicTokens.includes(fromSym) || problematicTokens.includes(toSym);
+  // Cálculo exacto del mínimo esperado según el precio actual para que coincida con la UI
+  var expectedOutputStr = document.getElementById('tAmt').value;
+  var amountOutMin = BigInt(Math.floor(parseFloat(expectedOutputStr) * 0.98 * Math.pow(10, toObj.decimals))); 
+  if(amountOutMin < 1n) amountOutMin = 1n;
 
   try {
     var txs = [];
@@ -422,18 +402,12 @@ async function doSwapDirect(){
       }
     }
 
-    let swapData = '';
-    if (requiresMultiHop && fromSym !== 'USDC' && toSym !== 'USDC') {
-      const usdcObj = CONTRACTS['USDC'];
-      const path = encodePath([fromObj.address, usdcObj.address, toObj.address], [3000, 3000]);
-      swapData = encodeExactInput(path, FEE_RECIPIENT, amountIn, 1n);
-    } else {
-      let poolFee = 3000;
-      if (['ETH', 'WETH', 'USDC'].includes(fromSym) && ['ETH', 'WETH', 'USDC'].includes(toSym)) {
-        poolFee = 500;
-      }
-      swapData = encodeExactInputSingle(fromObj.address, toObj.address, poolFee, FEE_RECIPIENT, amountIn);
+    let poolFee = 3000;
+    if (['ETH', 'WETH', 'USDC'].includes(fromSym) && ['ETH', 'WETH', 'USDC'].includes(toSym)) {
+      poolFee = 500;
     }
+    
+    let swapData = encodeExactInputSingle(fromObj.address, toObj.address, poolFee, FEE_RECIPIENT, amountIn, amountOutMin);
 
     txs.push({
       to: SWAP_ROUTER,
@@ -479,7 +453,6 @@ async function doSend(){
     } else {
       var token = CONTRACTS[sym];
       var amountRaw = BigInt(Math.floor(amount * Math.pow(10, token.decimals)));
-      // CORREGIDO: Se asigna correctamente el contrato en 'to' y los datos de transferencia en 'data'
       var transferData = '0xa9059cbb' + toAddr.slice(2).toLowerCase().padStart(64, '0') + amountRaw.toString(16).padStart(64, '0');
       txs.push({
         to: token.address,
@@ -513,7 +486,7 @@ async function fetchLivePrices(){
     renderTokenList();
   }catch(e){} 
 
-  for(let sym of ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO']){
+  for(let sym of ['HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO']){
     try{
       let r=await fetch('https://api.dexscreener.com/latest/dex/tokens/'+CONTRACTS[sym].address);
       let j=await r.json();

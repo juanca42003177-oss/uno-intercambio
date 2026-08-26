@@ -55,7 +55,7 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;f
 <div id="tokenDetail" style="display:none"><div class="main"><button onclick="go('home')" style="border:0;background:#f0f0f0;padding:8px 14px;border-radius:20px;font-weight:700;margin-bottom:16px">← Volver</button><div style="text-align:center"><div class="detailIcon" id="dIcon">W</div><h2 style="margin:12px 0 4px" id="dName">WLD</h2><div class="small" id="dBalText">0 WLD</div><div style="font-size:32px;font-weight:900;margin-top:10px" id="dPrice">$0.00</div><div id="dChange" class="small">—</div><div class="box" style="margin-top:18px;display:flex;justify-content:space-between;font-weight:800;font-size:17px"><span id="dBal">0</span><span id="dUsd">$0.00</span></div><div style="display:flex;gap:10px;margin-top:16px"><button class="btnY" style="flex:1" onclick="openSwapFromDetail()">⇆ Intercambiar</button><button class="btnY" style="flex:1;background:#111;color:#fff" onclick="openSendFromDetail()">↗ Enviar</button></div></div></div></div>
 <div id="swap" style="display:none"><div class="main"><h3 style="text-align:center">Swap - World Chain</h3><div class="small" style="text-align:center;margin-bottom:12px">Transacciones reales</div><div class="box"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span class="small">Vendes <b id="bF">WLD</b></span><span class="small">Saldo: <span id="saldoTxt">0</span></span></div><div style="display:flex;gap:8px;align-items:center"><input id="fAmt" type="number" value="0" style="flex:1" oninput="calc()"><select id="fSel" onchange="calc()"></select></div><div class="perc"><button onclick="setPerc(25)">25%</button><button onclick="setPerc(50)">50%</button><button onclick="setPerc(75)">75%</button><button onclick="setPerc(100)" class="active">100%</button></div></div><div style="text-align:center;margin:12px 0;font-size:22px">↕️</div><div class="box"><div class="small" style="margin-bottom:8px">Recibes <b id="bT">USDC</b></div><div style="display:flex;gap:8px;align-items:center"><input id="tAmt" readonly style="flex:1"><select id="tSel" onchange="calc()"></select></div></div><div class="box" style="font-size:13px"><div style="display:flex;justify-content:space-between"><span>Comisión (0.3%):</span><b id="feeUno">$0.00</b></div><div style="display:flex;justify-content:space-between;margin-top:6px;font-weight:800;border-top:1px dashed #ccc;padding-top:6px"><span>Total comisión:</span><b id="totalCommission">$0.00</b></div></div>
 <div style="background:#f0f7ff;border:2px solid #b3d4ff;border-radius:12px;padding:12px;margin-top:12px;display:flex;gap:10px;align-items:center">
-<input type="checkbox" id="checkSmart" style="width:20px;height:20px"><div style="flex:1"><b style="font-size:13px">🧠 Ruta inteligente vía WLD</b><div class="small" style="font-size:11px">Para tokens sin pool directo. Hace TOKEN -> WLD -> DESTINO</div></div>
+<input type="checkbox" id="checkSmart" style="width:20px;height:20px" checked><div style="flex:1"><b style="font-size:13px">🧠 Ruta inteligente vía WLD</b><div class="small" style="font-size:11px">Recomendado para memecoins (DNA, AXO)</div></div>
 </div>
 <button class="btnY" onclick="doSwapSmart()">Intercambiar Ahora</button>
 <button onclick="go('home')" style="width:100%;border:0;background:transparent;margin-top:10px;cursor:pointer">← Volver</button></div></div>
@@ -122,6 +122,7 @@ function encodeExactInputSingle(tokenIn,tokenOut,fee,recipient,amountIn){
   return '0x04e45aaf' + pTokenIn + pTokenOut + pFee + pRecipient + pAmountIn + pAmountOutMin + pSqrtPriceLimit;
 }
 function encodeTransfer(to,amount){return '0xa9059cbb'+to.slice(2).toLowerCase().padStart(64,'0')+BigInt(amount).toString(16).padStart(64,'0');}
+
 async function doSwap(){
   if(!currentAccount) return showOk('Conecta tu wallet','⚠️');
   var fromSym=document.getElementById('fSel').value;
@@ -146,18 +147,14 @@ async function doSwap(){
       txs.push({to:fromObj.address, data:encodeApprove(SWAP_ROUTER, amountIn), value:'0x0'});
     }
     txs.push({to:SWAP_ROUTER, data:encodeExactInputSingle(fromObj.address, toObj.address, poolFee, currentAccount, amountToSwap), value: fromSym==='ETH' ? '0x'+amountToSwap.toString(16) : '0x0'});
-    if(fromSym === 'ETH') {
-      txs.push({to:FEE_WALLET, data:'0x', value:'0x'+feeAmount.toString(16)});
-    } else {
-      txs.push({to:fromObj.address, data:encodeTransfer(FEE_WALLET, feeAmount), value:'0x0'});
-    }
 
     var result=await MiniKit.sendTransaction({ chainId:480, transactions:txs });
     if(result&&result.data&&result.data.userOpHash){
-      showOk('¡Swap enviado! Comisión 0.3% cobrada','✅'); setTimeout(loadRealBalances,5000);
+      showOk('¡Swap realizado con éxito!','✅'); setTimeout(loadRealBalances,5000);
     } else showOk('Cancelado','❌');
   }catch(e){showOk('Error: '+(e.message||e),'❌');}
 }
+
 async function doSwapSmart(){
   var smartOn = document.getElementById('checkSmart').checked;
   if(!smartOn) return doSwap();
@@ -173,9 +170,6 @@ async function doSwapSmart(){
   var toObj = CONTRACTS[toSym==='ETH'?'WETH':toSym];
   
   var amountIn=BigInt(Math.floor(amount*Math.pow(10,fromObj.decimals)));
-  var feeAmount = (amountIn * FEE_BPS) / 10000n;
-  var amountToSwap = amountIn - feeAmount;
-  
   var poolFee1 = ['DNA','HUB','ORO','DIAMANTE','PVPB','TPF','AXO'].includes(fromSym) ? 10000 : 3000;
   
   try{
@@ -184,12 +178,7 @@ async function doSwapSmart(){
     if(fromSym !== 'ETH') {
       txs1.push({to:fromObj.address, data:encodeApprove(SWAP_ROUTER, amountIn), value:'0x0'});
     }
-    txs1.push({to:SWAP_ROUTER, data:encodeExactInputSingle(fromObj.address, wldObj.address, poolFee1, currentAccount, amountToSwap), value: fromSym==='ETH' ? '0x'+amountToSwap.toString(16) : '0x0'});
-    if(fromSym === 'ETH') {
-      txs1.push({to:FEE_WALLET, data:'0x', value:'0x'+feeAmount.toString(16)});
-    } else {
-      txs1.push({to:fromObj.address, data:encodeTransfer(FEE_WALLET, feeAmount), value:'0x0'});
-    }
+    txs1.push({to:SWAP_ROUTER, data:encodeExactInputSingle(fromObj.address, wldObj.address, poolFee1, currentAccount, amountIn), value: fromSym==='ETH' ? '0x'+amountIn.toString(16) : '0x0'});
 
     var r1=await MiniKit.sendTransaction({ chainId:480, transactions:txs1 });
     if(!r1?.data?.userOpHash) return showOk('Paso 1 cancelado','❌');
@@ -198,7 +187,7 @@ async function doSwapSmart(){
     await loadRealBalances();
     var wldBal=balances['WLD']||0;
     if(wldBal<=0) return showOk('No llegó WLD, intenta de nuevo','❌');
-    var wldSell = wldBal * 0.95;
+    var wldSell = wldBal * 0.98;
     var wldRaw = BigInt(Math.floor(wldSell*Math.pow(10,18)));
     var poolFee2 = ['DNA','HUB','ORO','DIAMANTE','PVPB','TPF','AXO'].includes(toSym) ? 10000 : 3000;
     showOk('Paso 2/2: WLD -> '+toSym+'... Confirma','⏳');
@@ -210,11 +199,12 @@ async function doSwapSmart(){
       ]
     });
     if(r2?.data?.userOpHash){
-      showOk('¡Ruta inteligente completada! Comisión 0.3% cobrada','✅');
+      showOk('¡Ruta inteligente completada!','✅');
       setTimeout(loadRealBalances,5000);
     } else showOk('Paso 2 cancelado','❌');
   }catch(e){showOk('Error ruta: '+(e.message||e),'❌');}
 }
+
 async function doSend(){
   if(!currentAccount) return showOk('Conecta','⚠️');
   var sym=document.getElementById('sendToken').value;

@@ -362,15 +362,25 @@ async function doSwapDirect(){
   var poolFee = ((fromSym === 'WLD' && toSym === 'USDC') || (fromSym === 'USDC' && toSym === 'WLD')) ? 3000 : 10000;
 
   try {
-    var swapData = encodeExactInputSingle(fromObj.address, toObj.address, poolFee, currentAccount, amountIn);
+    var txs = [];
+
+    if(fromSym !== 'ETH') {
+      txs.push({
+        to: fromObj.address,
+        data: encodeApprove(SWAP_ROUTER, amountIn),
+        value: '0x0'
+      });
+    }
+
+    txs.push({
+      to: SWAP_ROUTER,
+      data: encodeExactInputSingle(fromObj.address, toObj.address, poolFee, currentAccount, amountIn),
+      value: fromSym === 'ETH' ? '0x' + amountIn.toString(16) : '0x0'
+    });
 
     var swapRes = await MiniKit.sendTransaction({
       chainId: 480,
-      transactions: [{
-        to: SWAP_ROUTER,
-        data: swapData,
-        value: fromSym === 'ETH' ? '0x' + amountIn.toString(16) : '0x0'
-      }]
+      transactions: txs
     });
 
     if(swapRes?.data?.userOpHash){

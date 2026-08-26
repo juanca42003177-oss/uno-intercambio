@@ -342,7 +342,6 @@ function encodeExactInputSingle(tokenIn,tokenOut,fee,recipient,amountIn){
   const pFee = Number(fee).toString(16).padStart(64, '0');
   const pRecipient = recipient.slice(2).toLowerCase().padStart(64, '0');
   const pAmountIn = BigInt(amountIn).toString(16).padStart(64, '0');
-  // Tolerancia de deslizamiento ajustada para permitir tokens de baja capitalización como DNA
   const pAmountOutMin = '1'; 
   const pSqrtPriceLimit = '0'.padStart(64, '0');
   return '0x04e45aaf' + pTokenIn + pTokenOut + pFee + pRecipient + pAmountIn + pAmountOutMin.padStart(64, '0') + pSqrtPriceLimit;
@@ -358,8 +357,11 @@ async function doSwapDirect(){
   if(fromSym === toSym) return showOk('Elige tokens diferentes','⚠️');
   if((balances[fromSym] || 0) < amount) return showOk('Saldo insuficiente','⚠️');
 
-  var fromObj = CONTRACTS[fromSym === 'ETH' ? 'WETH' : fromSym];
-  var toObj = CONTRACTS[toSym === 'ETH' ? 'WETH' : toSym];
+  var realFrom = (fromSym === 'ETH') ? 'WETH' : fromSym;
+  var realTo = (toSym === 'ETH') ? 'WETH' : toSym;
+
+  var fromObj = CONTRACTS[realFrom];
+  var toObj = CONTRACTS[realTo];
   
   var feeRate = 0.003;
   var amountFeeNum = amount * feeRate;
@@ -368,12 +370,13 @@ async function doSwapDirect(){
   var amountIn = BigInt(Math.floor(amountSwapNum * Math.pow(10, fromObj.decimals)));
   var amountFeeIn = BigInt(Math.floor(amountFeeNum * Math.pow(10, fromObj.decimals)));
 
-  // Ajuste dinámico de tarifa para pools de Uniswap (DNA usa tasa de 10000 o 3000 según disponibilidad)
-  var poolFee = 10000;
-  if ((fromSym === 'WLD' && toSym === 'USDC') || (fromSym === 'USDC' && toSym === 'WLD')) {
+  // Selección automática inteligente de tarifas para evitar errores en ETH, WETH, DNA y otros
+  let poolFee = 500;
+  if(fromSym === 'WLD' || toSym === 'WLD' || fromSym === 'USDC' || toSym === 'USDC') {
     poolFee = 3000;
-  } else if (fromSym === 'DNA' || toSym === 'DNA') {
-    poolFee = 10000; // Fee tier de 1% común en tokens meme/secundarios
+  }
+  if(fromSym === 'DNA' || toSym === 'DNA' || fromSym === 'ETH' || toSym === 'WETH') {
+    poolFee = 10000; // Tarifa alta universal para asegurar compatibilidad en pares especiales
   }
 
   try {

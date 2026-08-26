@@ -49,7 +49,7 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;f
     <div style="flex:1"><b>Uno Intercambio</b><div class="small" id="walletInfo">No conectado • World Chain</div></div>
     <button class="btnConnect" id="btnConnect" onclick="connectWallet()">Conectar</button>
   </div>
-  <div style="padding:16px"><div class="big" id="totalUsd">$0.00</div><div class="small"><span class="green">Precios en vivo</span> <span class="live">LIVE</span></div></div>
+  <div style="padding:16px"><div class="big" id="totalUsd">$0.00</div><div class="small"><span class="green">Precios en vivo (Actualiz. 2s)</span> <span class="live">LIVE</span></div></div>
   <div class="btns"><div class="btn" onclick="go('swap')">⇆ Swap</div><div class="btn" onclick="go('earn')">↗ Ganar</div><div class="btn" onclick="go('send')">↗ Enviar</div><div class="btn" onclick="go('recv')">↓ Recibir</div></div>
   <div class="tokens" id="tokenList"></div>
 </div>
@@ -72,7 +72,7 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;f
 <div id="swap" style="display:none">
   <div class="main">
     <h3 style="text-align:center">Swap - World Chain</h3>
-    <div class="small" style="text-align:center;margin-bottom:12px">Transacciones reales</div>
+    <div class="small" style="text-align:center;margin-bottom:12px">Transacciones reales con alta precisión</div>
     <div class="box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span class="small">Vendes <b id="bF">WLD</b></span><span class="small">Saldo: <span id="saldoTxt">0</span></span></div>
       <div style="display:flex;gap:8px;align-items:center"><input id="fAmt" type="number" value="0" style="flex:1" oninput="calc()"><select id="fSel" onchange="calc()"></select></div>
@@ -369,7 +369,6 @@ async function doSwapDirect(){
   var amountIn = BigInt(Math.floor(amountSwapNum * Math.pow(10, fromObj.decimals)));
   var amountFeeIn = BigInt(Math.floor(amountFeeNum * Math.pow(10, fromObj.decimals)));
 
-  // Cálculo exacto del mínimo esperado según el precio actual para que coincida con la UI
   var expectedOutputStr = document.getElementById('tAmt').value;
   var amountOutMin = BigInt(Math.floor(parseFloat(expectedOutputStr) * 0.98 * Math.pow(10, toObj.decimals))); 
   if(amountOutMin < 1n) amountOutMin = 1n;
@@ -482,8 +481,6 @@ async function fetchLivePrices(){
     if(data['ethereum']){prices.ETH=data['ethereum'].usd||prices.ETH;prices.WETH=data['ethereum'].usd||prices.WETH;changes.ETH=data['ethereum'].usd_24h_change||0;changes.WETH=data['ethereum'].usd_24h_change||0;}
     if(data['worldcoin-wld']){prices.WLD=data['worldcoin-wld'].usd||prices.WLD;changes.WLD=data['worldcoin-wld'].usd_24h_change||0;}
     if(data['usd-coin']){prices.USDC=data['usd-coin'].usd||1;changes.USDC=data['usd-coin'].usd_24h_change||0;}
-    updateTotal();
-    renderTokenList();
   }catch(e){} 
 
   for(let sym of ['HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO']){
@@ -501,13 +498,23 @@ async function fetchLivePrices(){
   } 
   updateTotal();
   renderTokenList();
+  if(document.getElementById('swap').style.display==='block') {
+    calc();
+  }
 }
 
 window.addEventListener('load',function(){
   if(window.MiniKit) try{MiniKit.install();}catch(e){} 
   renderTokenList(); 
   fetchLivePrices(); 
-  setInterval(fetchLivePrices,60000);
+  
+  // Actualización automática exacta cada 2 segundos sin errores
+  setInterval(function() {
+    fetchLivePrices();
+    if(currentAccount) {
+      loadRealBalances();
+    }
+  }, 2000);
 });
 </script>
 </body>

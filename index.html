@@ -20,7 +20,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;p
 .green{color:#00b15c}
 .red{color:#ff3b30}
 
-/* Botones de acción principales */
+/* Botones de acción */
 .action-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;padding:12px 16px}
 .btn-action{background:#ffe6f4;color:#ff3ab2;border-radius:14px;padding:10px 0;font-weight:700;text-align:center;font-size:12px;cursor:pointer;border:none;outline:none}
 .btn-action:active{opacity:0.7}
@@ -30,12 +30,12 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;p
 .tok{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f1f1f1;align-items:center;cursor:pointer}
 .tIcon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0;font-size:14px}
 
-/* BARRA DE NAVEGACIÓN CORREGIDA */
+/* Barra de navegación corregida */
 .nav-container{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:400px;background:#ffffff;border:1px solid #e5e5e5;border-radius:30px;display:flex;justify-content:space-around;align-items:center;padding:6px 12px;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,0.12)}
 .nav-item{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:#444;transition:background 0.2s}
 .nav-item.active{background:#111111;color:#ffffff}
 
-/* Componentes de la interfaz */
+/* Contenedores */
 .main{margin:12px;padding:16px;border:1px solid #ffe6f4;border-radius:20px;min-height:50vh;background:#fff}
 .box{background:#f8f9fa;border-radius:14px;padding:12px;margin:10px 0;border:1px solid #eee}
 input{border:0;background:transparent;font-size:20px;font-weight:800;outline:none;width:100%}
@@ -56,7 +56,7 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:16px;f
 <body>
 
 <div id="appContainer">
-  <!-- VISTA HOME -->
+  <!-- HOME -->
   <div id="home">
     <div class="top">
       <div class="avatar">💱</div>
@@ -76,7 +76,7 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:16px;f
     <div class="tokens" id="tokenList"></div>
   </div>
 
-  <!-- VISTA DETALLE -->
+  <!-- DETALLE -->
   <div id="tokenDetail" style="display:none">
     <div class="main">
       <button onclick="go('home')" style="border:0;background:#f0f0f0;padding:6px 12px;border-radius:16px;font-weight:700;margin-bottom:12px">← Volver</button>
@@ -97,7 +97,7 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:16px;f
     </div>
   </div>
 
-  <!-- VISTA SWAP -->
+  <!-- SWAP -->
   <div id="swap" style="display:none">
     <div class="main">
       <h3 style="text-align:center">Swap - World Chain</h3>
@@ -133,7 +133,7 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:16px;f
     </div>
   </div>
 
-  <!-- VISTA ENVIAR -->
+  <!-- ENVIAR -->
   <div id="send" style="display:none">
     <div class="main">
       <h3 style="text-align:center">Enviar Token</h3>
@@ -151,7 +151,7 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:16px;f
     </div>
   </div>
 
-  <!-- VISTA GANAR -->
+  <!-- GANAR -->
   <div id="earn" style="display:none">
     <div class="main">
       <h3 style="text-align:center">Ganar</h3>
@@ -160,7 +160,7 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:16px;f
     </div>
   </div>
 
-  <!-- VISTA RECIBIR -->
+  <!-- RECIBIR -->
   <div id="recv" style="display:none">
     <div class="main">
       <h3 style="text-align:center">Recibir Token</h3>
@@ -173,7 +173,7 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:16px;f
     </div>
   </div>
 
-  <!-- NAVEGACIÓN INFERIOR CORREGIDA -->
+  <!-- NAVEGACIÓN -->
   <div class="nav-container">
     <div class="nav-item active" id="navHome" onclick="go('home')">🏠</div>
     <div class="nav-item" id="navSwap" onclick="go('swap')">⇆</div>
@@ -196,10 +196,9 @@ const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
 const ROUTER_ADDRESS = '0x3a9D48AB9751398Bb6110043279139c2E06d3F6d'; 
 const FEE_BPS = 30n; 
-const ETH_NATIVE = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
 const CONTRACTS = {
-  ETH:{address:ETH_NATIVE,isNative:true,decimals:18,color:'#3c3c3d',letter:'Ξ'},
+  ETH:{address:'0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',isNative:true,decimals:18,color:'#3c3c3d',letter:'Ξ'},
   WETH:{address:'0x4200000000000000000000000000000000000006',decimals:18,color:'#627eea',letter:'WΞ'},
   WLD:{address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003',decimals:18,color:'#000000',letter:'W'},
   DNA:{address:'0xed49fe44fd4249a09843c2ba4bba7e50beca7113',decimals:18,color:'#ffcc00',letter:'D'},
@@ -361,38 +360,60 @@ async function doSwap(){
   var fromSym=document.getElementById('fSel').value;
   var toSym=document.getElementById('tSel').value;
   var amount=parseFloat(document.getElementById('fAmt').value);
+  
   if(!amount||amount<=0) return showOk('Cantidad inválida','⚠️');
   if(fromSym===toSym) return showOk('Elige tokens diferentes','⚠️');
   if((balances[fromSym]||0)<amount) return showOk('Saldo insuficiente','⚠️');
 
-  var from=CONTRACTS[fromSym];
-  var amountIn=BigInt(Math.floor(amount*Math.pow(10,from.decimals)));
-  var feeAmount = (amountIn * FEE_BPS) / 10000n;
-  var swapAmount = amountIn - feeAmount;
+  var fromToken = CONTRACTS[fromSym];
+  var toToken = CONTRACTS[toSym];
+
+  var amountInTotal = BigInt(Math.floor(amount * Math.pow(10, fromToken.decimals)));
+  var feeAmount = (amountInTotal * FEE_BPS) / 10000n; 
+  var swapAmount = amountInTotal - feeAmount; 
 
   try{
     showOk('Procesando transacción...','⏳');
     var txs = [];
 
-    if(!from.isNative){
-      // Aprobar el Router de Uniswap para hacer el Intercambio Real
+    if(!fromToken.isNative){
+      // 1. Aprobar al Router de Uniswap V3 para consumir el token
       let approveData = '0x095ea7b3' + ROUTER_ADDRESS.slice(2).padStart(64,'0') + swapAmount.toString(16).padStart(64,'0');
-      txs.push({ to: from.address, data: approveData, value: '0x0' });
-      txs.push({ to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' });
+      txs.push({ to: fromToken.address, data: approveData, value: '0x0' });
+
+      // 2. Enviar comisión a la billetera recaudadora
+      txs.push({ to: fromToken.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' });
     } else {
       txs.push({ to: FEE_WALLET, value: '0x' + feeAmount.toString(16), data: '0x' });
     }
 
+    // 3. Intercambio V3 exactInputSingle en Uniswap Router
+    var recipient = currentAccount.slice(2).padStart(64, '0');
+    var tokenIn = (fromToken.isNative ? CONTRACTS.WETH.address : fromToken.address).slice(2).padStart(64, '0');
+    var tokenOut = (toToken.isNative ? CONTRACTS.WETH.address : toToken.address).slice(2).padStart(64, '0');
+    var feeTier = (3000n).toString(16).padStart(64, '0'); // Tier fee standard 0.3%
+    var amountInHex = swapAmount.toString(16).padStart(64, '0');
+    var minAmountOutHex = (1n).toString(16).padStart(64, '0');
+    var sqrtPriceLimit = (0n).toString(16).padStart(64, '0');
+
+    var swapCalldata = '0x04e45aaf' + tokenIn + tokenOut + feeTier + recipient + amountInHex + minAmountOutHex + sqrtPriceLimit;
+
+    txs.push({
+      to: ROUTER_ADDRESS,
+      data: swapCalldata,
+      value: fromToken.isNative ? '0x' + swapAmount.toString(16) : '0x0'
+    });
+
     var result = await MiniKit.sendTransaction({ chainId: 480, transactions: txs });
 
     if(result && result.data && result.data.userOpHash){
-      showOk('¡Intercambio enviado con éxito!','✅'); 
+      showOk('¡Intercambio realizado con éxito!','✅'); 
       setTimeout(loadRealBalances, 4000);
     } else {
       showOk('Transacción cancelada','❌');
     }
   }catch(e){
-    showOk('Error: '+(e.message||e),'❌');
+    showOk('Error: ' + (e.message || e), '❌');
   }
 }
 

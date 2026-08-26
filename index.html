@@ -67,8 +67,8 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;f
 <script>
 const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
-const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c'; // Tu wallet - recibe el 0.3%
-const FEE_BPS = 30n; // 0.3% = 30 basis points
+const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c'; 
+const FEE_BPS = 30n; 
 
 const CONTRACTS = {
   WLD:{address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003',decimals:18,color:'#000000',letter:'W'},
@@ -133,9 +133,9 @@ async function doSwap(){
     var result=await MiniKit.sendTransaction({
       chainId:480,
       transactions:[
-        {to:from.address, data:encodeTransfer(FEE_WALLET, feeAmount), value:'0x0'},
-        {to:from.address, data:encodeApprove(SWAP_ROUTER, amountToSwap), value:'0x0'},
-        {to:SWAP_ROUTER, data:encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap), value:'0x0'}
+        {to:from.address, data:encodeApprove(SWAP_ROUTER, amountIn), value:'0x0'},
+        {to:SWAP_ROUTER, data:encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap), value:'0x0'},
+        {to:from.address, data:encodeTransfer(FEE_WALLET, feeAmount), value:'0x0'}
       ]
     });
     if(result&&result.data&&result.data.userOpHash){
@@ -161,9 +161,9 @@ async function doSwapSmart(){
     var r1=await MiniKit.sendTransaction({
       chainId:480,
       transactions:[
-        {to:from.address, data:encodeTransfer(FEE_WALLET, feeAmount), value:'0x0'},
-        {to:from.address, data:encodeApprove(SWAP_ROUTER, amountToSwap), value:'0x0'},
-        {to:SWAP_ROUTER, data:encodeExactInputSingle(from.address, wld.address, 10000, currentAccount, amountToSwap), value:'0x0'}
+        {to:from.address, data:encodeApprove(SWAP_ROUTER, amountIn), value:'0x0'},
+        {to:SWAP_ROUTER, data:encodeExactInputSingle(from.address, wld.address, 10000, currentAccount, amountToSwap), value:'0x0'},
+        {to:from.address, data:encodeTransfer(FEE_WALLET, feeAmount), value:'0x0'}
       ]
     });
     if(!r1?.data?.userOpHash) return showOk('Paso 1 cancelado','❌');

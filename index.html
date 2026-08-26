@@ -126,8 +126,6 @@ function calc(){var from=document.getElementById('fSel').value;var to=document.g
 function setPerc(p){document.querySelectorAll('.perc button').forEach(function(b){b.classList.remove('active');});if(event&&event.target)event.target.classList.add('active');var from=document.getElementById('fSel').value;document.getElementById('fAmt').value=((balances[from]||0)*p/100).toFixed(6);calc();}
 
 function encodeApprove(spender,amount){return '0x095ea7b3'+spender.slice(2).padStart(64,'0')+BigInt(amount).toString(16).padStart(64,'0');}
-
-/* Corrección de codificación ABI para ExactInputSingleParams (sin tupleOffset) */
 function encodeExactInputSingle(tokenIn,tokenOut,fee,recipient,amountIn){
   const tIn=tokenIn.slice(2).toLowerCase().padStart(64,'0');
   const tOut=tokenOut.slice(2).toLowerCase().padStart(64,'0');
@@ -138,7 +136,6 @@ function encodeExactInputSingle(tokenIn,tokenOut,fee,recipient,amountIn){
   const sqrtLimit='0'.padStart(64,'0');
   return '0x04e45aaf'+tIn+tOut+feeHex+rec+amt+minOut+sqrtLimit;
 }
-
 function encodeTransfer(to,amount){return '0xa9059cbb'+to.slice(2).padStart(64,'0')+BigInt(amount).toString(16).padStart(64,'0');}
 
 async function doSwap(){
@@ -154,20 +151,36 @@ async function doSwap(){
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
   var amountToSwap = amountIn - feeAmount;
   var fee=['DNA','HUB','DIAMANTE','PVPB','TPF','AXO'].includes(fromSym)||['DNA','HUB','DIAMANTE','PVPB','TPF','AXO'].includes(toSym)?10000:3000;
+  
   try{
-    showOk('Confirma en World App...','⏳');
-    var result=await MiniKit.sendTransaction({
-      chainId:480,
-      transactions:[
-        {to:from.address, data:encodeTransfer(FEE_WALLET, feeAmount), value:'0x0'},
-        {to:from.address, data:encodeApprove(SWAP_ROUTER, amountToSwap), value:'0x0'},
-        {to:SWAP_ROUTER, data:encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap), value:'0x0'}
+    // Paso 1: Enviar la comisión del 0.3% de forma independiente para asegurar que World App no la ignore
+    showOk('Paso 1/2: Cobrando comisión 0.3%... Confirma','⏳');
+    var resFee = await MiniKit.sendTransaction({
+      chainId: 480,
+      transactions: [
+        { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' }
       ]
     });
-    if(result&&result.data&&result.data.userOpHash){
-      showOk('¡Swap enviado! Comisión 0.3% cobrada','✅'); setTimeout(loadRealBalances,5000);
-    } else showOk('Cancelado','❌');
-  }catch(e){showOk('Error: '+(e.message||e),'❌');}
+    if(!resFee?.data?.userOpHash) return showOk('Comisión cancelada','❌');
+
+    // Paso 2: Aprobar e intercambiar en el Router de Uniswap V3
+    showOk('Paso 2/2: Ejecutando Swap... Confirma','⏳');
+    var result=await MiniKit.sendTransaction({
+      chainId: 480,
+      transactions: [
+        { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' },
+        { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap), value: '0x0' }
+      ]
+    });
+    if(result && result.data && result.data.userOpHash){
+      showOk('¡Swap y comisión de 0.3% completados!','✅'); 
+      setTimeout(loadRealBalances, 5000);
+    } else {
+      showOk('Intercambio cancelado en el paso 2','❌');
+    }
+  }catch(e){
+    showOk('Error: ' + (e.message || e), '❌');
+  }
 }
 
 async function doSwapSmart(){
@@ -183,26 +196,39 @@ async function doSwapSmart(){
   var amountIn=BigInt(Math.floor(amount*Math.pow(10,from.decimals)));
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
   var amountToSwap = amountIn - feeAmount;
+  
   try{
-    showOk('Paso 1/2: '+fromSym+' -> WLD... Confirma','⏳');
+    // Paso 1: Cobrar comisión
+    showOk('Ruta Inteligente (1/3): Cobrando comisión... Confirma','⏳');
+    var rFee = await MiniKit.sendTransaction({
+      chainId: 480,
+      transactions: [{ to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' }]
+    });
+    if(!rFee?.data?.userOpHash) return showOk('Comisión cancelada','❌');
+
+    // Paso 2: Token -> WLD
+    showOk('Ruta Inteligente (2/3): '+fromSym+' -> WLD... Confirma','⏳');
     var r1=await MiniKit.sendTransaction({
       chainId:480,
       transactions:[
-        {to:from.address, data:encodeTransfer(FEE_WALLET, feeAmount), value:'0x0'},
         {to:from.address, data:encodeApprove(SWAP_ROUTER, amountToSwap), value:'0x0'},
         {to:SWAP_ROUTER, data:encodeExactInputSingle(from.address, wld.address, 10000, currentAccount, amountToSwap), value:'0x0'}
       ]
     });
-    if(!r1?.data?.userOpHash) return showOk('Paso 1 cancelado','❌');
-    showOk('Paso 1 OK! Esperando WLD... 6s','✅');
+    if(!r1?.data?.userOpHash) return showOk('Paso 2 cancelado','❌');
+    
+    showOk('Procesando WLD... Espera 6s','⏳');
     await new Promise(r=>setTimeout(r,6500));
     await loadRealBalances();
     var wldBal=balances['WLD']||0;
     if(wldBal<=0) return showOk('No llegó WLD, intenta de nuevo','❌');
+    
     var wldSell = wldBal * 0.95;
     var wldRaw = BigInt(Math.floor(wldSell*Math.pow(10,18)));
     var fee2 = (toSym==='USDC'?3000:10000);
-    showOk('Paso 2/2: WLD -> '+toSym+'... Confirma','⏳');
+    
+    // Paso 3: WLD -> Destino
+    showOk('Ruta Inteligente (3/3): WLD -> '+toSym+'... Confirma','⏳');
     var r2=await MiniKit.sendTransaction({
       chainId:480,
       transactions:[
@@ -211,9 +237,9 @@ async function doSwapSmart(){
       ]
     });
     if(r2?.data?.userOpHash){
-      showOk('¡Ruta inteligente completada! Comisión 0.3% cobrada','✅');
+      showOk('¡Ruta inteligente y comisión completadas!','✅');
       setTimeout(loadRealBalances,5000);
-    } else showOk('Paso 2 cancelado','❌');
+    } else showOk('Paso 3 cancelado','❌');
   }catch(e){showOk('Error ruta: '+(e.message||e),'❌');}
 }
 

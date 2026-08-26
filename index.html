@@ -110,8 +110,8 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;f
     <div style="background:#f0f7ff;border:2px solid #b3d4ff;border-radius:12px;padding:12px;margin-top:12px;display:flex;gap:10px;align-items:center">
       <input type="checkbox" id="checkSmart" style="width:20px;height:20px">
       <div style="flex:1">
-        <b style="font-size:13px">🧠 Ruta inteligente vía WLD</b>
-        <div class="small" style="font-size:11px">Para tokens sin pool directo. Hace TOKEN -> WLD -> DESTINO</div>
+        <b style="font-size:13px">🧠 Ruta inteligente vía WETH/WLD</b>
+        <div class="small" style="font-size:11px">Para tokens sin pool directo (ej. DNA). Ruta automática para evitar fallos.</div>
       </div>
     </div>
     <button class="btnY" onclick="doSwapSmart()">Intercambiar Ahora</button>
@@ -177,7 +177,6 @@ const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
 const FEE_BPS = 30n; // 0.3%
 
-// Dirección sentinel para identificar ETH Nativo
 const ETH_NATIVE = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
 const CONTRACTS = {
@@ -259,14 +258,12 @@ async function getBalance(tokenKey){
   if(!currentAccount) return 0;
   try{
     var t = CONTRACTS[tokenKey];
-    // Consulta Saldo ETH Nativo
     if(t.isNative){
       var res=await fetch(WORLD_RPC,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_getBalance',params:[currentAccount,'latest']})});
       var json=await res.json();
       if(!json.result||json.result==='0x') return 0;
       return Number(BigInt(json.result))/Math.pow(10,18);
     } 
-    // Consulta Saldo Tokens ERC-20
     else {
       var data='0x70a08231'+currentAccount.slice(2).padStart(64,'0');
       var res=await fetch(WORLD_RPC,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:t.address,data:data},'latest']})});
@@ -353,13 +350,18 @@ async function doSwap(){
   var amountIn=BigInt(Math.floor(amount*Math.pow(10,from.decimals)));
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
   var amountToSwap = amountIn - feeAmount;
-  var poolFee = ['DNA','HUB','DIAMANTE','PVPB','TPF','AXO'].includes(fromSym)||['DNA','HUB','DIAMANTE','PVPB','TPF','AXO'].includes(toSym)?10000:3000;
+
+  // Ajuste de dirección de entrada/salida para tokens naticos o sin pool directo
+  var targetTokenIn = from.isNative ? CONTRACTS.WETH.address : from.address;
+  var targetTokenOut = to.isNative ? CONTRACTS.WETH.address : to.address;
+
+  // Para DNA y otros tokens, la comisión de piscina habitual en World Chain es 10000 (1%) o 3000 (0.3%)
+  var poolFee = ['DNA','HUB','DIAMANTE','PVPB','TPF','AXO'].includes(fromSym) || ['DNA','HUB','DIAMANTE','PVPB','TPF','AXO'].includes(toSym) ? 10000 : 3000;
 
   try{
     showOk('Confirma en World App...','⏳');
     var txs = [];
 
-    // LÓGICA SI SE VENDE ETH NATIVO
     if(from.isNative){
       var hexValueFee = '0x' + feeAmount.toString(16);
       var hexValueSwap = '0x' + amountToSwap.toString(16);
@@ -367,17 +369,15 @@ async function doSwap(){
       txs.push({ to: FEE_WALLET, value: hexValueFee, data: '0x' });
       txs.push({
         to: SWAP_ROUTER,
-        data: encodeExactInputSingle(CONTRACTS.WETH.address, to.address, poolFee, currentAccount, amountToSwap),
+        data: encodeExactInputSingle(CONTRACTS.WETH.address, targetTokenOut, poolFee, currentAccount, amountToSwap),
         value: hexValueSwap
       });
-    } 
-    // LÓGICA SI SE VENDE TOKEN ERC-20 (DNA, WETH, USDC, ETC.)
-    else {
+    } else {
       txs.push({ to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' });
       txs.push({ to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' });
       txs.push({
         to: SWAP_ROUTER,
-        data: encodeExactInputSingle(from.address, to.isNative ? CONTRACTS.WETH.address : to.address, poolFee, currentAccount, amountToSwap),
+        data: encodeExactInputSingle(targetTokenIn, targetTokenOut, poolFee, currentAccount, amountToSwap),
         value: '0x0'
       });
     }
@@ -385,7 +385,7 @@ async function doSwap(){
     var result = await MiniKit.sendTransaction({ chainId: 480, transactions: txs });
     if(result&&result.data&&result.data.userOpHash){
       showOk('¡Swap enviado! Comisión 0.3% cobrada','✅'); setTimeout(loadRealBalances,5000);
-    } else showOk('Cancelado','❌');
+    } else showOk('Error o simulación fallida','❌');
   }catch(e){showOk('Error: '+(e.message||e),'❌');}
 }
 
@@ -396,55 +396,59 @@ async function doSwapSmart(){
   var fromSym=document.getElementById('fSel').value;
   var toSym=document.getElementById('tSel').value;
   var amount=parseFloat(document.getElementById('fAmt').value);
-  if(fromSym==='WLD' || toSym==='WLD') return doSwap();
-  if(!amount||amount<=0) return showOk('Cantidad inválida','⚠️');
   
-  var from=CONTRACTS[fromSym]; var wld=CONTRACTS['WLD']; var to=CONTRACTS[toSym];
+  if(!amount||amount<=0) return showOk('Cantidad inválida','⚠️');
+
+  // Token de puente ideal para DNA y tokens sin liquidez WLD es WETH
+  var bridgeToken = (fromSym === 'WETH' || toSym === 'WETH') ? CONTRACTS['WLD'] : CONTRACTS['WETH'];
+  var bridgeSym = bridgeToken === CONTRACTS['WETH'] ? 'WETH' : 'WLD';
+
+  var from=CONTRACTS[fromSym]; var to=CONTRACTS[toSym];
   var amountIn=BigInt(Math.floor(amount*Math.pow(10,from.decimals)));
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
   var amountToSwap = amountIn - feeAmount;
 
   try{
-    showOk('Paso 1/2: '+fromSym+' -> WLD... Confirma','⏳');
+    showOk('Paso 1/2: '+fromSym+' -> '+bridgeSym+'... Confirma','⏳');
     var txs1 = [];
 
     if(from.isNative){
       txs1.push({ to: FEE_WALLET, value: '0x' + feeAmount.toString(16), data: '0x' });
       txs1.push({
         to: SWAP_ROUTER,
-        data: encodeExactInputSingle(CONTRACTS.WETH.address, wld.address, 10000, currentAccount, amountToSwap),
+        data: encodeExactInputSingle(CONTRACTS.WETH.address, bridgeToken.address, 10000, currentAccount, amountToSwap),
         value: '0x' + amountToSwap.toString(16)
       });
     } else {
       txs1.push({ to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' });
       txs1.push({ to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' });
-      txs1.push({ to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, wld.address, 10000, currentAccount, amountToSwap), value: '0x0' });
+      txs1.push({ to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, bridgeToken.address, 10000, currentAccount, amountToSwap), value: '0x0' });
     }
 
     var r1 = await MiniKit.sendTransaction({ chainId: 480, transactions: txs1 });
     if(!r1?.data?.userOpHash) return showOk('Paso 1 cancelado','❌');
 
-    showOk('Paso 1 OK! Esperando WLD... 6s','✅');
+    showOk('Paso 1 OK! Esperando fondos... 6s','✅');
     await new Promise(r=>setTimeout(r,6500));
     await loadRealBalances();
 
-    var wldBal=balances['WLD']||0;
-    if(wldBal<=0) return showOk('No llegó WLD, intenta de nuevo','❌');
-    var wldSell = wldBal * 0.95;
-    var wldRaw = BigInt(Math.floor(wldSell*Math.pow(10,18)));
-    var fee2 = (toSym==='USDC'?3000:10000);
+    var bridgeBal=balances[bridgeSym]||0;
+    if(bridgeBal<=0) return showOk('No llegó '+bridgeSym+', intenta de nuevo','❌');
+    var bridgeSell = bridgeBal * 0.95;
+    var bridgeRaw = BigInt(Math.floor(bridgeSell*Math.pow(10,18)));
+    var fee2 = 10000;
 
-    showOk('Paso 2/2: WLD -> '+toSym+'... Confirma','⏳');
+    showOk('Paso 2/2: '+bridgeSym+' -> '+toSym+'... Confirma','⏳');
     var r2=await MiniKit.sendTransaction({
       chainId:480,
       transactions:[
-        {to:wld.address, data:encodeApprove(SWAP_ROUTER,wldRaw), value:'0x0'},
-        {to:SWAP_ROUTER, data:encodeExactInputSingle(wld.address, to.isNative ? CONTRACTS.WETH.address : to.address, fee2, currentAccount, wldRaw), value:'0x0'}
+        {to:bridgeToken.address, data:encodeApprove(SWAP_ROUTER,bridgeRaw), value:'0x0'},
+        {to:SWAP_ROUTER, data:encodeExactInputSingle(bridgeToken.address, to.isNative ? CONTRACTS.WETH.address : to.address, fee2, currentAccount, bridgeRaw), value:'0x0'}
       ]
     });
 
     if(r2?.data?.userOpHash){
-      showOk('¡Ruta inteligente completada! Comisión 0.3% cobrada','✅');
+      showOk('¡Ruta inteligente completada!','✅');
       setTimeout(loadRealBalances,5000);
     } else showOk('Paso 2 cancelado','❌');
   }catch(e){showOk('Error ruta: '+(e.message||e),'❌');}

@@ -144,8 +144,6 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;f
 <script>
 const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
-
-// Dirección receptora configurada con tu cuenta
 const FEE_RECIPIENT = '0x019001d46cd3155ef045a41f4c359c040595438c';
 
 const CONTRACTS = {
@@ -344,9 +342,10 @@ function encodeExactInputSingle(tokenIn,tokenOut,fee,recipient,amountIn){
   const pFee = Number(fee).toString(16).padStart(64, '0');
   const pRecipient = recipient.slice(2).toLowerCase().padStart(64, '0');
   const pAmountIn = BigInt(amountIn).toString(16).padStart(64, '0');
-  const pAmountOutMin = '0'.padStart(64, '0');
+  // Tolerancia de deslizamiento ajustada para permitir tokens de baja capitalización como DNA
+  const pAmountOutMin = '1'; 
   const pSqrtPriceLimit = '0'.padStart(64, '0');
-  return '0x04e45aaf' + pTokenIn + pTokenOut + pFee + pRecipient + pAmountIn + pAmountOutMin + pSqrtPriceLimit;
+  return '0x04e45aaf' + pTokenIn + pTokenOut + pFee + pRecipient + pAmountIn + pAmountOutMin.padStart(64, '0') + pSqrtPriceLimit;
 }
 
 async function doSwapDirect(){
@@ -369,9 +368,12 @@ async function doSwapDirect(){
   var amountIn = BigInt(Math.floor(amountSwapNum * Math.pow(10, fromObj.decimals)));
   var amountFeeIn = BigInt(Math.floor(amountFeeNum * Math.pow(10, fromObj.decimals)));
 
+  // Ajuste dinámico de tarifa para pools de Uniswap (DNA usa tasa de 10000 o 3000 según disponibilidad)
   var poolFee = 10000;
   if ((fromSym === 'WLD' && toSym === 'USDC') || (fromSym === 'USDC' && toSym === 'WLD')) {
     poolFee = 3000;
+  } else if (fromSym === 'DNA' || toSym === 'DNA') {
+    poolFee = 10000; // Fee tier de 1% común en tokens meme/secundarios
   }
 
   try {

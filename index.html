@@ -48,7 +48,7 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;f
     <div style="flex:1"><b>Uno Intercambio</b><div class="small" id="walletInfo">No conectado • World Chain</div></div>
     <button class="btnConnect" id="btnConnect" onclick="connectWallet()">Conectar</button>
   </div>
-  <div style="padding:16px"><div class="big" id="totalUsd">$0.00</div><div class="small"><span class="green">Precios en vivo (2s)</span> <span class="live">LIVE</span></div></div>
+  <div style="padding:16px"><div class="big" id="totalUsd">$0.00</div><div class="small"><span class="green">Precios sincronizados en vivo</span> <span class="live">LIVE</span></div></div>
   <div class="btns"><div class="btn" onclick="go('swap')">⇆ Swap</div><div class="btn" onclick="go('earn')">↗ Ganar</div><div class="btn" onclick="go('send')">↗ Enviar</div><div class="btn" onclick="go('recv')">↓ Recibir</div></div>
   <div class="tokens" id="tokenList"></div>
 </div>
@@ -84,9 +84,11 @@ const CONTRACTS = {
   TPF:{address:'0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45',decimals:18,color:'#1abc9c',letter:'T'},
   AXO:{address:'0x249820C0479D0A7feE6A2A3a14583267550F3caF',decimals:18,color:'#e67e22',letter:'A'}
 };
+
 let prices={ETH:3400,WLD:0.4,DNA:0.00000045,HUB:0.0000008,ORO:0.002,USDC:1,WETH:3400,SUSHI:0.5,DIAMANTE:0.0001,PVPB:0.0001,TPF:0.0001,AXO:0.0001};
 let changes={ETH:0,WLD:0,DNA:0,HUB:0,ORO:0,USDC:0,WETH:0,SUSHI:0,DIAMANTE:0,PVPB:0,TPF:0,AXO:0};
 let balances={}; let currentAccount=null; let selectedToken='WLD';
+
 function showOk(msg,icon){document.getElementById('modalIcon').innerText=icon||'✅';document.getElementById('modalTxt').innerText=msg;document.getElementById('modal').style.display='flex';}
 function go(page){['home','swap','earn','send','recv','tokenDetail'].forEach(function(p){var el=document.getElementById(p); if(el) el.style.display=(p===page)?'block':'none';}); document.querySelectorAll('.nav div').forEach(function(d){d.classList.remove('active');}); if(page==='home') document.getElementById('navHome').classList.add('active'); if(page==='recv'&&currentAccount){document.getElementById('recvAddr').innerText=currentAccount; document.getElementById('qrImg').src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent(currentAccount);} if(page==='swap'){fillSelects();calc();} if(page==='send'){fillSendSelect();updateSendBal();}}
 function openToken(sym){selectedToken=sym;var t=CONTRACTS[sym];var bal=balances[sym]||0;var price=prices[sym]||0;var ch=changes[sym]||0;document.getElementById('dIcon').style.background=t.color;document.getElementById('dIcon').innerText=t.letter;document.getElementById('dName').innerText=sym;document.getElementById('dBalText').innerText=bal.toFixed(6)+' '+sym;document.getElementById('dPrice').innerText='$' + price.toFixed(price<0.01?8:4);document.getElementById('dChange').innerText=(ch>=0?'▲ +':'▼ ')+Math.abs(ch).toFixed(2)+'%';document.getElementById('dBal').innerText=bal.toFixed(6)+' '+sym;document.getElementById('dUsd').innerText=' $' + (bal*price).toFixed(2);go('tokenDetail');}
@@ -114,13 +116,30 @@ async function getBalance(tokenKey, t){
   }catch(e){return 0;}
 }
 
-async function loadRealBalances(){if(!currentAccount) return;showOk('Cargando saldos...','⏳');for(var sym in CONTRACTS){balances[sym]=await getBalance(sym, CONTRACTS[sym]);}document.getElementById('modal').style.display='none';renderTokenList();updateTotal();}
+async function loadRealBalances(){if(!currentAccount) return;for(var sym in CONTRACTS){balances[sym]=await getBalance(sym, CONTRACTS[sym]);0;}renderTokenList();updateTotal();}
 function updateTotal(){var total=0;for(var sym in balances) total+=(balances[sym]||0)*(prices[sym]||0);document.getElementById('totalUsd').innerText='$'+total.toFixed(2);}
 function renderTokenList(){var html='<div style="font-weight:800;margin:10px 0 6px">World Chain</div>';for(var sym in CONTRACTS){var t=CONTRACTS[sym];var bal=balances[sym]||0;var usd=bal*(prices[sym]||0);var ch=changes[sym]||0;html+='<div class="tok" onclick="openToken(\''+sym+'\')"><div style="display:flex;gap:12px;align-items:center"><div class="tIcon" style="background:'+t.color+'">'+t.letter+'</div><div><b>'+sym+'</b><div class="small">'+bal.toFixed(6)+' '+sym+'</div></div></div><div style="text-align:right"><b>$'+usd.toFixed(2)+'</b><div class="small '+(ch>=0?'green':'red')+'">'+(ch>=0?'▲ +':'▼ ')+Math.abs(ch).toFixed(2)+'%</div></div></div>';}document.getElementById('tokenList').innerHTML=html;}
 function fillSelects(){var opts='';for(var sym in CONTRACTS) opts+='<option value="'+sym+'">'+sym+'</option>';document.getElementById('fSel').innerHTML=opts;document.getElementById('tSel').innerHTML=opts;document.getElementById('fSel').value=selectedToken||'WLD';document.getElementById('tSel').value='USDC';}
 function fillSendSelect(){var opts='';for(var sym in CONTRACTS) opts+='<option value="'+sym+'">'+sym+'</option>';document.getElementById('sendToken').innerHTML=opts;document.getElementById('sendToken').value=selectedToken||'WLD';}
 function updateSendBal(){var sym=document.getElementById('sendToken').value;document.getElementById('sendBal').innerText=(balances[sym]||0).toFixed(6)+' '+sym;}
-function calc(){var from=document.getElementById('fSel').value;var to=document.getElementById('tSel').value;var amt=parseFloat(document.getElementById('fAmt').value)||0;document.getElementById('bF').innerText=from;document.getElementById('bT').innerText=to;document.getElementById('saldoTxt').innerText=(balances[from]||0).toFixed(6);if(amt<=0){document.getElementById('tAmt').value='0';return;}var pf=prices[from]||0.0000001;var pt=prices[to]||0.0000001;var usd=amt*pf;var fee=usd*0.003;document.getElementById('tAmt').value=((usd-fee)/pt).toFixed(6);document.getElementById('feeUno').innerText='$' + fee.toFixed(4);document.getElementById('totalCommission').innerText='$' + fee.toFixed(4);}
+
+function calc(){
+  var from=document.getElementById('fSel').value;
+  var to=document.getElementById('tSel').value;
+  var amt=parseFloat(document.getElementById('fAmt').value)||0;
+  document.getElementById('bF').innerText=from;
+  document.getElementById('bT').innerText=to;
+  document.getElementById('saldoTxt').innerText=(balances[from]||0).toFixed(6);
+  if(amt<=0){document.getElementById('tAmt').value='0';return;}
+  var pf=prices[from]||0.0000001;
+  var pt=prices[to]||0.0000001;
+  var usd=amt*pf;
+  var fee=usd*0.003;
+  document.getElementById('tAmt').value=((usd-fee)/pt).toFixed(6);
+  document.getElementById('feeUno').innerText='$' + fee.toFixed(4);
+  document.getElementById('totalCommission').innerText='$' + fee.toFixed(4);
+}
+
 function setPerc(p){document.querySelectorAll('.perc button').forEach(function(b){b.classList.remove('active');});event.target.classList.add('active');var from=document.getElementById('fSel').value;document.getElementById('fAmt').value=((balances[from]||0)*p/100).toFixed(6);calc();}
 function encodeApprove(spender,amount){return '0x095ea7b3'+spender.slice(2).padStart(64,'0')+BigInt(amount).toString(16).padStart(64,'0');}
 function encodeExactInputSingle(tokenIn,tokenOut,fee,recipient,amountIn){return '0x04e45aaf'+tokenIn.slice(2).padStart(64,'0')+tokenOut.slice(2).padStart(64,'0')+Number(fee).toString(16).padStart(64,'0')+recipient.slice(2).padStart(64,'0')+BigInt(amountIn).toString(16).padStart(64,'0')+'0'.padStart(64,'0')+'0'.padStart(64,'0');}
@@ -138,10 +157,10 @@ async function doSwap(){
   var amountIn=BigInt(Math.floor(amount*Math.pow(10,from.decimals)));
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
   var amountToSwap = amountIn - feeAmount;
-  var fee=['DNA','HUB','DIAMANTE','PVPB','TPF','AXO'].includes(fromSym)||['DNA','HUB','DIAMANTE','PVPB','TPF','AXO'].includes(toSym)?10000:3000;
+  var fee=3000;
   
   try{
-    showOk('Confirma en World App...','⏳');
+    showOk('Preparando transacción...','⏳');
     let txs = [];
     if(from.native){
       txs.push({to:FEE_WALLET, data:'0x', value:'0x'+feeAmount.toString(16)});
@@ -157,7 +176,7 @@ async function doSwap(){
       transactions: txs
     });
     if(result&&result.data&&result.data.userOpHash){
-      showOk('¡Swap enviado! Comisión 0.3% cobrada','✅'); setTimeout(loadRealBalances,5000);
+      showOk('¡Swap enviado correctamente!','✅'); setTimeout(loadRealBalances,5000);
     } else showOk('Cancelado','❌');
   }catch(e){showOk('Error: '+(e.message||e),'❌');}
 }
@@ -182,7 +201,7 @@ async function doSwapSmart(){
       transactions:[
         {to:from.address, data:encodeTransfer(FEE_WALLET, feeAmount), value:'0x0'},
         {to:from.address, data:encodeApprove(SWAP_ROUTER, amountToSwap), value:'0x0'},
-        {to:SWAP_ROUTER, data:encodeExactInputSingle(from.address, wld.address, 10000, currentAccount, amountToSwap), value:'0x0'}
+        {to:SWAP_ROUTER, data:encodeExactInputSingle(from.address, wld.address, 3000, currentAccount, amountToSwap), value:'0x0'}
       ]
     });
     if(!r1?.data?.userOpHash) return showOk('Paso 1 cancelado','❌');
@@ -193,17 +212,16 @@ async function doSwapSmart(){
     if(wldBal<=0) return showOk('No llegó WLD, intenta de nuevo','❌');
     var wldSell = wldBal * 0.95;
     var wldRaw = BigInt(Math.floor(wldSell*Math.pow(10,18)));
-    var fee2 = (toSym==='USDC'?3000:10000);
     showOk('Paso 2/2: WLD -> '+toSym+'... Confirma','⏳');
     var r2=await MiniKit.sendTransaction({
       chainId:480,
       transactions:[
         {to:wld.address,data:encodeApprove(SWAP_ROUTER,wldRaw),value:'0x0'},
-        {to:SWAP_ROUTER,data:encodeExactInputSingle(wld.address,to.address,fee2,currentAccount,wldRaw),value:'0x0'}
+        {to:SWAP_ROUTER,data:encodeExactInputSingle(wld.address,to.address,3000,currentAccount,wldRaw),value:'0x0'}
       ]
     });
     if(r2?.data?.userOpHash){
-      showOk('¡Ruta inteligente completada! Comisión 0.3% cobrada','✅');
+      showOk('¡Ruta inteligente completada!','✅');
       setTimeout(loadRealBalances,5000);
     } else showOk('Paso 2 cancelado','❌');
   }catch(e){showOk('Error ruta: '+(e.message||e),'❌');}
@@ -229,7 +247,7 @@ async function doSend(){
     }
     var result=await MiniKit.sendTransaction({chainId:480, transactions:[tx]});
     if(result&&result.data&&result.data.userOpHash){
-      showOk('¡Envío enviado!');setTimeout(loadRealBalances,5000);
+      showOk('¡Envío exitoso!');setTimeout(loadRealBalances,5000);
     }else{showOk('Envío cancelado','❌');}
   }catch(e){showOk('Error: '+(e.message||e),'❌');}
 }
@@ -268,7 +286,7 @@ window.addEventListener('load',function(){
   if(window.MiniKit) try{MiniKit.install();}catch(e){} 
   renderTokenList(); 
   fetchLivePrices(); 
-  setInterval(fetchLivePrices, 2000); // Actualiza precios automáticamente cada 2 segundos
+  setInterval(fetchLivePrices, 2000);
 });
 </script>
 </body>

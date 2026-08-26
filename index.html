@@ -48,7 +48,7 @@ select{border:0;background:#111;color:#fff;padding:8px 12px;border-radius:20px;f
     <div style="flex:1"><b>Uno Intercambio</b><div class="small" id="walletInfo">No conectado • World Chain</div></div>
     <button class="btnConnect" id="btnConnect" onclick="connectWallet()">Conectar</button>
   </div>
-  <div style="padding:16px"><div class="big" id="totalUsd">$0.00</div><div class="small"><span class="green">Precios en vivo</span> <span class="live">LIVE</span></div></div>
+  <div style="padding:16px"><div class="big" id="totalUsd">$0.00</div><div class="small"><span class="green">Precios en vivo (2s)</span> <span class="live">LIVE</span></div></div>
   <div class="btns"><div class="btn" onclick="go('swap')">⇆ Swap</div><div class="btn" onclick="go('earn')">↗ Ganar</div><div class="btn" onclick="go('send')">↗ Enviar</div><div class="btn" onclick="go('recv')">↓ Recibir</div></div>
   <div class="tokens" id="tokenList"></div>
 </div>
@@ -235,8 +235,41 @@ async function doSend(){
 }
 
 function copyAddr(){if(currentAccount){navigator.clipboard.writeText(currentAccount);showOk('Dirección copiada');}}
-async function fetchLivePrices(){try{var res=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=worldcoin-wld,usd-coin,weth,ethereum&vs_currencies=usd&include_24hr_change=true');var data=await res.json();if(data['worldcoin-wld']){prices.WLD=data['worldcoin-wld'].usd||prices.WLD;changes.WLD=data['worldcoin-wld'].usd_24h_change||0;}if(data['usd-coin']){prices.USDC=data['usd-coin'].usd||1;changes.USDC=data['usd-coin'].usd_24h_change||0;}if(data['weth']){prices.WETH=data['weth'].usd||prices.WETH;changes.WETH=data['weth'].usd_24h_change||0;}if(data['ethereum']){prices.ETH=data['ethereum'].usd||prices.ETH;changes.ETH=data['ethereum'].usd_24h_change||0;}updateTotal();renderTokenList();}catch(e){} for(let sym of ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO']){try{let r=await fetch('https://api.dexscreener.com/latest/dex/tokens/'+CONTRACTS[sym].address);let j=await r.json();if(j.pairs&&j.pairs[0]){let best=j.pairs.sort((a,b)=>(b.liquidity?.usd||0)-(a.liquidity?.usd||0))[0];if(best?.priceUsd){prices[sym]=parseFloat(best.priceUsd);changes[sym]=parseFloat(best.priceChange?.h24||0);}}}catch(e){}} updateTotal();renderTokenList();}
-window.addEventListener('load',function(){if(window.MiniKit) try{MiniKit.install();}catch(e){} renderTokenList(); fetchLivePrices(); setInterval(fetchLivePrices,60000);});
+
+async function fetchLivePrices(){
+  try{
+    var res=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=worldcoin-wld,usd-coin,weth,ethereum&vs_currencies=usd&include_24hr_change=true');
+    var data=await res.json();
+    if(data['worldcoin-wld']){prices.WLD=data['worldcoin-wld'].usd||prices.WLD;changes.WLD=data['worldcoin-wld'].usd_24h_change||0;}
+    if(data['usd-coin']){prices.USDC=data['usd-coin'].usd||1;changes.USDC=data['usd-coin'].usd_24h_change||0;}
+    if(data['weth']){prices.WETH=data['weth'].usd||prices.WETH;changes.WETH=data['weth'].usd_24h_change||0;}
+    if(data['ethereum']){prices.ETH=data['ethereum'].usd||prices.ETH;changes.ETH=data['ethereum'].usd_24h_change||0;}
+  }catch(e){}
+
+  for(let sym of ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO']){
+    try{
+      let r=await fetch('https://api.dexscreener.com/latest/dex/tokens/'+CONTRACTS[sym].address);
+      let j=await r.json();
+      if(j.pairs&&j.pairs.length>0){
+        let best=j.pairs.sort((a,b)=>(b.liquidity?.usd||0)-(a.liquidity?.usd||0))[0];
+        if(best?.priceUsd){
+          prices[sym]=parseFloat(best.priceUsd);
+          changes[sym]=parseFloat(best.priceChange?.h24||0);
+        }
+      }
+    }catch(e){}
+  }
+  updateTotal();
+  renderTokenList();
+  calc();
+}
+
+window.addEventListener('load',function(){
+  if(window.MiniKit) try{MiniKit.install();}catch(e){} 
+  renderTokenList(); 
+  fetchLivePrices(); 
+  setInterval(fetchLivePrices, 2000); // Actualiza precios automáticamente cada 2 segundos
+});
 </script>
 </body>
 </html>

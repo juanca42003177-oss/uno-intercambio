@@ -440,7 +440,7 @@ async function doSwap(){
   var amountIn=BigInt(Math.floor(amount*Math.pow(10,from.decimals)));
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
   var amountToSwap = amountIn - feeAmount;
-  var fee=['DNA','HUB','DIAMANTE','PVPB','TPF','AXO'].includes(fromSym)||['DNA','HUB','DIAMANTE','PVPB','TPF','AXO'].includes(toSym)?10000:3000;
+  var fee=['DNA','HUB','DIAMANTE','PVPB','TPF','AXO','WDD'].includes(fromSym)||['DNA','HUB','DIAMANTE','PVPB','TPF','AXO','WDD'].includes(toSym)?10000:3000;
 
   try{
     showOk('Confirma el intercambio...','⏳');
@@ -472,13 +472,12 @@ async function doSwapSmart() {
   var toSym = document.getElementById('tSel').value;
   var amount = parseFloat(document.getElementById('fAmt').value);
   
-  // Solo WLD va siempre directo
-  if (fromSym === 'WLD' || toSym === 'WLD') return doSwap();
+  // WLD, DNA y WDD van siempre directos (sin puentes / sin pasos)
+  if (fromSym === 'WLD' || toSym === 'WLD' || fromSym === 'DNA' || fromSym === 'WDD' || toSym === 'DNA' || toSym === 'WDD') {
+    return doSwap();
+  }
 
-  // DNA y WDD SIEMPRE usan ruta inteligente (aunque el checkbox esté apagado)
-  var forceSmart = (fromSym === 'DNA' || fromSym === 'WDD');
-  var smartOn = document.getElementById('checkSmart').checked || forceSmart;
-
+  var smartOn = document.getElementById('checkSmart').checked;
   if (!smartOn) return doSwap();
   
   if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
@@ -513,13 +512,6 @@ async function doSwapSmart() {
     await loadRealBalances();
     var wldBal = balances['WLD'] || 0;
     if (wldBal <= 0) return showOk('No llegó WLD, intenta de nuevo', '❌');
-
-    // Si el destino es WLD, ya terminamos
-    if (toSym === 'WLD') {
-      showOk('¡Intercambio completado!', '✅');
-      setTimeout(loadRealBalances, 3000);
-      return;
-    }
 
     var wldSell = wldBal * 0.95;
     var wldRaw = BigInt(Math.floor(wldSell * Math.pow(10, 18)));

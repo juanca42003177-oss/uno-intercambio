@@ -425,46 +425,41 @@ function encodeTransfer(to, amount) {
   return '0xa9059cbb' + to.slice(2).padStart(64, '0') + BigInt(amount).toString(16).padStart(64, '0');
 }
 
-async function doSwap() {
-  if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
-  var fromSym = document.getElementById('fSel').value;
-  var toSym = document.getElementById('tSel').value;
-  var amount = parseFloat(document.getElementById('fAmt').value);
-  if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
-  if (fromSym === toSym) return showOk('Elige tokens diferentes', '⚠️');
-  if ((balances[fromSym] || 0) < amount) return showOk('Saldo insuficiente', '⚠️');
+async function doSwap(){
+  if(!currentAccount) return showOk('Conecta tu wallet','⚠️');
+  var fromSym=document.getElementById('fSel').value;
+  var toSym=document.getElementById('tSel').value;
+  var amount=parseFloat(document.getElementById('fAmt').value);
+  if(!amount||amount<=0) return showOk('Cantidad inválida','⚠️');
+  if(fromSym===toSym) return showOk('Elige tokens diferentes','⚠️');
+  if((balances[fromSym]||0)<amount) return showOk('Saldo insuficiente','⚠️');
 
-  var from = CONTRACTS[fromSym];
-  var to = CONTRACTS[toSym];
-  var amountIn = BigInt(Math.floor(amount * Math.pow(10, from.decimals)));
+  var from=CONTRACTS[fromSym]; 
+  var to=CONTRACTS[toSym];
+  var amountIn=BigInt(Math.floor(amount*Math.pow(10,from.decimals)));
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
   var amountToSwap = amountIn - feeAmount;
-  var fee = ['DNA','HUB','DIAMANTE','PVPB','TPF','AXO','WDD'].includes(fromSym) ||
-            ['DNA','HUB','DIAMANTE','PVPB','TPF','AXO','WDD'].includes(toSym) ? 10000 : 3000;
+  var fee=['DNA','HUB','DIAMANTE','PVPB','TPF','AXO','WDD'].includes(fromSym)||['DNA','HUB','DIAMANTE','PVPB','TPF','AXO','WDD'].includes(toSym)?10000:3000;
 
-  try {
-    showOk('Paso 1/2: Cobrando comisión 0.3%... Confirma', '⏳');
-    var resFee = await MiniKit.sendTransaction({
-      chainId: 480,
-      transactions: [{ to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' }]
-    });
-    if (!resFee?.data?.userOpHash) return showOk('Comisión cancelada', '❌');
-
-    showOk('Paso 2/2: Ejecutando Swap... Confirma', '⏳');
+  try{
+    showOk('Confirma el intercambio...','⏳');
+    
     var result = await MiniKit.sendTransaction({
       chainId: 480,
       transactions: [
+        { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' },
         { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' },
         { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap), value: '0x0' }
       ]
     });
-    if (result && result.data && result.data.userOpHash) {
-      showOk('¡Swap y comisión de 0.3% completados!', '✅');
+
+    if(result && result.data && result.data.userOpHash){
+      showOk('¡Intercambio completado!','✅'); 
       setTimeout(loadRealBalances, 5000);
     } else {
-      showOk('Intercambio cancelado en el paso 2', '❌');
+      showOk('Intercambio cancelado','❌');
     }
-  } catch (e) {
+  }catch(e){
     showOk('Error: ' + (e.message || e), '❌');
   }
 }
@@ -608,10 +603,10 @@ window.addEventListener('load', function() {
   if (window.MiniKit) {
     try { MiniKit.install(); } catch(e) {}
   }
-  renderTokenList();          // ← siempre se muestra la lista
+  renderTokenList();
   fetchLivePrices();
   setInterval(fetchLivePrices, 60000);
 });
 </script>
 </body>
-  </html>
+      </html>

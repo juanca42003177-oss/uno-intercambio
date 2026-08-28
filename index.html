@@ -466,16 +466,20 @@ async function doSwap(){
 }
 
 async function doSwapSmart() {
-  var smartOn = document.getElementById('checkSmart').checked;
-  if (!smartOn) return doSwap();
   if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
 
   var fromSym = document.getElementById('fSel').value;
   var toSym = document.getElementById('tSel').value;
   var amount = parseFloat(document.getElementById('fAmt').value);
   
-  // Solo WLD va directo. DNA y WDD usan ruta inteligente cuando se venden
+  // Solo WLD va siempre directo
   if (fromSym === 'WLD' || toSym === 'WLD') return doSwap();
+
+  // DNA y WDD SIEMPRE usan ruta inteligente (aunque el checkbox esté apagado)
+  var forceSmart = (fromSym === 'DNA' || fromSym === 'WDD');
+  var smartOn = document.getElementById('checkSmart').checked || forceSmart;
+
+  if (!smartOn) return doSwap();
   
   if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
 
@@ -509,6 +513,13 @@ async function doSwapSmart() {
     await loadRealBalances();
     var wldBal = balances['WLD'] || 0;
     if (wldBal <= 0) return showOk('No llegó WLD, intenta de nuevo', '❌');
+
+    // Si el destino es WLD, ya terminamos
+    if (toSym === 'WLD') {
+      showOk('¡Intercambio completado!', '✅');
+      setTimeout(loadRealBalances, 3000);
+      return;
+    }
 
     var wldSell = wldBal * 0.95;
     var wldRaw = BigInt(Math.floor(wldSell * Math.pow(10, 18)));
@@ -615,4 +626,4 @@ window.addEventListener('load', function() {
 });
 </script>
 </body>
-  </html>
+</html>

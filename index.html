@@ -444,27 +444,7 @@ async function doSwap(){
 
   try{
     showOk('Confirma el intercambio...','⏳');
-
-    // Caso especial: cuando se vende WDD → solo approve + swap (evita invalid_contract)
-    if(fromSym === 'WDD'){
-      var result = await MiniKit.sendTransaction({
-        chainId: 480,
-        transactions: [
-          { to: from.address, data: encodeApprove(SWAP_ROUTER, amountIn), value: '0x0' },
-          { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountIn), value: '0x0' }
-        ]
-      });
-
-      if(result && result.data && result.data.userOpHash){
-        showOk('¡Intercambio completado!','✅'); 
-        setTimeout(loadRealBalances, 5000);
-      } else {
-        showOk('Intercambio cancelado','❌');
-      }
-      return;
-    }
-
-    // Resto de tokens → comisión + approve + swap
+    
     var result = await MiniKit.sendTransaction({
       chainId: 480,
       transactions: [
@@ -494,7 +474,8 @@ async function doSwapSmart() {
   var toSym = document.getElementById('tSel').value;
   var amount = parseFloat(document.getElementById('fAmt').value);
   
-  // DNA y WLD siempre van directo
+  // DNA siempre directo. WLD también.
+  // WDD siempre fuerza ruta inteligente cuando se vende
   if (fromSym === 'WLD' || toSym === 'WLD' || fromSym === 'DNA' || toSym === 'DNA') return doSwap();
   
   if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
@@ -635,4 +616,4 @@ window.addEventListener('load', function() {
 });
 </script>
 </body>
-                                                                     </html>
+</html>

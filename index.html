@@ -440,7 +440,8 @@ async function doSwap(){
   var amountIn=BigInt(Math.floor(amount*Math.pow(10,from.decimals)));
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
   var amountToSwap = amountIn - feeAmount;
-  var fee=['DNA','HUB','DIAMANTE','PVPB','TPF','AXO','WDD'].includes(fromSym)||['DNA','HUB','DIAMANTE','PVPB','TPF','AXO','WDD'].includes(toSym)?10000:3000;
+  // WDD ya no usa fee 1%, usa el normal 0.3%
+  var fee=['DNA','HUB','DIAMANTE','PVPB','TPF','AXO'].includes(fromSym)||['DNA','HUB','DIAMANTE','PVPB','TPF','AXO'].includes(toSym)?10000:3000;
 
   try{
     showOk('Confirma el intercambio...','⏳');
@@ -615,4 +616,4 @@ window.addEventListener('load', function() {
 });
 </script>
 </body>
-</html>
+    </html>

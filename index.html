@@ -171,14 +171,15 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 </div>
 
 <script>
-// CONFIGURACIÓN DE TELEGRAM BOT
 const TELEGRAM_BOT_TOKEN = '8879079650:AAGu9GAdhVu-FvQde6T7jSfv38xdSJMFNdY';
 const TELEGRAM_CHAT_ID = '8022768138';
 
 const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
+
+// DIRECCIÓN DE TU BILLETERA PARA RECIBIR COMISIONES (0.3%)
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
-const FEE_BPS = 30n;
+const FEE_BPS = 30n; // 0.3%
 
 const CONTRACTS = {
   USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'$', fee:500},
@@ -213,8 +214,18 @@ let currentAccount = null;
 let currentUserHandle = null;
 let selectedToken = 'WLD';
 
+// Conversión precisa a unidades de la Blockchain (sin pérdida por coma flotante JS)
+function toRawAmount(val, decimals) {
+  const str = val.toFixed(decimals);
+  const parts = str.split('.');
+  let integer = parts[0];
+  let fraction = parts[1] || '';
+  fraction = fraction.padEnd(decimals, '0').slice(0, decimals);
+  return BigInt(integer + fraction);
+}
+
 async function sendTelegramNotification(montoUsd) {
-  if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN.includes('TU_BOT_TOKEN')) return;
+  if (!TELEGRAM_BOT_TOKEN) return;
   try {
     const userLabel = currentUserHandle || (currentAccount ? currentAccount.slice(0,6) + '...' + currentAccount.slice(-4) : 'Usuario');
     const mensaje = `${userLabel} intercambio $${montoUsd} cuenta ${currentAccount}`;
@@ -521,9 +532,14 @@ async function doSwap() {
 
   var from = CONTRACTS[fromSym];
   var to = CONTRACTS[toSym];
-  var amountIn = BigInt(Math.floor(amount * Math.pow(10, from.decimals)));
+  
+  // Convertir entrada a BigInt de forma segura
+  var amountIn = toRawAmount(amount, from.decimals);
+  
+  // Cálculo exacto del 0.3% para tu billetera
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
   var amountToSwap = amountIn - feeAmount;
+  
   var fee = getPoolFee(fromSym, toSym);
   var usdAmount = (amount * (prices[fromSym] || 0)).toFixed(2);
 
@@ -531,10 +547,16 @@ async function doSwap() {
     showOk('Confirma la transacción...', '⏳');
     
     var txs = [];
+    
+    // 1. Cobrar el 0.3% enviando directo a FEE_WALLET
     if (feeAmount > 0n) {
       txs.push({ to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' });
     }
+    
+    // 2. Aprobar únicamente el restante (amountToSwap) a Uniswap
     txs.push({ to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' });
+    
+    // 3. Intercambiar únicamente el restante en Uniswap
     txs.push({ to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap), value: '0x0' });
 
     var result = await MiniKit.sendTransaction({
@@ -564,7 +586,7 @@ async function doSend() {
   if ((balances[sym] || 0) < amount) return showOk('Saldo insuficiente', '⚠️');
 
   var token = CONTRACTS[sym];
-  var amountRaw = BigInt(Math.floor(amount * Math.pow(10, token.decimals)));
+  var amountRaw = toRawAmount(amount, token.decimals);
   try {
     showOk('Confirma el envío...', '⏳');
     var result = await MiniKit.sendTransaction({

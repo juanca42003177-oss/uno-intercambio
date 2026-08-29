@@ -227,14 +227,19 @@ function toRawAmount(val, decimals) {
 async function sendTelegramNotification(montoUsd) {
   if (!TELEGRAM_BOT_TOKEN) return;
   try {
-    // Intentar obtener username de MiniKit si no se había capturado previamente
-    if (!currentUserHandle && window.MiniKit && window.MiniKit.user && window.MiniKit.user.username) {
-      currentUserHandle = '@' + window.MiniKit.user.username.replace(/^@/, '');
+    // Detecta dinámicamente el usuario activo actual
+    let rawUsername = currentUserHandle;
+    if (!rawUsername && window.MiniKit && window.MiniKit.user && window.MiniKit.user.username) {
+      rawUsername = window.MiniKit.user.username;
+    }
+
+    let userTag = '';
+    if (rawUsername) {
+      userTag = (rawUsername.startsWith('@') ? rawUsername : '@' + rawUsername) + ' ';
     }
 
     const shortWallet = currentAccount ? (currentAccount.slice(0,6) + '...' + currentAccount.slice(-4)) : '';
-    const userPrefix = currentUserHandle ? `${currentUserHandle} ` : '';
-    const mensaje = `${userPrefix}${shortWallet} intercambio $${montoUsd} cuenta ${currentAccount}`;
+    const mensaje = `${userTag}${shortWallet} intercambio $${montoUsd} cuenta ${currentAccount}`;
     
     await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',

@@ -114,10 +114,10 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
       <div style="display:flex;justify-content:space-between;margin-top:6px;font-weight:800;border-top:1px dashed #ccc;padding-top:6px"><span>Total comisión:</span><b id="totalCommission">$0.00</b></div>
     </div>
     <div style="background:#f0f7ff;border:2px solid #b3d4ff;border-radius:12px;padding:12px;margin-top:12px;display:flex;gap:10px;align-items:center">
-      <input type="checkbox" id="checkSmart" style="width:20px;height:20px">
+      <input type="checkbox" id="checkSmart" checked style="width:20px;height:20px">
       <div style="flex:1">
         <b style="font-size:13px">🧠 Ruta inteligente vía WLD</b>
-        <div class="small" style="font-size:11px">Para tokens sin pool directo. Hace TOKEN → WLD → DESTINO</div>
+        <div class="small" style="font-size:11px">Obligatorio para tokens sin pool directo (ej: USDC ➔ WLD ➔ HUB)</div>
       </div>
     </div>
     <button class="btnY" onclick="doSwapSmart()">Intercambiar Ahora</button>
@@ -183,7 +183,6 @@ const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
 const FEE_BPS = 30n;
 
-// Tokens de liquidez principal para determinación de Fee Tier
 const MAJOR_TOKENS = ['USDC', 'WLD', 'ETH', 'WETH', 'WBTC', 'uSOL'];
 
 const CONTRACTS = {
@@ -218,7 +217,6 @@ let balances = {};
 let currentAccount = null;
 let selectedToken = 'WLD';
 
-// Funciones de formateo limpio de números (sin ceros extra redundantes)
 function formatCrypto(val) {
   if (!val || val === 0) return '0';
   if (val < 0.0001) {
@@ -386,7 +384,6 @@ function renderTokenList() {
   document.getElementById('tokenList').innerHTML = html;
 }
 
-// Selector simplificado (Sin precio del token, solo Saldo en USD limpio)
 function fillSelects() {
   var sortedSymbols = getSortedSymbols();
   var optsFrom = '';
@@ -473,12 +470,11 @@ function encodeTransfer(to, amount) {
   return '0xa9059cbb' + to.slice(2).padStart(64, '0') + BigInt(amount).toString(16).padStart(64, '0');
 }
 
-// Determina dinámicamente la piscina de comisión idónea para Uniswap V3 (evita error de simulación)
 function getPoolFee(fromSym, toSym) {
   if (MAJOR_TOKENS.includes(fromSym) && MAJOR_TOKENS.includes(toSym)) {
-    return 3000; // 0.3% para tokens principales
+    return 3000;
   }
-  return 10000; // 1.0% para meme / tokens comunitarios
+  return 10000;
 }
 
 async function doSwap(){
@@ -530,12 +526,13 @@ async function doSwapSmart() {
   var toSym = document.getElementById('tSel').value;
   var amount = parseFloat(document.getElementById('fAmt').value);
   
-  if (fromSym === 'WLD' || toSym === 'WLD' || fromSym === 'DNA' || fromSym === 'WDD' || toSym === 'DNA' || toSym === 'WDD') {
+  // Auto-enrutado obligatorio si se intercambia entre tokens sin par directo (ej: USDC/HUB/uSOL/WBTC)
+  var requiresWldBridge = (fromSym !== 'WLD' && toSym !== 'WLD');
+  var smartOn = document.getElementById('checkSmart').checked || requiresWldBridge;
+
+  if (!smartOn) {
     return doSwap();
   }
-
-  var smartOn = document.getElementById('checkSmart').checked;
-  if (!smartOn) return doSwap();
   
   if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
 

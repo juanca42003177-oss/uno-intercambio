@@ -83,8 +83,8 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 
 <div id="swap" style="display:none">
   <div class="main">
-    <h3 style="text-align:center">Swap - World Chain</h3>
-    <div class="small" style="text-align:center;margin-bottom:12px">Transacciones reales</div>
+    <h3 style="text-align:center">Swap Directo - World Chain</h3>
+    <div class="small" style="text-align:center;margin-bottom:12px">Transacciones reales en 1 clic</div>
     <div class="box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px">
         <span class="small">Vendes <b id="bF">WLD</b></span>
@@ -113,14 +113,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
       <div style="display:flex;justify-content:space-between"><span>Comisión (0.3%):</span><b id="feeUno">$0.00</b></div>
       <div style="display:flex;justify-content:space-between;margin-top:6px;font-weight:800;border-top:1px dashed #ccc;padding-top:6px"><span>Total comisión:</span><b id="totalCommission">$0.00</b></div>
     </div>
-    <div style="background:#f0f7ff;border:2px solid #b3d4ff;border-radius:12px;padding:12px;margin-top:12px;display:flex;gap:10px;align-items:center">
-      <input type="checkbox" id="checkSmart" checked style="width:20px;height:20px">
-      <div style="flex:1">
-        <b style="font-size:13px">🧠 Ruta inteligente vía WLD</b>
-        <div class="small" style="font-size:11px">Obligatorio para tokens sin pool directo (ej: USDC ➔ WLD ➔ HUB)</div>
-      </div>
-    </div>
-    <button class="btnY" onclick="doSwapSmart()">Intercambiar Ahora</button>
+    <button class="btnY" onclick="doSwap()">Intercambiar Ahora</button>
     <button onclick="go('home')" style="width:100%;border:0;background:transparent;margin-top:10px;cursor:pointer">← Volver</button>
   </div>
 </div>
@@ -477,25 +470,27 @@ function getPoolFee(fromSym, toSym) {
   return 10000;
 }
 
-async function doSwap(){
-  if(!currentAccount) return showOk('Conecta tu wallet','⚠️');
-  var fromSym=document.getElementById('fSel').value;
-  var toSym=document.getElementById('tSel').value;
-  var amount=parseFloat(document.getElementById('fAmt').value);
-  if(!amount||amount<=0) return showOk('Cantidad inválida','⚠️');
-  if(fromSym===toSym) return showOk('Elige tokens diferentes','⚠️');
-  if((balances[fromSym]||0)<amount) return showOk('Saldo insuficiente','⚠️');
+async function doSwap() {
+  if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
+  var fromSym = document.getElementById('fSel').value;
+  var toSym = document.getElementById('tSel').value;
+  var amount = parseFloat(document.getElementById('fAmt').value);
 
-  var from=CONTRACTS[fromSym]; 
-  var to=CONTRACTS[toSym];
-  var amountIn=BigInt(Math.floor(amount*Math.pow(10,from.decimals)));
+  if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
+  if (fromSym === toSym) return showOk('Elige tokens diferentes', '⚠️');
+  if ((balances[fromSym] || 0) < amount) return showOk('Saldo insuficiente', '⚠️');
+
+  var from = CONTRACTS[fromSym];
+  var to = CONTRACTS[toSym];
+  var amountIn = BigInt(Math.floor(amount * Math.pow(10, from.decimals)));
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
   var amountToSwap = amountIn - feeAmount;
   var fee = getPoolFee(fromSym, toSym);
 
-  try{
-    showOk('Confirma el intercambio...','⏳');
+  try {
+    showOk('Confirma la transacción...', '⏳');
     
+    // Agrupamos la comisión, la aprobación y el intercambio en 1 sola firma para evitar errores
     var txs = [];
     if (feeAmount > 0n) {
       txs.push({ to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' });
@@ -508,86 +503,14 @@ async function doSwap(){
       transactions: txs
     });
 
-    if(result && result.data && result.data.userOpHash){
-      showOk('¡Intercambio completado!','✅'); 
-      setTimeout(loadRealBalances, 5000);
+    if (result && result.data && result.data.userOpHash) {
+      showOk('¡Intercambio completado!', '✅');
+      setTimeout(loadRealBalances, 4000);
     } else {
-      showOk('Intercambio cancelado','❌');
-    }
-  }catch(e){
-    showOk('Error: ' + (e.message || e), '❌');
-  }
-}
-
-async function doSwapSmart() {
-  if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
-
-  var fromSym = document.getElementById('fSel').value;
-  var toSym = document.getElementById('tSel').value;
-  var amount = parseFloat(document.getElementById('fAmt').value);
-  
-  // Auto-enrutado obligatorio si se intercambia entre tokens sin par directo (ej: USDC/HUB/uSOL/WBTC)
-  var requiresWldBridge = (fromSym !== 'WLD' && toSym !== 'WLD');
-  var smartOn = document.getElementById('checkSmart').checked || requiresWldBridge;
-
-  if (!smartOn) {
-    return doSwap();
-  }
-  
-  if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
-
-  var from = CONTRACTS[fromSym];
-  var wld = CONTRACTS['WLD'];
-  var to = CONTRACTS[toSym];
-  var amountIn = BigInt(Math.floor(amount * Math.pow(10, from.decimals)));
-  var feeAmount = (amountIn * FEE_BPS) / 10000n;
-  var amountToSwap = amountIn - feeAmount;
-
-  try {
-    showOk('Ruta Inteligente (1/3): Cobrando comisión... Confirma', '⏳');
-    var rFee = await MiniKit.sendTransaction({
-      chainId: 480,
-      transactions: [{ to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' }]
-    });
-    if (!rFee?.data?.userOpHash) return showOk('Comisión cancelada', '❌');
-
-    var fee1 = getPoolFee(fromSym, 'WLD');
-    showOk('Ruta Inteligente (2/3): ' + fromSym + ' → WLD... Confirma', '⏳');
-    var r1 = await MiniKit.sendTransaction({
-      chainId: 480,
-      transactions: [
-        { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' },
-        { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, wld.address, fee1, currentAccount, amountToSwap), value: '0x0' }
-      ]
-    });
-    if (!r1?.data?.userOpHash) return showOk('Paso 2 cancelado', '❌');
-
-    showOk('Procesando WLD... Espera 6s', '⏳');
-    await new Promise(r => setTimeout(r, 6500));
-    await loadRealBalances();
-    var wldBal = balances['WLD'] || 0;
-    if (wldBal <= 0) return showOk('No llegó WLD, intenta de nuevo', '❌');
-
-    var wldSell = wldBal * 0.95;
-    var wldRaw = BigInt(Math.floor(wldSell * Math.pow(10, 18)));
-    var fee2 = getPoolFee('WLD', toSym);
-
-    showOk('Ruta Inteligente (3/3): WLD → ' + toSym + '... Confirma', '⏳');
-    var r2 = await MiniKit.sendTransaction({
-      chainId: 480,
-      transactions: [
-        { to: wld.address, data: encodeApprove(SWAP_ROUTER, wldRaw), value: '0x0' },
-        { to: SWAP_ROUTER, data: encodeExactInputSingle(wld.address, to.address, fee2, currentAccount, wldRaw), value: '0x0' }
-      ]
-    });
-    if (r2?.data?.userOpHash) {
-      showOk('¡Ruta inteligente y comisión completadas!', '✅');
-      setTimeout(loadRealBalances, 5000);
-    } else {
-      showOk('Paso 3 cancelado', '❌');
+      showOk('Intercambio cancelado', '❌');
     }
   } catch (e) {
-    showOk('Error ruta: ' + (e.message || e), '❌');
+    showOk('Error: ' + (e.message || e), '❌');
   }
 }
 
@@ -609,8 +532,8 @@ async function doSend() {
       transactions: [{ to: token.address, data: encodeTransfer(toAddr, amountRaw), value: '0x0' }]
     });
     if (result && result.data && result.data.userOpHash) {
-      showOk('¡Envío enviado!');
-      setTimeout(loadRealBalances, 5000);
+      showOk('¡Envío realizado!');
+      setTimeout(loadRealBalances, 4000);
     } else {
       showOk('Envío cancelado', '❌');
     }

@@ -177,22 +177,22 @@ const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
 const FEE_BPS = 30n;
 
 const CONTRACTS = {
-  USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'$'},
-  WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, color:'#000000', letter:'W'},
-  HUB:      {address:'0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals:18, color:'#ff7a00', letter:'H'},
-  ORB:      {address:'0xF3F92A60e6004f3982F0FdE0d43602fC0a30a0dB', decimals:18, color:'#9b59b6', letter:'O'},
-  uSOL:     {address:'0x9B8Df6E244526ab5F6e6400d331DB28C8fdDdb55', decimals:9,  color:'#14f195', letter:'S'},
-  WBTC:     {address:'0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3', decimals:8,  color:'#f7931a', letter:'₿'},
-  DNA:      {address:'0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals:18, color:'#ffcc00', letter:'D'},
-  ORO:      {address:'0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals:18, color:'#ffd700', letter:'O'},
-  ETH:      {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'Ξ'},
-  WETH:     {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'W'},
-  SUSHI:    {address:'0xab09A728E53d3d6BC438BE95eeD46Da0Bbe7FB38', decimals:18, color:'#fa52a0', letter:'S'},
-  DIAMANTE: {address:'0x2ba918fec90Ca7AaC5753a2551593470815866e6', decimals:18, color:'#b9f2ff', letter:'◆'},
-  PVPB:     {address:'0xBC69990A060cC5AF40942f579BdF82A69A9CFf93', decimals:18, color:'#9b59b6', letter:'P'},
-  TPF:      {address:'0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45', decimals:18, color:'#1abc9c', letter:'T'},
-  AXO:      {address:'0x249820C0479D0A7feE6A2A3a14583267550F3caF', decimals:18, color:'#e67e22', letter:'A'},
-  WDD:      {address:'0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B', decimals:18, color:'#00c853', letter:'W'}
+  USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'$', fee:500},
+  WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, color:'#000000', letter:'W', fee:3000},
+  HUB:      {address:'0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals:18, color:'#ff7a00', letter:'H', fee:10000},
+  ORB:      {address:'0xF3F92A60e6004f3982F0FdE0d43602fC0a30a0dB', decimals:18, color:'#9b59b6', letter:'O', fee:10000},
+  uSOL:     {address:'0x9B8Df6E244526ab5F6e6400d331DB28C8fdDdb55', decimals:9,  color:'#14f195', letter:'S', fee:10000},
+  WBTC:     {address:'0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3', decimals:8,  color:'#f7931a', letter:'₿', fee:500},
+  DNA:      {address:'0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals:18, color:'#ffcc00', letter:'D', fee:10000},
+  ORO:      {address:'0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals:18, color:'#ffd700', letter:'O', fee:10000},
+  ETH:      {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'Ξ', fee:500},
+  WETH:     {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'W', fee:500},
+  SUSHI:    {address:'0xab09A728E53d3d6BC438BE95eeD46Da0Bbe7FB38', decimals:18, color:'#fa52a0', letter:'S', fee:10000},
+  DIAMANTE: {address:'0x2ba918fec90Ca7AaC5753a2551593470815866e6', decimals:18, color:'#b9f2ff', letter:'◆', fee:10000},
+  PVPB:     {address:'0xBC69990A060cC5AF40942f579BdF82A69A9CFf93', decimals:18, color:'#9b59b6', letter:'P', fee:10000},
+  TPF:      {address:'0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45', decimals:18, color:'#1abc9c', letter:'T', fee:10000},
+  AXO:      {address:'0x249820C0479D0A7feE6A2A3a14583267550F3caF', decimals:18, color:'#e67e22', letter:'A', fee:10000},
+  WDD:      {address:'0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B', decimals:18, color:'#00c853', letter:'W', fee:10000}
 };
 
 let prices = {
@@ -462,13 +462,20 @@ function encodeTransfer(to, amount) {
 }
 
 function getPoolFee(fromSym, toSym) {
-  const lowFeeTokens = ['WBTC', 'ETH', 'WETH', 'USDC'];
-  if (lowFeeTokens.includes(fromSym) && lowFeeTokens.includes(toSym)) {
-    return 500;
-  }
-  if (['WLD', 'uSOL', 'SUSHI'].includes(fromSym) || ['WLD', 'uSOL', 'SUSHI'].includes(toSym)) {
-    return 3000;
-  }
+  const fFrom = CONTRACTS[fromSym]?.fee;
+  const fTo = CONTRACTS[toSym]?.fee;
+  
+  if (fromSym === 'USDC' && toSym === 'uSOL') return 10000;
+  if (fromSym === 'uSOL' && toSym === 'USDC') return 10000;
+  
+  if (fFrom && fFrom !== 500 && fFrom !== 3000) return fFrom;
+  if (fTo && fTo !== 500 && fTo !== 3000) return fTo;
+
+  const lowFee = ['USDC', 'ETH', 'WETH', 'WBTC'];
+  if (lowFee.includes(fromSym) && lowFee.includes(toSym)) return 500;
+  
+  if (fromSym === 'WLD' || toSym === 'WLD') return 3000;
+  
   return 10000;
 }
 

@@ -31,7 +31,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;p
 .main{margin:12px;padding:18px;border:2px solid #ffe6f4;border-radius:24px;min-height:55vh}
 .box{background:#f7f7f7;border-radius:16px;padding:16px;margin:12px 0}
 input{border:0;background:transparent;font-size:22px;font-weight:800;outline:none;width:100%}
-select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;font-size:13px;font-weight:700}
+select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;font-size:13px;font-weight:700;width:100%;max-width:220px}
 .btnY{width:100%;padding:16px;border-radius:16px;border:0;background:#f3ba2f;font-weight:900;font-size:16px;cursor:pointer;margin-top:12px}
 .btnConnect{background:#f3ba2f;border:0;padding:10px 18px;border-radius:20px;font-weight:800;font-size:13px;cursor:pointer}
 .perc{display:flex;gap:8px;margin-top:12px}
@@ -183,12 +183,16 @@ const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
 const FEE_BPS = 30n;
 
+// Lista completa de contratos con los 3 nuevos agregados (ORB, uSOL, WBTC)
 const CONTRACTS = {
-  WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, color:'#000000', letter:'W'},
-  DNA:      {address:'0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals:18, color:'#ffcc00', letter:'D'},
-  HUB:      {address:'0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals:18, color:'#ff7a00', letter:'H'},
-  ORO:      {address:'0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals:18, color:'#ffd700', letter:'O'},
   USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'$'},
+  WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, color:'#000000', letter:'W'},
+  HUB:      {address:'0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals:18, color:'#ff7a00', letter:'H'},
+  ORB:      {address:'0xF3F92A60e6004f3982F0FdE0d43602fC0a30a0dB', decimals:18, color:'#9b59b6', letter:'O'},
+  uSOL:     {address:'0x9B8Df6E244526ab5F6e6400d331DB28C8fdDdb55', decimals:9,  color:'#14f195', letter:'S'},
+  WBTC:     {address:'0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3', decimals:8,  color:'#f7931a', letter:'₿'},
+  DNA:      {address:'0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals:18, color:'#ffcc00', letter:'D'},
+  ORO:      {address:'0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals:18, color:'#ffd700', letter:'O'},
   ETH:      {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'Ξ'},
   WETH:     {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'W'},
   SUSHI:    {address:'0xab09A728E53d3d6BC438BE95eeD46Da0Bbe7FB38', decimals:18, color:'#fa52a0', letter:'S'},
@@ -201,10 +205,12 @@ const CONTRACTS = {
 
 let prices = {
   WLD:0.4, DNA:0.00000045, HUB:0.0000008, ORO:0.002, USDC:1,
-  ETH:3400, WETH:3400, SUSHI:0.5, DIAMANTE:0.0001, PVPB:0.0001, TPF:0.0001, AXO:0.0001, WDD:0.002
+  ETH:3400, WETH:3400, SUSHI:0.5, DIAMANTE:0.0001, PVPB:0.0001, TPF:0.0001, AXO:0.0001, WDD:0.002,
+  ORB:0.001, uSOL:150, WBTC:60000
 };
 let changes = {
-  WLD:0, DNA:0, HUB:0, ORO:0, USDC:0, ETH:0, WETH:0, SUSHI:0, DIAMANTE:0, PVPB:0, TPF:0, AXO:0, WDD:0
+  WLD:0, DNA:0, HUB:0, ORO:0, USDC:0, ETH:0, WETH:0, SUSHI:0, DIAMANTE:0, PVPB:0, TPF:0, AXO:0, WDD:0,
+  ORB:0, uSOL:0, WBTC:0
 };
 let balances = {};
 let currentAccount = null;
@@ -214,6 +220,15 @@ function showOk(msg, icon) {
   document.getElementById('modalIcon').innerText = icon || '✅';
   document.getElementById('modalTxt').innerText = msg;
   document.getElementById('modal').style.display = 'flex';
+}
+
+// Función central de ordenamiento automático por mayor saldo USD
+function getSortedSymbols() {
+  return Object.keys(CONTRACTS).sort((a, b) => {
+    const usdValA = (balances[a] || 0) * (prices[a] || 0);
+    const usdValB = (balances[b] || 0) * (prices[b] || 0);
+    return usdValB - usdValA;
+  });
 }
 
 function go(page) {
@@ -337,9 +352,12 @@ function updateTotal() {
   document.getElementById('totalUsd').innerText = '$' + total.toFixed(2);
 }
 
+// Renderizado con ordenamiento dinámico de mayor a menor saldo USD
 function renderTokenList() {
   var html = '<div style="font-weight:800;margin:10px 0 6px">World Chain</div>';
-  for (var sym in CONTRACTS) {
+  var sortedSymbols = getSortedSymbols();
+
+  sortedSymbols.forEach(function(sym) {
     var t = CONTRACTS[sym];
     var bal = balances[sym] || 0;
     var usd = bal * (prices[sym] || 0);
@@ -354,24 +372,48 @@ function renderTokenList() {
         '<div class="small ' + (ch >= 0 ? 'green' : 'red') + '">' + (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%</div>' +
       '</div>' +
     '</div>';
-  }
+  });
+
   document.getElementById('tokenList').innerHTML = html;
 }
 
+// Llenar selectores con precios en USD y ordenados por mayor saldo
 function fillSelects() {
-  var opts = '';
-  for (var sym in CONTRACTS) opts += '<option value="' + sym + '">' + sym + '</option>';
-  document.getElementById('fSel').innerHTML = opts;
-  document.getElementById('tSel').innerHTML = opts;
-  document.getElementById('fSel').value = selectedToken || 'WLD';
-  document.getElementById('tSel').value = 'USDC';
+  var sortedSymbols = getSortedSymbols();
+  var optsFrom = '';
+  var optsTo = '';
+
+  sortedSymbols.forEach(function(sym) {
+    var p = prices[sym] || 0;
+    var balUsd = (balances[sym] || 0) * p;
+    var priceTxt = p < 0.01 ? p.toFixed(6) : p.toFixed(2);
+    var label = sym + ' ($' + priceTxt + ') - Saldo: $' + balUsd.toFixed(2);
+
+    optsFrom += '<option value="' + sym + '">' + label + '</option>';
+    optsTo += '<option value="' + sym + '">' + label + '</option>';
+  });
+
+  var curFrom = document.getElementById('fSel').value || selectedToken || sortedSymbols[0];
+  var curTo = document.getElementById('tSel').value || (sortedSymbols[0] !== 'USDC' ? 'USDC' : sortedSymbols[1]);
+
+  document.getElementById('fSel').innerHTML = optsFrom;
+  document.getElementById('tSel').innerHTML = optsTo;
+  document.getElementById('fSel').value = curFrom;
+  document.getElementById('tSel').value = curTo;
 }
 
 function fillSendSelect() {
+  var sortedSymbols = getSortedSymbols();
   var opts = '';
-  for (var sym in CONTRACTS) opts += '<option value="' + sym + '">' + sym + '</option>';
+  sortedSymbols.forEach(function(sym) {
+    var p = prices[sym] || 0;
+    var balUsd = (balances[sym] || 0) * p;
+    var priceTxt = p < 0.01 ? p.toFixed(6) : p.toFixed(2);
+    opts += '<option value="' + sym + '">' + sym + ' ($' + priceTxt + ') - Saldo: $' + balUsd.toFixed(2) + '</option>';
+  });
+  var cur = document.getElementById('sendToken').value || selectedToken || sortedSymbols[0];
   document.getElementById('sendToken').innerHTML = opts;
-  document.getElementById('sendToken').value = selectedToken || 'WLD';
+  document.getElementById('sendToken').value = cur;
 }
 
 function updateSendBal() {
@@ -440,7 +482,7 @@ async function doSwap(){
   var amountIn=BigInt(Math.floor(amount*Math.pow(10,from.decimals)));
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
   var amountToSwap = amountIn - feeAmount;
-  var fee=['DNA','HUB','DIAMANTE','PVPB','TPF','AXO','WDD'].includes(fromSym)||['DNA','HUB','DIAMANTE','PVPB','TPF','AXO','WDD'].includes(toSym)?10000:3000;
+  var fee=['DNA','HUB','DIAMANTE','PVPB','TPF','AXO','WDD','ORB','uSOL','WBTC'].includes(fromSym)||['DNA','HUB','DIAMANTE','PVPB','TPF','AXO','WDD','ORB','uSOL','WBTC'].includes(toSym)?10000:3000;
 
   try{
     showOk('Confirma el intercambio...','⏳');
@@ -472,7 +514,6 @@ async function doSwapSmart() {
   var toSym = document.getElementById('tSel').value;
   var amount = parseFloat(document.getElementById('fAmt').value);
   
-  // WLD, DNA y WDD van siempre directos (sin puentes / sin pasos)
   if (fromSym === 'WLD' || toSym === 'WLD' || fromSym === 'DNA' || fromSym === 'WDD' || toSym === 'DNA' || toSym === 'WDD') {
     return doSwap();
   }
@@ -591,7 +632,7 @@ async function fetchLivePrices() {
     }
   } catch (e) {}
 
-  for (let sym of ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO','WDD']) {
+  for (let sym of ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO','WDD','ORB','uSOL','WBTC']) {
     try {
       let r = await fetch('https://api.dexscreener.com/latest/dex/tokens/' + CONTRACTS[sym].address);
       let j = await r.json();
@@ -606,6 +647,8 @@ async function fetchLivePrices() {
   }
   updateTotal();
   renderTokenList();
+  if (document.getElementById('swap').style.display === 'block') fillSelects();
+  if (document.getElementById('send').style.display === 'block') fillSendSelect();
 }
 
 window.addEventListener('load', function() {

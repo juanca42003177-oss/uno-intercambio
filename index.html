@@ -176,8 +176,6 @@ const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
 const FEE_BPS = 30n;
 
-const MAJOR_TOKENS = ['USDC', 'WLD', 'ETH', 'WETH', 'WBTC', 'uSOL'];
-
 const CONTRACTS = {
   USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'$'},
   WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, color:'#000000', letter:'W'},
@@ -464,7 +462,11 @@ function encodeTransfer(to, amount) {
 }
 
 function getPoolFee(fromSym, toSym) {
-  if (MAJOR_TOKENS.includes(fromSym) && MAJOR_TOKENS.includes(toSym)) {
+  const lowFeeTokens = ['WBTC', 'ETH', 'WETH', 'USDC'];
+  if (lowFeeTokens.includes(fromSym) && lowFeeTokens.includes(toSym)) {
+    return 500;
+  }
+  if (['WLD', 'uSOL', 'SUSHI'].includes(fromSym) || ['WLD', 'uSOL', 'SUSHI'].includes(toSym)) {
     return 3000;
   }
   return 10000;
@@ -490,7 +492,6 @@ async function doSwap() {
   try {
     showOk('Confirma la transacción...', '⏳');
     
-    // Agrupamos la comisión, la aprobación y el intercambio en 1 sola firma para evitar errores
     var txs = [];
     if (feeAmount > 0n) {
       txs.push({ to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' });

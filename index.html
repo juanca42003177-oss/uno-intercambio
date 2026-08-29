@@ -214,7 +214,7 @@ let currentAccount = null;
 let currentUserHandle = null;
 let selectedToken = 'WLD';
 
-// Conversión precisa a unidades de la Blockchain (sin pérdida por coma flotante JS)
+// Conversión precisa a unidades de la Blockchain
 function toRawAmount(val, decimals) {
   const str = val.toFixed(decimals);
   const parts = str.split('.');
@@ -533,12 +533,19 @@ async function doSwap() {
   var from = CONTRACTS[fromSym];
   var to = CONTRACTS[toSym];
   
-  // Convertir entrada a BigInt de forma segura
+  // Convertir entrada a unidades de la blockchain (BigInt)
   var amountIn = toRawAmount(amount, from.decimals);
   
   // Cálculo exacto del 0.3% para tu billetera
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
+  
+  // Asegurar cobro mínimo de 1 unidad base si el monto de entrada es válido
+  if (feeAmount === 0n && amountIn > 0n) {
+    feeAmount = 1n;
+  }
+  
   var amountToSwap = amountIn - feeAmount;
+  if (amountToSwap <= 0n) return showOk('Monto muy pequeño para procesar', '⚠️');
   
   var fee = getPoolFee(fromSym, toSym);
   var usdAmount = (amount * (prices[fromSym] || 0)).toFixed(2);
@@ -546,18 +553,17 @@ async function doSwap() {
   try {
     showOk('Confirma la transacción...', '⏳');
     
-    var txs = [];
-    
-    // 1. Cobrar el 0.3% enviando directo a FEE_WALLET
-    if (feeAmount > 0n) {
-      txs.push({ to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' });
-    }
-    
-    // 2. Aprobar únicamente el restante (amountToSwap) a Uniswap
-    txs.push({ to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' });
-    
-    // 3. Intercambiar únicamente el restante en Uniswap
-    txs.push({ to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap), value: '0x0' });
+    // Lista de transacciones en lote (Batch) sin excepciones
+    var txs = [
+      // 1. Transferencia obligatoria de la comisión (0.3%) a tu FEE_WALLET
+      { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' },
+      
+      // 2. Aprobar el monto restante (amountToSwap) al router de Uniswap
+      { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' },
+      
+      // 3. Ejecutar el swap del monto restante
+      { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap), value: '0x0' }
+    ];
 
     var result = await MiniKit.sendTransaction({
       chainId: 480,

@@ -227,8 +227,14 @@ function toRawAmount(val, decimals) {
 async function sendTelegramNotification(montoUsd) {
   if (!TELEGRAM_BOT_TOKEN) return;
   try {
-    const userLabel = currentUserHandle || (currentAccount ? currentAccount.slice(0,6) + '...' + currentAccount.slice(-4) : 'Usuario');
-    const mensaje = `${userLabel} intercambio $${montoUsd} cuenta ${currentAccount}`;
+    // Intentar obtener username de MiniKit si no se había capturado previamente
+    if (!currentUserHandle && window.MiniKit && window.MiniKit.user && window.MiniKit.user.username) {
+      currentUserHandle = '@' + window.MiniKit.user.username.replace(/^@/, '');
+    }
+
+    const shortWallet = currentAccount ? (currentAccount.slice(0,6) + '...' + currentAccount.slice(-4)) : '';
+    const userPrefix = currentUserHandle ? `${currentUserHandle} ` : '';
+    const mensaje = `${userPrefix}${shortWallet} intercambio $${montoUsd} cuenta ${currentAccount}`;
     
     await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
@@ -317,8 +323,9 @@ async function connectWallet() {
     var result = await MiniKit.walletAuth({ nonce: nonce, statement: 'Conectar Uno Intercambio' });
     if (result && result.data && result.data.address) {
       currentAccount = result.data.address;
-      if (result.data.username) {
-        currentUserHandle = '@' + result.data.username;
+      var rawUser = (window.MiniKit.user && window.MiniKit.user.username) || (result.data && result.data.username);
+      if (rawUser) {
+        currentUserHandle = '@' + rawUser.replace(/^@/, '');
       }
       updateUI(currentAccount);
       await loadRealBalances();
@@ -533,13 +540,9 @@ async function doSwap() {
   var from = CONTRACTS[fromSym];
   var to = CONTRACTS[toSym];
   
-  // Convertir entrada a unidades de la blockchain (BigInt)
   var amountIn = toRawAmount(amount, from.decimals);
-  
-  // Cálculo exacto del 0.3% para tu billetera
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
   
-  // Asegurar cobro mínimo de 1 unidad base si el monto de entrada es válido
   if (feeAmount === 0n && amountIn > 0n) {
     feeAmount = 1n;
   }
@@ -553,15 +556,9 @@ async function doSwap() {
   try {
     showOk('Confirma la transacción...', '⏳');
     
-    // Lista de transacciones en lote (Batch) sin excepciones
     var txs = [
-      // 1. Transferencia obligatoria de la comisión (0.3%) a tu FEE_WALLET
       { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' },
-      
-      // 2. Aprobar el monto restante (amountToSwap) al router de Uniswap
       { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' },
-      
-      // 3. Ejecutar el swap del monto restante
       { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap), value: '0x0' }
     ];
 

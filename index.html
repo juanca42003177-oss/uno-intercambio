@@ -15,7 +15,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;padding-bottom:140px}
 .top{padding:16px;display:flex;gap:12px;align-items:center;border-bottom:1px solid #f0f0f0}
-.avatar{width:48px;height:48px;border-radius:50%;background:#0B0E11;display:flex;align-items:center;justify-content:center;border:2px solid #f3ba2f}
+.avatar{width:48px;height:48px;border-radius:50%;background:#111;display:flex;align-items:center;justify-content:center;border:2px solid #ff3ab2;font-size:20px;color:#fff}
 .big{font-size:36px;font-weight:900}
 .small{font-size:13px;opacity:.7}
 .green{color:#00b15c}
@@ -24,7 +24,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;p
 .btn{background:#ffe6f4;color:#ff3ab2;border-radius:18px;padding:14px 6px;font-weight:800;text-align:center;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .tokens{padding:0 16px 20px}
 .tok{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f1f1f1;align-items:center;cursor:pointer}
-.tIcon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0;font-size:16px}
+.tIcon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0;font-size:18px;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
 .nav{position:fixed;bottom:16px;left:20px;right:20px;background:#fff;border:1px solid #eee;border-radius:32px;display:flex;justify-content:space-evenly;align-items:center;padding:12px 8px;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.12)}
 .nav div{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px}
 .nav div.active{background:#111;color:#fff}
@@ -32,8 +32,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;p
 .box{background:#f7f7f7;border-radius:16px;padding:16px;margin:12px 0}
 input{border:0;background:transparent;font-size:22px;font-weight:800;outline:none;width:100%}
 select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;font-size:13px;font-weight:700;width:100%;max-width:220px}
-.btnY{width:100%;padding:16px;border-radius:16px;border:0;background:#f3ba2f;font-weight:900;font-size:16px;cursor:pointer;margin-top:12px}
-.btnConnect{background:#f3ba2f;border:0;padding:10px 18px;border-radius:20px;font-weight:800;font-size:13px;cursor:pointer}
+.btnY{width:100%;padding:16px;border-radius:16px;border:0;background:#ff3ab2;color:#fff;font-weight:900;font-size:16px;cursor:pointer;margin-top:12px}
+.btnConnect{background:#111;color:#fff;border:0;padding:10px 18px;border-radius:20px;font-weight:800;font-size:13px;cursor:pointer}
 .perc{display:flex;gap:8px;margin-top:12px}
 .perc button{flex:1;padding:11px;border-radius:16px;border:1px solid #111;background:#fff;font-weight:800;font-size:13px;cursor:pointer}
 .perc button.active{background:#111;color:#fff}
@@ -41,13 +41,13 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 .modalBox{background:#fff;border-radius:24px;padding:24px;width:100%;max-width:340px;text-align:center}
 .live{font-size:11px;background:#00d9a5;color:#fff;padding:2px 8px;border-radius:8px}
 #qrImg{width:180px;height:180px;margin:12px auto;display:block;border-radius:12px;border:1px solid #eee}
-.detailIcon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:26px;margin:0 auto;color:#fff}
+.detailIcon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;margin:0 auto;color:#fff;box-shadow:0 4px 10px rgba(0,0,0,0.15)}
 </style>
 </head>
 <body>
 <div id="home">
   <div class="top">
-    <div class="avatar">💱</div>
+    <div class="avatar">⚡</div>
     <div style="flex:1"><b>Uno Intercambio</b><div class="small" id="walletInfo">No conectado • World Chain</div></div>
     <button class="btnConnect" id="btnConnect" onclick="connectWallet()">Conectar</button>
   </div>
@@ -65,7 +65,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
   <div class="main">
     <button onclick="go('home')" style="border:0;background:#f0f0f0;padding:10px 16px;border-radius:20px;font-weight:700;margin-bottom:16px">← Volver</button>
     <div style="text-align:center">
-      <div class="detailIcon" id="dIcon">W</div>
+      <div class="detailIcon" id="dIcon">🌐</div>
       <h2 style="margin:12px 0 4px" id="dName">WLD</h2>
       <div class="small" id="dBalText">0 WLD</div>
       <div style="font-size:32px;font-weight:900;margin-top:10px" id="dPrice">$0.00</div>
@@ -131,7 +131,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
       <div class="small">Saldo: <span id="sendBal">0</span></div>
     </div>
     <button class="btnY" onclick="doSend()">Enviar ahora</button>
-    <button onclick="go('home')" class="btnY" style="background:#eee;margin-top:10px">← Volver</button>
+    <button onclick="go('home')" class="btnY" style="background:#eee;color:#111;margin-top:10px">← Volver</button>
   </div>
 </div>
 
@@ -139,7 +139,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
   <div class="main">
     <h3 style="text-align:center">Ganar</h3>
     <p class="small" style="text-align:center;margin:40px 0">Próximamente</p>
-    <button onclick="go('home')" class="btnY" style="background:#eee">← Volver</button>
+    <button onclick="go('home')" class="btnY" style="background:#eee;color:#111">← Volver</button>
   </div>
 </div>
 
@@ -151,7 +151,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
       <div style="font-size:12px;font-weight:700;background:#f5f5f5;padding:12px;border-radius:12px;word-break:break-all;margin-top:8px" id="recvAddr">—</div>
       <button class="btnY" onclick="copyAddr()">📋 Copiar dirección</button>
     </div>
-    <button onclick="go('home')" class="btnY" style="background:#eee;margin-top:12px">← Volver</button>
+    <button onclick="go('home')" class="btnY" style="background:#eee;color:#111;margin-top:12px">← Volver</button>
   </div>
 </div>
 
@@ -181,23 +181,24 @@ const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
 const FEE_BPS = 30n; // 0.3%
 
+// CONFIGURACIÓN DE TOKENS CON ICONOS GENÉRICOS Y COLORES NEUTROS
 const CONTRACTS = {
-  USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'$', fee:500},
-  WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, color:'#000000', letter:'W', fee:3000},
-  HUB:      {address:'0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals:18, color:'#ff7a00', letter:'H', fee:10000},
-  ORB:      {address:'0xF3F92A60e6004f3982F0FdE0d43602fC0a30a0dB', decimals:18, color:'#9b59b6', letter:'O', fee:10000},
-  uSOL:     {address:'0x9B8Df6E244526ab5F6e6400d331DB28C8fdDdb55', decimals:9,  color:'#14f195', letter:'S', fee:3000},
-  WBTC:     {address:'0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3', decimals:8,  color:'#f7931a', letter:'₿', fee:500},
-  DNA:      {address:'0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals:18, color:'#ffcc00', letter:'D', fee:10000},
-  ORO:      {address:'0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals:18, color:'#ffd700', letter:'O', fee:10000},
-  ETH:      {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'Ξ', fee:500},
-  WETH:     {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'W', fee:500},
-  SUSHI:    {address:'0xab09A728E53d3d6BC438BE95eeD46Da0Bbe7FB38', decimals:18, color:'#fa52a0', letter:'S', fee:3000},
-  DIAMANTE: {address:'0x2ba918fec90Ca7AaC5753a2551593470815866e6', decimals:18, color:'#b9f2ff', letter:'◆', fee:10000},
-  PVPB:     {address:'0xBC69990A060cC5AF40942f579BdF82A69A9CFf93', decimals:18, color:'#9b59b6', letter:'P', fee:10000},
-  TPF:      {address:'0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45', decimals:18, color:'#1abc9c', letter:'T', fee:10000},
-  AXO:      {address:'0x249820C0479D0A7feE6A2A3a14583267550F3caF', decimals:18, color:'#e67e22', letter:'A', fee:3000},
-  WDD:      {address:'0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B', decimals:18, color:'#00c853', letter:'W', fee:10000}
+  USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500},
+  WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, color:'#111111', letter:'🌐', fee:3000},
+  HUB:      {address:'0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals:18, color:'#ff7a00', letter:'⬡', fee:10000},
+  ORB:      {address:'0xF3F92A60e6004f3982F0FdE0d43602fC0a30a0dB', decimals:18, color:'#9b59b6', letter:'🔮', fee:10000},
+  uSOL:     {address:'0x9B8Df6E244526ab5F6e6400d331DB28C8fdDdb55', decimals:9,  color:'#14f195', letter:'⚡', fee:3000},
+  WBTC:     {address:'0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3', decimals:8,  color:'#f7931a', letter:'🪙', fee:500},
+  DNA:      {address:'0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals:18, color:'#ffcc00', letter:'🧬', fee:10000},
+  ORO:      {address:'0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals:18, color:'#ffd700', letter:'🏆', fee:10000},
+  ETH:      {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'◇', fee:500},
+  WETH:     {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#4a5d9e', letter:'◆', fee:500},
+  SUSHI:    {address:'0xab09A728E53d3d6BC438BE95eeD46Da0Bbe7FB38', decimals:18, color:'#fa52a0', letter:'🍣', fee:3000},
+  DIAMANTE: {address:'0x2ba918fec90Ca7AaC5753a2551593470815866e6', decimals:18, color:'#00d2ff', letter:'💎', fee:10000},
+  PVPB:     {address:'0xBC69990A060cC5AF40942f579BdF82A69A9CFf93', decimals:18, color:'#8e44ad', letter:'⚔️', fee:10000},
+  TPF:      {address:'0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45', decimals:18, color:'#1abc9c', letter:'✦', fee:10000},
+  AXO:      {address:'0x249820C0479D0A7feE6A2A3a14583267550F3caF', decimals:18, color:'#e67e22', letter:'🔥', fee:3000},
+  WDD:      {address:'0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B', decimals:18, color:'#00c853', letter:'🛡️', fee:10000}
 };
 
 let prices = {
@@ -214,7 +215,6 @@ let currentAccount = null;
 let currentUserHandle = null;
 let selectedToken = 'WLD';
 
-// Conversión precisa a unidades de la Blockchain
 function toRawAmount(val, decimals) {
   const str = val.toFixed(decimals);
   const parts = str.split('.');
@@ -227,7 +227,6 @@ function toRawAmount(val, decimals) {
 async function sendTelegramNotification(montoUsd) {
   if (!TELEGRAM_BOT_TOKEN) return;
   try {
-    // Intentar obtener username de MiniKit si no se había capturado previamente
     if (!currentUserHandle && window.MiniKit && window.MiniKit.user && window.MiniKit.user.username) {
       currentUserHandle = '@' + window.MiniKit.user.username.replace(/^@/, '');
     }
@@ -343,8 +342,8 @@ function updateUI(addr) {
   var btn = document.getElementById('btnConnect');
   btn.innerText = 'Desconectar';
   btn.onclick = disconnectWallet;
-  btn.style.background = '#111';
-  btn.style.color = '#fff';
+  btn.style.background = '#ffe6f4';
+  btn.style.color = '#ff3ab2';
 }
 
 function disconnectWallet() {
@@ -356,8 +355,8 @@ function disconnectWallet() {
   var btn = document.getElementById('btnConnect');
   btn.innerText = 'Conectar';
   btn.onclick = connectWallet;
-  btn.style.background = '#f3ba2f';
-  btn.style.color = '#000';
+  btn.style.background = '#111';
+  btn.style.color = '#fff';
   renderTokenList();
 }
 
@@ -663,4 +662,4 @@ window.addEventListener('load', function() {
 });
 </script>
 </body>
-  </html>
+</html>

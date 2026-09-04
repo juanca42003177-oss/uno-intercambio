@@ -110,7 +110,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
       </div>
     </div>
     <div class="box" style="font-size:13px">
-      <div style="display:flex;justify-content:space-between"><span>Comisión (0.5%):</span><b id="feeUno">$0.00</b></div>
+      <div style="display:flex;justify-content:space-between"><span>Tarifa (0.5%):</span><b id="feeUno">$0.00</b></div>
       <div style="display:flex;justify-content:space-between;margin-top:6px;font-weight:800;border-top:1px dashed #ccc;padding-top:6px"><span>Total comisión:</span><b id="totalCommission">$0.00</b></div>
     </div>
     <button class="btnY" onclick="doSwap()">Intercambiar Ahora</button>
@@ -178,7 +178,7 @@ const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
-const FEE_BPS = 50n; // 0.5% optimizado al nivel de DNA
+const FEE_BPS = 50n; // 0.5% tarifa visual
 
 const CONTRACTS = {
   USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500},
@@ -460,8 +460,8 @@ function calc() {
   var pt = prices[to] || 1;
   
   var totalUsd = amt * pf;
-  var feeUsd = totalUsd * 0.005; // Actualizado a 0.5%
-  var netUsd = totalUsd - feeUsd;
+  var feeUsd = totalUsd * 0.005; // 0.5% tarifa visual
+  var netUsd = totalUsd; // Sin descontar en la UI del input para empatar con DNA
   
   var poolFeeRate = 1 - ((CONTRACTS[to]?.fee || getPoolFee(from, to)) / 1000000); 
   var finalNetUsd = netUsd * poolFeeRate;
@@ -525,13 +525,8 @@ async function doSwap() {
   var from = CONTRACTS[fromSym];
   var to = CONTRACTS[toSym];
   
+  // Enviamos el 100% de los tokens directos al router (igual que DNA)
   var amountIn = toRawAmount(amount, from.decimals);
-  var feeAmount = (amountIn * FEE_BPS) / 10000n;
-  if (feeAmount === 0n && amountIn > 0n) feeAmount = 1n;
-  
-  var amountToSwap = amountIn - feeAmount;
-  if (amountToSwap <= 0n) return showOk('Monto muy pequeño para procesar', '⚠️');
-  
   var fee = getPoolFee(fromSym, toSym);
   var usdAmount = (amount * (prices[fromSym] || 0)).toFixed(2);
 
@@ -539,9 +534,8 @@ async function doSwap() {
     showOk('Confirma la transacción...', '⏳');
     
     var txs = [
-      { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' },
-      { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' },
-      { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap), value: '0x0' }
+      { to: from.address, data: encodeApprove(SWAP_ROUTER, amountIn), value: '0x0' },
+      { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountIn), value: '0x0' }
     ];
 
     var result = await MiniKit.sendTransaction({

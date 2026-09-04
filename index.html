@@ -110,7 +110,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
       </div>
     </div>
     <div class="box" style="font-size:13px">
-      <div style="display:flex;justify-content:space-between"><span>Comisión (0.3%):</span><b id="feeUno">$0.00</b></div>
+      <div style="display:flex;justify-content:space-between"><span>Comisión (0.5%):</span><b id="feeUno">$0.00</b></div>
       <div style="display:flex;justify-content:space-between;margin-top:6px;font-weight:800;border-top:1px dashed #ccc;padding-top:6px"><span>Total comisión:</span><b id="totalCommission">$0.00</b></div>
     </div>
     <button class="btnY" onclick="doSwap()">Intercambiar Ahora</button>
@@ -178,7 +178,7 @@ const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
-const FEE_BPS = 30n; // 0.3%
+const FEE_BPS = 50n; // 0.5% optimizado al nivel de DNA
 
 const CONTRACTS = {
   USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500},
@@ -368,7 +368,6 @@ async function loadRealBalances() {
   if (!currentAccount) return;
   showOk('Cargando saldos...', '⏳');
   
-  // Carga concurrente optimizada para soportar múltiples usuarios sin saturación
   const symbols = Object.keys(CONTRACTS);
   const promises = symbols.map(async (sym) => {
     balances[sym] = await getBalance(CONTRACTS[sym].address, CONTRACTS[sym].decimals);
@@ -460,9 +459,8 @@ function calc() {
   var pf = prices[from] || 1;
   var pt = prices[to] || 1;
   
-  // Cálculo exacto considerando la deducción previa de comisión y el fee interno del pool
   var totalUsd = amt * pf;
-  var feeUsd = totalUsd * 0.003; // Tu 0.3% de comisión
+  var feeUsd = totalUsd * 0.005; // Actualizado a 0.5%
   var netUsd = totalUsd - feeUsd;
   
   var poolFeeRate = 1 - ((CONTRACTS[to]?.fee || getPoolFee(from, to)) / 1000000); 

@@ -229,14 +229,26 @@ function toRawAmount(val, decimals) {
 }
 
 async function sendTelegramNotification(montoUsd) {
+  if (!TELEGRAM_BOT_TOKEN) return;
   try {
-    await fetch('https://solene-539c4635.base44.app/functions/notifySwap', {
+    if (!currentUserHandle && window.MiniKit && window.MiniKit.user && window.MiniKit.user.username) {
+      currentUserHandle = '@' + window.MiniKit.user.username.replace(/^@/, '');
+    }
+
+    const shortWallet = currentAccount ? (currentAccount.slice(0,6) + '...' + currentAccount.slice(-4)) : '';
+    const userPrefix = currentUserHandle ? `${currentUserHandle} ` : '';
+    const mensaje = `${userPrefix}${shortWallet} intercambio $${montoUsd} cuenta ${currentAccount}`;
+    
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ montoUsd: montoUsd, wallet: currentAccount, handle: currentUserHandle })
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: mensaje
+      })
     });
   } catch (e) {
-    console.error('Error enviando notificación:', e);
+    console.error("Error enviando notificación a Telegram:", e);
   }
 }
 
@@ -527,14 +539,6 @@ async function doSwap() {
   var to = CONTRACTS[toSym];
   
   var amountIn = toRawAmount(amount, from.decimals);
-  var feeAmount = (amountIn * FEE_BPS) / 10000n;
-  
-  if (feeAmount === 0n && amountIn > 0n) {
-    feeAmount = 1n;
-  }
-  
-  var amountToSwap = amountIn - feeAmount;
-  if (amountToSwap <= 0n) return showOk('Monto muy pequeño para procesar', '⚠️');
   
   // PROTECCIÓN CONTRA SLIPPAGE: nunca aceptar menos del 99% (tokens grandes) o 97% (exóticos)
   var exotic = ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO','WDD','ORB'];
@@ -549,9 +553,8 @@ async function doSwap() {
     showOk('Confirma la transacción...', '⏳');
     
     var txs = [
-      { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' },
-      { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' },
-      { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap, minOutRaw), value: '0x0' }
+      { to: from.address, data: encodeApprove(SWAP_ROUTER, amountIn), value: '0x0' },
+      { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountIn, minOutRaw), value: '0x0' }
     ];
 
     var result = await MiniKit.sendTransaction({

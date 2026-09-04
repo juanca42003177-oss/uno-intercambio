@@ -171,11 +171,11 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 </div>
 
 <script>
+// --- Config
 const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
-
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
-const FEE_BPS = 30n;
+const FEE_BPS = 30n; // 0.3%
 
 const CONTRACTS = {
   USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500},
@@ -201,87 +201,225 @@ let prices = {
   ETH:3400, WETH:3400, SUSHI:0.5, DIAMANTE:0.0001, PVPB:0.0001, TPF:0.0001, AXO:0.0001, WDD:0.002,
   ORB:0.001, uSOL:103.70, WBTC:77412.12
 };
-let changes = {
-  WLD:0, DNA:0, HUB:0, ORO:0, USDC:0, ETH:0, WETH:0, SUSHI:0, DIAMANTE:0, PVPB:0, TPF:0, AXO:0, WDD:0,
-  ORB:0, uSOL:0, WBTC:0
-};
+let changes = {};
 let balances = {};
 let currentAccount = null;
 let currentUserHandle = null;
 let selectedToken = 'WLD';
 
-function toRawAmount(val, decimals) {
-  const str = val.toFixed(decimals);
-  const parts = str.split('.');
-  let integer = parts[0];
-  let fraction = parts[1] || '';
-  fraction = fraction.padEnd(decimals, '0').slice(0, decimals);
-  return BigInt(integer + fraction);
+// ----------------- Utilities -----------------
+function safeNumber(x, fallback = 0) {
+  if (x === undefined || x === null) return fallback;
+  const n = Number(x);
+  return Number.isFinite(n) ? n : fallback;
+}
+function formatCrypto(val) {
+  const v = safeNumber(val, 0);
+  if (v === 0) return '0';
+  if (v < 0.0001) return v.toFixed(6).replace(/\.?0+$/, '');
+  return v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+}
+function formatUsdPrice(price) {
+  const p = safeNumber(price, 0);
+  if (p === 0) return '—';
+  if (p < 0.01) return '$' + p.toFixed(6);
+  return '$' + p.toFixed(2);
+}
+function formatUsdTotal(usdVal) {
+  const u = safeNumber(usdVal, 0);
+  if (u === 0) return '$0.00';
+  if (u < 0.01) return '$' + u.toFixed(4);
+  return '$' + u.toFixed(2);
+}
+function normalizeBalances(rawBalances) {
+  const out = {};
+  for (const sym of Object.keys(CONTRACTS)) {
+    let v = rawBalances && rawBalances[sym];
+    if (v === undefined || v === null) { out[sym] = 0; continue; }
+    if (typeof v === 'string' && /^\d+$/.test(v)) {
+      try {
+        const raw = BigInt(v);
+        const decimals = CONTRACTS[sym].decimals || 18;
+        const denom = BigInt(10) ** BigInt(decimals);
+        const whole = raw / denom;
+        const frac = raw % denom;
+        const fracStr = frac.toString().padStart(decimals, '0').slice(0, 6);
+        out[sym] = Number(whole.toString() + '.' + fracStr);
+        continue;
+      } catch (e) { out[sym] = 0; continue; }
+    }
+    const n = Number(v);
+    out[sym] = Number.isFinite(n) ? n : 0;
+  }
+  return out;
 }
 
-async function sendTelegramNotification(montoUsd) {
+// ----------------- UI helpers -----------------
+function showOk(msg, icon) {
   try {
-    if (!currentUserHandle && window.MiniKit && window.MiniKit.user && window.MiniKit.user.username) {
-      currentUserHandle = '@' + window.MiniKit.user.username.replace(/^@/, '');
-    }
-    const shortWallet = currentAccount ? (currentAccount.slice(0,6) + '...' + currentAccount.slice(-4)) : '';
-    const userPrefix = currentUserHandle ? `${currentUserHandle} ` : '';
-    const mensaje = `${userPrefix}${shortWallet} intercambio $${montoUsd} cuenta ${currentAccount}`;
+    document.getElementById('modalIcon').innerText = icon || '✅';
+    document.getElementById('modalTxt').innerText = msg;
+    document.getElementById('modal').style.display = 'flex';
+  } catch (e) { console.error('showOk error', e); }
+}
+function getSortedSymbols() {
+  return Object.keys(CONTRACTS).sort((a,b) => {
+    const va = safeNumber(balances[a],0) * safeNumber(prices[a],0);
+    const vb = safeNumber(balances[b],0) * safeNumber(prices[b],0);
+    return vb - va;
+  });
+}
 
-    await fetch('/api/notify', {
+// ----------------- Wallet / balances -----------------
+async function connectWallet() {
+  try {
+    if (!window.MiniKit) return showOk('Abre dentro de World App', '⚠️');
+    MiniKit.install();
+    const nonce = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    const result = await MiniKit.walletAuth({ nonce, statement: 'Conectar Uno Intercambio' });
+    if (result && result.data && result.data.address) {
+      currentAccount = result.data.address;
+      const rawUser = (window.MiniKit.user && window.MiniKit.user.username) || (result.data && result.data.username);
+      if (rawUser) currentUserHandle = '@' + rawUser.replace(/^@/, '');
+      updateUI(currentAccount);
+      await loadRealBalances();
+    } else {
+      showOk('No se pudo conectar', '❌');
+    }
+  } catch (e) {
+    console.error('connectWallet error', e);
+    showOk('Error: ' + (e.message || e), '❌');
+  }
+}
+function updateUI(addr) {
+  try {
+    const displayLabel = currentUserHandle || (addr.slice(0,6) + '...' + addr.slice(-4));
+    document.getElementById('walletInfo').innerHTML = displayLabel + ' • World Chain';
+    const btn = document.getElementById('btnConnect');
+    btn.innerText = 'Desconectar';
+    btn.onclick = disconnectWallet;
+    btn.style.background = '#ffe6f4';
+    btn.style.color = '#ff3ab2';
+  } catch (e) { console.error('updateUI', e); }
+}
+function disconnectWallet() {
+  currentAccount = null;
+  currentUserHandle = null;
+  balances = {};
+  document.getElementById('walletInfo').innerHTML = 'No conectado • World Chain';
+  document.getElementById('totalUsd').innerText = '$0.00';
+  const btn = document.getElementById('btnConnect');
+  btn.innerText = 'Conectar';
+  btn.onclick = connectWallet;
+  btn.style.background = '#111';
+  btn.style.color = '#fff';
+  renderTokenList();
+}
+async function getBalance(addr, decimals) {
+  if (!currentAccount) return 0;
+  try {
+    const data = '0x70a08231' + currentAccount.slice(2).padStart(64, '0');
+    const res = await fetch(WORLD_RPC, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: mensaje, usd: montoUsd })
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to: addr, data }, 'latest'] })
     });
+    const json = await res.json();
+    if (!json.result || json.result === '0x') return 0;
+    const n = Number(BigInt(json.result)) / Math.pow(10, decimals);
+    return Number.isFinite(n) ? n : 0;
   } catch (e) {
-    console.error("Error enviando notificación al backend:", e);
+    console.warn('getBalance error', e);
+    return 0;
   }
 }
-
-function formatCrypto(val) {
-  if (!val || val === 0) return '0';
-  if (val < 0.0001) {
-    return val.toFixed(6).replace(/\.?0+$/, '');
+async function loadRealBalances() {
+  if (!currentAccount) return;
+  showOk('Cargando saldos...', '⏳');
+  try {
+    const res = await fetch('/api/balances?address=' + encodeURIComponent(currentAccount), { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      const raw = data && data.balances ? data.balances : data;
+      balances = normalizeBalances(raw);
+    } else {
+      throw new Error('Backend balances no disponible (status ' + res.status + ')');
+    }
+  } catch (e) {
+    console.warn('Fallo /api/balances, fallback RPC:', e);
+    try {
+      const syms = Object.keys(CONTRACTS);
+      const p = {};
+      const chunkSize = 6;
+      for (let i=0; i<syms.length; i+=chunkSize) {
+        const chunk = syms.slice(i, i+chunkSize);
+        await Promise.all(chunk.map(async sym => {
+          p[sym] = await getBalance(CONTRACTS[sym].address, CONTRACTS[sym].decimals);
+        }));
+      }
+      balances = p;
+    } catch (err) {
+      console.error('Error fallback balances:', err);
+      balances = {};
+    }
   }
-  return val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+  try { document.getElementById('modal').style.display = 'none'; } catch(e){}
+  renderTokenList();
+  updateTotal();
 }
 
-function formatUsdPrice(price) {
-  if (!price || price === 0) return '$0.00';
-  if (price < 0.01) {
-    return '$' + price.toFixed(6);
+// ----------------- Render / UI -----------------
+function updateTotal() {
+  let total = 0;
+  for (const sym in balances) {
+    total += safeNumber(balances[sym],0) * safeNumber(prices[sym],0);
   }
-  return '$' + price.toFixed(2);
+  document.getElementById('totalUsd').innerText = formatUsdTotal(total);
 }
-
-function formatUsdTotal(usdVal) {
-  if (!usdVal || usdVal === 0) return '$0.00';
-  if (usdVal < 0.01) {
-    return '$' + usdVal.toFixed(4);
+function renderTokenList() {
+  const sortedSymbols = getSortedSymbols();
+  let html = '<div style="font-weight:800;margin:10px 0 6px">World Chain</div>';
+  for (const sym of sortedSymbols) {
+    const t = CONTRACTS[sym];
+    const bal = safeNumber(balances[sym], 0);
+    const price = safeNumber(prices[sym], 0);
+    const usd = price > 0 ? bal * price : null;
+    const ch = safeNumber(changes[sym], 0);
+    html += '<div class="tok" onclick="openToken(\\''+sym+'\\')">' +
+      '<div style="display:flex;gap:12px;align-items:center">' +
+        '<div class="tIcon" style="background:' + t.color + '">' + t.letter + '</div>' +
+        '<div><b>' + sym + '</b><div class="small">' + formatCrypto(bal) + ' ' + sym + '</div></div>' +
+      '</div>' +
+      '<div style="text-align:right">' +
+        '<b>' + (usd !== null ? formatUsdTotal(usd) : '—') + '</b>' +
+        '<div class="small ' + (ch >= 0 ? 'green' : 'red') + '">' + (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%</div>' +
+      '</div>' +
+    '</div>';
   }
-  return '$' + usdVal.toFixed(2);
+  document.getElementById('tokenList').innerHTML = html;
 }
-
-function showOk(msg, icon) {
-  document.getElementById('modalIcon').innerText = icon || '✅';
-  document.getElementById('modalTxt').innerText = msg;
-  document.getElementById('modal').style.display = 'flex';
+function openToken(sym) {
+  selectedToken = sym;
+  const t = CONTRACTS[sym];
+  const bal = safeNumber(balances[sym],0);
+  const price = safeNumber(prices[sym],0);
+  const ch = safeNumber(changes[sym],0);
+  document.getElementById('dIcon').style.background = t.color;
+  document.getElementById('dIcon').innerText = t.letter;
+  document.getElementById('dName').innerText = sym;
+  document.getElementById('dBalText').innerText = formatCrypto(bal) + ' ' + sym;
+  document.getElementById('dPrice').innerText = formatUsdPrice(price);
+  document.getElementById('dChange').innerText = (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%';
+  document.getElementById('dBal').innerText = formatCrypto(bal) + ' ' + sym;
+  document.getElementById('dUsd').innerText = price > 0 ? ('$' + (bal*price).toFixed(2)) : '—';
+  go('tokenDetail');
 }
-
-function getSortedSymbols() {
-  return Object.keys(CONTRACTS).sort((a, b) => {
-    const usdValA = (balances[a] || 0) * (prices[a] || 0);
-    const usdValB = (balances[b] || 0) * (prices[b] || 0);
-    return usdValB - usdValA;
-  });
-}
-
 function go(page) {
-  ['home','swap','earn','send','recv','tokenDetail'].forEach(function(p) {
-    var el = document.getElementById(p);
+  ['home','swap','earn','send','recv','tokenDetail'].forEach(p => {
+    const el = document.getElementById(p);
     if (el) el.style.display = (p === page) ? 'block' : 'none';
   });
-  document.querySelectorAll('.nav div').forEach(function(d) { d.classList.remove('active'); });
+  document.querySelectorAll('.nav div').forEach(d => d.classList.remove('active'));
   if (page === 'home') document.getElementById('navHome').classList.add('active');
   if (page === 'recv' && currentAccount) {
     document.getElementById('recvAddr').innerText = currentAccount;
@@ -290,250 +428,77 @@ function go(page) {
   if (page === 'swap') { fillSelects(); calc(); }
   if (page === 'send') { fillSendSelect(); updateSendBal(); }
 }
-
-function openToken(sym) {
-  selectedToken = sym;
-  var t = CONTRACTS[sym];
-  var bal = balances[sym] || 0;
-  var price = prices[sym] || 0;
-  var ch = changes[sym] || 0;
-  document.getElementById('dIcon').style.background = t.color;
-  document.getElementById('dIcon').innerText = t.letter;
-  document.getElementById('dName').innerText = sym;
-  document.getElementById('dBalText').innerText = formatCrypto(bal) + ' ' + sym;
-  document.getElementById('dPrice').innerText = formatUsdPrice(price);
-  document.getElementById('dChange').innerText = (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%';
-  document.getElementById('dBal').innerText = formatCrypto(bal) + ' ' + sym;
-  document.getElementById('dUsd').innerText = formatUsdTotal(bal * price);
-  go('tokenDetail');
-}
-
-function openSwapFromDetail() {
-  go('swap');
-  document.getElementById('fSel').value = selectedToken;
-  calc();
-}
-
-function openSendFromDetail() {
-  go('send');
-  document.getElementById('sendToken').value = selectedToken;
-  updateSendBal();
-}
-
-async function connectWallet() {
-  try {
-    if (!window.MiniKit) return showOk('Abre dentro de World App', '⚠️');
-    MiniKit.install();
-    var nonce = Math.random().toString(36).slice(2) + Date.now().toString(36);
-    var result = await MiniKit.walletAuth({ nonce: nonce, statement: 'Conectar Uno Intercambio' });
-    if (result && result.data && result.data.address) {
-      currentAccount = result.data.address;
-      var rawUser = (window.MiniKit.user && window.MiniKit.user.username) || (result.data && result.data.username);
-      if (rawUser) {
-        currentUserHandle = '@' + rawUser.replace(/^@/, '');
-      }
-      updateUI(currentAccount);
-      await loadRealBalances();
-    } else {
-      showOk('No se pudo conectar', '❌');
-    }
-  } catch (e) {
-    showOk('Error: ' + (e.message || e), '❌');
-  }
-}
-
-function updateUI(addr) {
-  const displayLabel = currentUserHandle || (addr.slice(0,6) + '...' + addr.slice(-4));
-  document.getElementById('walletInfo').innerHTML = displayLabel + ' • World Chain';
-  var btn = document.getElementById('btnConnect');
-  btn.innerText = 'Desconectar';
-  btn.onclick = disconnectWallet;
-  btn.style.background = '#ffe6f4';
-  btn.style.color = '#ff3ab2';
-}
-
-function disconnectWallet() {
-  currentAccount = null;
-  currentUserHandle = null;
-  balances = {};
-  document.getElementById('walletInfo').innerHTML = 'No conectado • World Chain';
-  document.getElementById('totalUsd').innerText = '$0.00';
-  var btn = document.getElementById('btnConnect');
-  btn.innerText = 'Conectar';
-  btn.onclick = connectWallet;
-  btn.style.background = '#111';
-  btn.style.color = '#fff';
-  renderTokenList();
-}
-
-async function getBalance(addr, decimals) {
-  if (!currentAccount) return 0;
-  try {
-    var data = '0x70a08231' + currentAccount.slice(2).padStart(64, '0');
-    var res = await fetch(WORLD_RPC, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jsonrpc: '2.0', id: 1, method: 'eth_call',
-        params: [{ to: addr, data: data }, 'latest']
-      })
-    });
-    var json = await res.json();
-    if (!json.result || json.result === '0x') return 0;
-    return Number(BigInt(json.result)) / Math.pow(10, decimals);
-  } catch (e) {
-    return 0;
-  }
-}
-
-async function loadRealBalances() {
-  if (!currentAccount) return;
-  showOk('Cargando saldos...', '⏳');
-
-  try {
-    const res = await fetch('/api/balances?address=' + encodeURIComponent(currentAccount), { cache: 'no-store' });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.balances) {
-        balances = data.balances;
-      } else if (data && typeof data === 'object') {
-        balances = data;
-      } else {
-        throw new Error('Formato de balances inválido');
-      }
-    } else {
-      throw new Error('Backend balances no disponible');
-    }
-  } catch (e) {
-    console.warn('Fallo /api/balances, usando fallback local:', e);
-    try {
-      const syms = Object.keys(CONTRACTS);
-      const p = {};
-      await Promise.all(syms.map(async (sym) => {
-        p[sym] = await getBalance(CONTRACTS[sym].address, CONTRACTS[sym].decimals);
-      }));
-      balances = p;
-    } catch (err) {
-      console.error('Error fallback balances:', err);
-      balances = {};
-    }
-  }
-
-  document.getElementById('modal').style.display = 'none';
-  renderTokenList();
-  updateTotal();
-}
-
-function updateTotal() {
-  var total = 0;
-  for (var sym in balances) total += (balances[sym] || 0) * (prices[sym] || 0);
-  document.getElementById('totalUsd').innerText = formatUsdTotal(total);
-}
-
-function renderTokenList() {
-  var html = '<div style="font-weight:800;margin:10px 0 6px">World Chain</div>';
-  var sortedSymbols = getSortedSymbols();
-
-  sortedSymbols.forEach(function(sym) {
-    var t = CONTRACTS[sym];
-    var bal = balances[sym] || 0;
-    var usd = bal * (prices[sym] || 0);
-    var ch = changes[sym] || 0;
-    html += '<div class="tok" onclick="openToken(\'' + sym + '\')">' +
-      '<div style="display:flex;gap:12px;align-items:center">' +
-        '<div class="tIcon" style="background:' + t.color + '">' + t.letter + '</div>' +
-        '<div><b>' + sym + '</b><div class="small">' + formatCrypto(bal) + ' ' + sym + '</div></div>' +
-      '</div>' +
-      '<div style="text-align:right">' +
-        '<b>' + formatUsdTotal(usd) + '</b>' +
-        '<div class="small ' + (ch >= 0 ? 'green' : 'red') + '">' + (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%</div>' +
-      '</div>' +
-    '</div>';
-  });
-
-  document.getElementById('tokenList').innerHTML = html;
-}
-
 function fillSelects() {
-  var sortedSymbols = getSortedSymbols();
-  var optsFrom = '';
-  var optsTo = '';
-
-  sortedSymbols.forEach(function(sym) {
-    var balUsd = (balances[sym] || 0) * (prices[sym] || 0);
-    var label = sym + ' — Saldo: ' + formatUsdTotal(balUsd);
-
+  const sortedSymbols = getSortedSymbols();
+  let optsFrom = '', optsTo = '';
+  for (const sym of sortedSymbols) {
+    const balUsd = safeNumber(balances[sym],0) * safeNumber(prices[sym],0);
+    const label = sym + ' — Saldo: ' + formatUsdTotal(balUsd);
     optsFrom += '<option value="' + sym + '">' + label + '</option>';
     optsTo += '<option value="' + sym + '">' + label + '</option>';
-  });
-
-  var curFrom = document.getElementById('fSel').value || selectedToken || sortedSymbols[0];
-  var curTo = document.getElementById('tSel').value || (sortedSymbols[0] !== 'USDC' ? 'USDC' : sortedSymbols[1]);
-
+  }
+  const curFrom = document.getElementById('fSel').value || selectedToken || sortedSymbols[0];
+  const curTo = document.getElementById('tSel').value || (sortedSymbols[0] !== 'USDC' ? 'USDC' : sortedSymbols[1]);
   document.getElementById('fSel').innerHTML = optsFrom;
   document.getElementById('tSel').innerHTML = optsTo;
   document.getElementById('fSel').value = curFrom;
   document.getElementById('tSel').value = curTo;
 }
-
 function fillSendSelect() {
-  var sortedSymbols = getSortedSymbols();
-  var opts = '';
-  sortedSymbols.forEach(function(sym) {
-    var balUsd = (balances[sym] || 0) * (prices[sym] || 0);
+  const sortedSymbols = getSortedSymbols();
+  let opts = '';
+  for (const sym of sortedSymbols) {
+    const balUsd = safeNumber(balances[sym],0) * safeNumber(prices[sym],0);
     opts += '<option value="' + sym + '">' + sym + ' — Saldo: ' + formatUsdTotal(balUsd) + '</option>';
-  });
-  var cur = document.getElementById('sendToken').value || selectedToken || sortedSymbols[0];
+  }
+  const cur = document.getElementById('sendToken').value || selectedToken || sortedSymbols[0];
   document.getElementById('sendToken').innerHTML = opts;
   document.getElementById('sendToken').value = cur;
 }
-
 function updateSendBal() {
-  var sym = document.getElementById('sendToken').value;
+  const sym = document.getElementById('sendToken').value;
   document.getElementById('sendBal').innerText = formatCrypto(balances[sym] || 0) + ' ' + sym;
 }
 
-function calc() {
-  var from = document.getElementById('fSel').value;
-  var to = document.getElementById('tSel').value;
-  var amt = parseFloat(document.getElementById('fAmt').value) || 0;
-  document.getElementById('bF').innerText = from;
-  document.getElementById('bT').innerText = to;
-  document.getElementById('saldoTxt').innerText = formatCrypto(balances[from] || 0);
-  
-  if (amt <= 0) {
-    document.getElementById('tAmt').value = '0';
-    document.getElementById('feeUno').innerText = '$0.00';
-    document.getElementById('totalCommission').innerText = '$0.00';
-    return;
-  }
-  
-  var pf = prices[from] || 0.0000001;
-  var pt = prices[to] || 0.0000001;
-  var usd = amt * pf;
-  var fee = usd * 0.003;
-  
-  // Cálculo exacto basado en USD y precio unitario del destino para evitar desajustes
-  var targetUsdValue = usd - fee;
-  var targetAmount = targetUsdValue / pt;
-  
-  document.getElementById('tAmt').value = formatCrypto(targetAmount);
-  document.getElementById('feeUno').innerText = '$' + fee.toFixed(4);
-  document.getElementById('totalCommission').innerText = '$' + fee.toFixed(4);
+// ----------------- Swap / Send -----------------
+function toRawAmount(val, decimals) {
+  const n = safeNumber(val, 0);
+  const str = n.toFixed(decimals);
+  const parts = str.split('.');
+  const integer = parts[0];
+  const fraction = (parts[1] || '').padEnd(decimals,'0').slice(0,decimals);
+  return BigInt(integer + fraction);
 }
-
 function setPerc(p, e) {
-  document.querySelectorAll('.perc button').forEach(function(b) { b.classList.remove('active'); });
-  if (e && e.target) e.target.classList.add('active');
-  var from = document.getElementById('fSel').value;
-  document.getElementById('fAmt').value = ((balances[from] || 0) * p / 100).toFixed(6);
-  calc();
+  try {
+    document.querySelectorAll('.perc button').forEach(b => b.classList.remove('active'));
+    if (e && e.target) e.target.classList.add('active');
+    const from = document.getElementById('fSel').value;
+    document.getElementById('fAmt').value = ((balances[from] || 0) * p / 100).toFixed(6);
+    calc();
+  } catch (err) { console.error('setPerc err', err); }
 }
-
+function calc() {
+  try {
+    const from = document.getElementById('fSel').value;
+    const to = document.getElementById('tSel').value;
+    const amt = Number(document.getElementById('fAmt').value) || 0;
+    document.getElementById('bF').innerText = from;
+    document.getElementById('bT').innerText = to;
+    document.getElementById('saldoTxt').innerText = formatCrypto(balances[from] || 0);
+    if (amt <= 0) { document.getElementById('tAmt').value = '0'; return; }
+    const pf = safeNumber(prices[from], 0.0000001);
+    const pt = safeNumber(prices[to], 0.0000001);
+    const usd = amt * pf;
+    const fee = usd * 0.003;
+    document.getElementById('tAmt').value = formatCrypto((usd - fee) / pt);
+    document.getElementById('feeUno').innerText = '$' + fee.toFixed(4);
+    document.getElementById('totalCommission').innerText = '$' + fee.toFixed(4);
+  } catch (e) { console.error('calc error', e); }
+}
 function encodeApprove(spender, amount) {
   return '0x095ea7b3' + spender.slice(2).padStart(64, '0') + BigInt(amount).toString(16).padStart(64, '0');
 }
-
 function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn) {
   const tIn = tokenIn.slice(2).toLowerCase().padStart(64, '0');
   const tOut = tokenOut.slice(2).toLowerCase().padStart(64, '0');
@@ -544,99 +509,80 @@ function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn) {
   const sqrtLimit = '0'.padStart(64, '0');
   return '0x04e45aaf' + tIn + tOut + feeHex + rec + amt + minOut + sqrtLimit;
 }
-
 function encodeTransfer(to, amount) {
   return '0xa9059cbb' + to.slice(2).padStart(64, '0') + BigInt(amount).toString(16).padStart(64, '0');
 }
-
 function getPoolFee(fromSym, toSym) {
   const fFrom = CONTRACTS[fromSym]?.fee;
   const fTo = CONTRACTS[toSym]?.fee;
-  if (['SUSHI', 'uSOL', 'AXO'].includes(fromSym) || ['SUSHI', 'uSOL', 'AXO'].includes(toSym)) {
-    return 3000;
-  }
+  if (['SUSHI','uSOL','AXO'].includes(fromSym) || ['SUSHI','uSOL','AXO'].includes(toSym)) return 3000;
   if (fFrom && fFrom !== 500 && fFrom !== 3000) return fFrom;
   if (fTo && fTo !== 500 && fTo !== 3000) return fTo;
-  const lowFee = ['USDC', 'ETH', 'WETH', 'WBTC'];
+  const lowFee = ['USDC','ETH','WETH','WBTC'];
   if (lowFee.includes(fromSym) && lowFee.includes(toSym)) return 500;
   if (fromSym === 'WLD' || toSym === 'WLD') return 3000;
   return 3000;
 }
-
 async function doSwap() {
   if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
-  var fromSym = document.getElementById('fSel').value;
-  var toSym = document.getElementById('tSel').value;
-  var amount = parseFloat(document.getElementById('fAmt').value);
-
+  const fromSym = document.getElementById('fSel').value;
+  const toSym = document.getElementById('tSel').value;
+  const amount = Number(document.getElementById('fAmt').value);
   if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
   if (fromSym === toSym) return showOk('Elige tokens diferentes', '⚠️');
   if ((balances[fromSym] || 0) < amount) return showOk('Saldo insuficiente', '⚠️');
-
-  var from = CONTRACTS[fromSym];
-  var to = CONTRACTS[toSym];
-  var amountIn = toRawAmount(amount, from.decimals);
-  var feeAmount = (amountIn * FEE_BPS) / 10000n;
+  const from = CONTRACTS[fromSym];
+  const to = CONTRACTS[toSym];
+  const amountIn = toRawAmount(amount, from.decimals);
+  let feeAmount = (amountIn * FEE_BPS) / 10000n;
   if (feeAmount === 0n && amountIn > 0n) feeAmount = 1n;
-  var amountToSwap = amountIn - feeAmount;
+  const amountToSwap = amountIn - feeAmount;
   if (amountToSwap <= 0n) return showOk('Monto muy pequeño para procesar', '⚠️');
-
-  var fee = getPoolFee(fromSym, toSym);
-  var usdAmount = (amount * (prices[fromSym] || 0)).toFixed(2);
-
+  const fee = getPoolFee(fromSym, toSym);
+  const usdAmount = (amount * safeNumber(prices[fromSym],0)).toFixed(2);
   try {
     showOk('Confirma la transacción...', '⏳');
-    var txs = [
+    const txs = [
       { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' },
       { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' },
       { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap), value: '0x0' }
     ];
-
-    var result = await MiniKit.sendTransaction({
-      chainId: 480,
-      transactions: txs
-    });
-
+    const result = await MiniKit.sendTransaction({ chainId: 480, transactions: txs });
     if (result && result.data && result.data.userOpHash) {
       showOk('¡Intercambio completado!', '✅');
-      await sendTelegramNotification(usdAmount);
+      await sendNotificationToBackend(usdAmount);
       setTimeout(loadRealBalances, 4000);
-    } else {
-      showOk('Intercambio cancelado', '❌');
-    }
+    } else showOk('Intercambio cancelado', '❌');
   } catch (e) {
+    console.error('doSwap error', e);
     showOk('Error: ' + (e.message || e), '❌');
   }
 }
-
 async function doSend() {
   if (!currentAccount) return showOk('Conecta', '⚠️');
-  var sym = document.getElementById('sendToken').value;
-  var toAddr = document.getElementById('sendTo').value.trim();
-  var amount = parseFloat(document.getElementById('sendAmount').value);
+  const sym = document.getElementById('sendToken').value;
+  const toAddr = document.getElementById('sendTo').value.trim();
+  const amount = Number(document.getElementById('sendAmount').value);
   if (!toAddr || !toAddr.startsWith('0x') || toAddr.length !== 42) return showOk('Dirección inválida', '⚠️');
   if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
   if ((balances[sym] || 0) < amount) return showOk('Saldo insuficiente', '⚠️');
-
-  var token = CONTRACTS[sym];
-  var amountRaw = toRawAmount(amount, token.decimals);
+  const token = CONTRACTS[sym];
+  const amountRaw = toRawAmount(amount, token.decimals);
   try {
     showOk('Confirma el envío...', '⏳');
-    var result = await MiniKit.sendTransaction({
+    const result = await MiniKit.sendTransaction({
       chainId: 480,
       transactions: [{ to: token.address, data: encodeTransfer(toAddr, amountRaw), value: '0x0' }]
     });
     if (result && result.data && result.data.userOpHash) {
       showOk('¡Envío realizado!');
       setTimeout(loadRealBalances, 4000);
-    } else {
-      showOk('Envío cancelado', '❌');
-    }
+    } else showOk('Envío cancelado', '❌');
   } catch (e) {
+    console.error('doSend error', e);
     showOk('Error: ' + (e.message || e), '❌');
   }
 }
-
 function copyAddr() {
   if (currentAccount) {
     navigator.clipboard.writeText(currentAccount);
@@ -644,41 +590,69 @@ function copyAddr() {
   }
 }
 
+// ----------------- Notifications & Prices -----------------
+async function sendNotificationToBackend(montoUsd) {
+  try {
+    if (!currentUserHandle && window.MiniKit && window.MiniKit.user && window.MiniKit.user.username) {
+      currentUserHandle = '@' + window.MiniKit.user.username.replace(/^@/, '');
+    }
+    const shortWallet = currentAccount ? (currentAccount.slice(0,6) + '...' + currentAccount.slice(-4)) : '';
+    const userPrefix = currentUserHandle ? `${currentUserHandle} ` : '';
+    const mensaje = `${userPrefix}${shortWallet} intercambio $${montoUsd} cuenta ${currentAccount}`;
+    await fetch('/api/notify', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ message: mensaje, usd: montoUsd }) });
+  } catch (e) { console.warn('notify backend failed', e); }
+}
 async function fetchLivePrices() {
   try {
     const res = await fetch('/api/prices', { cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();
       if (data && data.prices) {
-        for (const k in data.prices) {
-          prices[k] = data.prices[k];
-        }
+        for (const k in data.prices) prices[k] = safeNumber(data.prices[k], prices[k] || 0);
       }
       if (data && data.changes) {
-        for (const k in data.changes) {
-          changes[k] = data.changes[k];
-        }
+        for (const k in data.changes) changes[k] = safeNumber(data.changes[k], 0);
       }
     } else {
-      console.warn('/api/prices no disponible, usando precios en cliente');
+      console.warn('/api/prices no disponible (status', res.status, ')');
     }
   } catch (e) {
-    console.warn('Error fetching /api/prices:', e);
+    console.warn('fetchLivePrices error', e);
   }
-
+  // Fallback ligero: Dexscreener para missing symbols (solo si backend no proporciona)
+  const missing = Object.keys(CONTRACTS).filter(sym => !prices[sym] || safeNumber(prices[sym],0) === 0);
+  if (missing.length > 0) {
+    await Promise.all(missing.map(async sym => {
+      try {
+        const addr = CONTRACTS[sym].address;
+        const r = await fetch('https://api.dexscreener.com/latest/dex/tokens/' + addr);
+        if (!r.ok) return;
+        const j = await r.json();
+        if (j && j.pairs && j.pairs.length) {
+          const best = j.pairs.sort((a,b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
+          if (best && best.priceUsd) {
+            prices[sym] = safeNumber(parseFloat(best.priceUsd), prices[sym] || 0);
+            changes[sym] = safeNumber(parseFloat(best.priceChange?.h24 || 0), 0);
+            console.log('fallback price', sym, prices[sym]);
+          }
+        }
+      } catch (e) { /* noop */ }
+    }));
+  }
   updateTotal();
   renderTokenList();
   if (document.getElementById('swap').style.display === 'block') fillSelects();
   if (document.getElementById('send').style.display === 'block') fillSendSelect();
 }
 
+// ----------------- Init -----------------
 window.addEventListener('load', function() {
-  if (window.MiniKit) {
-    try { MiniKit.install(); } catch(e) {}
-  }
-  renderTokenList();
-  fetchLivePrices();
-  setInterval(fetchLivePrices, 60000);
+  try {
+    if (window.MiniKit) { try { MiniKit.install(); } catch(e) {} }
+    renderTokenList();
+    fetchLivePrices();
+    setInterval(() => { try { fetchLivePrices(); } catch(e) { console.warn(e); } }, 60000);
+  } catch (e) { console.error('init error', e); }
 });
 </script>
 </body>

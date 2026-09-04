@@ -501,6 +501,14 @@ function encodeTransfer(to, amount) {
 }
 
 function getPoolFee(fromSym, toSym) {
+  // Forzar pool de 0.3% (3000) o tarifa correspondiente para evitar saltar a pools incorrectos de 1% (10000)
+  if (fromSym === 'USDC' || toSym === 'USDC') {
+    var otherSym = fromSym === 'USDC' ? toSym : fromSym;
+    if (['DIAMANTE', 'DNA', 'HUB', 'ORO'].includes(otherSym)) {
+      return 3000; 
+    }
+    return 500;
+  }
   const fFrom = CONTRACTS[fromSym]?.fee;
   const fTo = CONTRACTS[toSym]?.fee;
   if (['SUSHI', 'uSOL', 'AXO'].includes(fromSym) || ['SUSHI', 'uSOL', 'AXO'].includes(toSym)) return 3000;

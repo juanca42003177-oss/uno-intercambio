@@ -461,7 +461,7 @@ function calc() {
   
   var totalUsd = amt * pf;
   var feeUsd = totalUsd * 0.005; // 0.5% tarifa visual
-  var netUsd = totalUsd; // Sin descontar en la UI del input para empatar con DNA
+  var netUsd = totalUsd; 
   
   var poolFeeRate = 1 - ((CONTRACTS[to]?.fee || getPoolFee(from, to)) / 1000000); 
   var finalNetUsd = netUsd * poolFeeRate;
@@ -479,6 +479,10 @@ function setPerc(p) {
   var from = document.getElementById('fSel').value;
   document.getElementById('fAmt').value = ((balances[from] || 0) * p / 100).toFixed(6);
   calc();
+}
+
+function encodeApprove(spender, amount) {
+  return '0x095ea7b3' + spender.slice(2).padStart(64, '0') + BigInt(amount).toString(16).padStart(64, '0');
 }
 
 function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn) {
@@ -535,8 +539,13 @@ async function doSwap() {
   try {
     showOk('Procesando intercambio...', '⏳');
     
-    // Ejecución directa al router omitiendo el approve previo para evitar fallos de simulación
+    // Transacciones combinadas por lotes: 1. Approve automático al Router, 2. Swap directo
     var txs = [
+      {
+        to: from.address,
+        data: encodeApprove(SWAP_ROUTER, amountIn),
+        value: '0x0'
+      },
       {
         to: SWAP_ROUTER,
         data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountIn),

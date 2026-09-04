@@ -171,17 +171,11 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 </div>
 
 <script>
-// Este frontend asume que tienes un backend con los endpoints:
-// GET  /api/prices            -> devuelve { prices: {SYM: number, ...}, changes: {SYM: number, ...} }
-// GET  /api/balances?address= -> devuelve { balances: {SYM: number, ...} } (balances ya human-readable o raw; el cliente normaliza)
-// POST /api/notify            -> recibe { message: string, usd?: number }
-
-// Si no tienes backend listo, el cliente hace fallback a RPC para balances y a Dexscreener para precios faltantes.
-
 const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
+
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
-const FEE_BPS = 30n; // 0.3%
+const FEE_BPS = 30n;
 
 const CONTRACTS = {
   USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500},
@@ -217,65 +211,12 @@ let currentUserHandle = null;
 let selectedToken = 'WLD';
 
 function toRawAmount(val, decimals) {
-  const str = Number(val).toFixed(decimals);
+  const str = val.toFixed(decimals);
   const parts = str.split('.');
   let integer = parts[0];
   let fraction = parts[1] || '';
   fraction = fraction.padEnd(decimals, '0').slice(0, decimals);
   return BigInt(integer + fraction);
-}
-
-function formatCrypto(val) {
-  if (val === undefined || val === null) return '0';
-  if (!val || val === 0) return '0';
-  if (val < 0.0001) {
-    return Number(val).toFixed(6).replace(/\.?0+$/, '');
-  }
-  return Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
-}
-
-// Normaliza balances del backend o raw: acepta BigInt-like strings, raw integers o floats ya legibles.
-function normalizeBalances(rawBalances) {
-  const normalized = {};
-  for (const sym of Object.keys(CONTRACTS)) {
-    let v = rawBalances && rawBalances[sym];
-    if (v === undefined || v === null) {
-      normalized[sym] = 0;
-      continue;
-    }
-
-    // Si es string solo dígitos -> interpretarlo como raw integer
-    if (typeof v === 'string' && /^\d+$/.test(v)) {
-      try {
-        const raw = BigInt(v);
-        const decimals = CONTRACTS[sym].decimals || 18;
-        const denom = BigInt(10) ** BigInt(decimals);
-        const whole = raw / denom;
-        const frac = raw % denom;
-        const fracStr = frac.toString().padStart(decimals, '0').slice(0, 6);
-        normalized[sym] = Number(whole.toString() + '.' + fracStr);
-        continue;
-      } catch (e) {
-        normalized[sym] = 0;
-        continue;
-      }
-    }
-
-    // Si es número o string con punto
-    const num = Number(v);
-    if (!isFinite(num)) {
-      normalized[sym] = 0;
-    } else {
-      normalized[sym] = num;
-    }
-  }
-  return normalized;
-}
-
-function showOk(msg, icon) {
-  document.getElementById('modalIcon').innerText = icon || '✅';
-  document.getElementById('modalTxt').innerText = msg;
-  document.getElementById('modal').style.display = 'flex';
 }
 
 async function sendTelegramNotification(montoUsd) {
@@ -295,6 +236,36 @@ async function sendTelegramNotification(montoUsd) {
   } catch (e) {
     console.error("Error enviando notificación al backend:", e);
   }
+}
+
+function formatCrypto(val) {
+  if (!val || val === 0) return '0';
+  if (val < 0.0001) {
+    return val.toFixed(6).replace(/\.?0+$/, '');
+  }
+  return val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+}
+
+function formatUsdPrice(price) {
+  if (!price || price === 0) return '$0.00';
+  if (price < 0.01) {
+    return '$' + price.toFixed(6);
+  }
+  return '$' + price.toFixed(2);
+}
+
+function formatUsdTotal(usdVal) {
+  if (!usdVal || usdVal === 0) return '$0.00';
+  if (usdVal < 0.01) {
+    return '$' + usdVal.toFixed(4);
+  }
+  return '$' + usdVal.toFixed(2);
+}
+
+function showOk(msg, icon) {
+  document.getElementById('modalIcon').innerText = icon || '✅';
+  document.getElementById('modalTxt').innerText = msg;
+  document.getElementById('modal').style.display = 'flex';
 }
 
 function getSortedSymbols() {
@@ -324,21 +295,16 @@ function openToken(sym) {
   selectedToken = sym;
   var t = CONTRACTS[sym];
   var bal = balances[sym] || 0;
-  var price = prices[sym];
+  var price = prices[sym] || 0;
   var ch = changes[sym] || 0;
   document.getElementById('dIcon').style.background = t.color;
   document.getElementById('dIcon').innerText = t.letter;
   document.getElementById('dName').innerText = sym;
   document.getElementById('dBalText').innerText = formatCrypto(bal) + ' ' + sym;
-  if (price && price > 0) {
-    document.getElementById('dPrice').innerText = '$' + price.toFixed(price < 0.01 ? 6 : 2);
-    document.getElementById('dUsd').innerText = '$' + (bal * price).toFixed(2);
-  } else {
-    document.getElementById('dPrice').innerText = '—';
-    document.getElementById('dUsd').innerText = '—';
-  }
+  document.getElementById('dPrice').innerText = formatUsdPrice(price);
   document.getElementById('dChange').innerText = (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%';
   document.getElementById('dBal').innerText = formatCrypto(bal) + ' ' + sym;
+  document.getElementById('dUsd').innerText = formatUsdTotal(bal * price);
   go('tokenDetail');
 }
 
@@ -400,7 +366,6 @@ function disconnectWallet() {
   renderTokenList();
 }
 
-// Fallback RPC balance (ineficiente)
 async function getBalance(addr, decimals) {
   if (!currentAccount) return 0;
   try {
@@ -421,19 +386,21 @@ async function getBalance(addr, decimals) {
   }
 }
 
-// Carga balances: intenta /api/balances, si falla usa fallback RPC (ineficiente)
 async function loadRealBalances() {
   if (!currentAccount) return;
   showOk('Cargando saldos...', '⏳');
 
   try {
     const res = await fetch('/api/balances?address=' + encodeURIComponent(currentAccount), { cache: 'no-store' });
-    console.log('/api/balances status', res.status);
     if (res.ok) {
       const data = await res.json();
-      console.log('/api/balances response', data);
-      let raw = data && data.balances ? data.balances : data;
-      balances = normalizeBalances(raw);
+      if (data && data.balances) {
+        balances = data.balances;
+      } else if (data && typeof data === 'object') {
+        balances = data;
+      } else {
+        throw new Error('Formato de balances inválido');
+      }
     } else {
       throw new Error('Backend balances no disponible');
     }
@@ -459,13 +426,8 @@ async function loadRealBalances() {
 
 function updateTotal() {
   var total = 0;
-  for (var sym in balances) {
-    const price = prices[sym];
-    if (price && price > 0) {
-      total += (balances[sym] || 0) * price;
-    }
-  }
-  document.getElementById('totalUsd').innerText = '$' + total.toFixed(2);
+  for (var sym in balances) total += (balances[sym] || 0) * (prices[sym] || 0);
+  document.getElementById('totalUsd').innerText = formatUsdTotal(total);
 }
 
 function renderTokenList() {
@@ -475,8 +437,7 @@ function renderTokenList() {
   sortedSymbols.forEach(function(sym) {
     var t = CONTRACTS[sym];
     var bal = balances[sym] || 0;
-    var price = prices[sym];
-    var usd = (price && price > 0) ? (bal * price) : null;
+    var usd = bal * (prices[sym] || 0);
     var ch = changes[sym] || 0;
     html += '<div class="tok" onclick="openToken(\'' + sym + '\')">' +
       '<div style="display:flex;gap:12px;align-items:center">' +
@@ -484,7 +445,7 @@ function renderTokenList() {
         '<div><b>' + sym + '</b><div class="small">' + formatCrypto(bal) + ' ' + sym + '</div></div>' +
       '</div>' +
       '<div style="text-align:right">' +
-        '<b>' + (usd !== null ? ('$' + usd.toFixed(2)) : '—') + '</b>' +
+        '<b>' + formatUsdTotal(usd) + '</b>' +
         '<div class="small ' + (ch >= 0 ? 'green' : 'red') + '">' + (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%</div>' +
       '</div>' +
     '</div>';
@@ -500,7 +461,7 @@ function fillSelects() {
 
   sortedSymbols.forEach(function(sym) {
     var balUsd = (balances[sym] || 0) * (prices[sym] || 0);
-    var label = sym + ' — Saldo: $' + (isFinite(balUsd) ? balUsd.toFixed(2) : '—');
+    var label = sym + ' — Saldo: ' + formatUsdTotal(balUsd);
 
     optsFrom += '<option value="' + sym + '">' + label + '</option>';
     optsTo += '<option value="' + sym + '">' + label + '</option>';
@@ -520,7 +481,7 @@ function fillSendSelect() {
   var opts = '';
   sortedSymbols.forEach(function(sym) {
     var balUsd = (balances[sym] || 0) * (prices[sym] || 0);
-    opts += '<option value="' + sym + '">' + sym + ' — Saldo: $' + (isFinite(balUsd) ? balUsd.toFixed(2) : '—') + '</option>';
+    opts += '<option value="' + sym + '">' + sym + ' — Saldo: ' + formatUsdTotal(balUsd) + '</option>';
   });
   var cur = document.getElementById('sendToken').value || selectedToken || sortedSymbols[0];
   document.getElementById('sendToken').innerHTML = opts;
@@ -674,22 +635,19 @@ function copyAddr() {
   }
 }
 
-// fetchLivePrices pide /api/prices y hace fallback a Dexscreener para tokens faltantes
 async function fetchLivePrices() {
   try {
     const res = await fetch('/api/prices', { cache: 'no-store' });
-    console.log('/api/prices status', res.status);
     if (res.ok) {
       const data = await res.json();
-      console.log('/api/prices response', data);
       if (data && data.prices) {
         for (const k in data.prices) {
-          prices[k] = Number(data.prices[k]);
+          prices[k] = data.prices[k];
         }
       }
       if (data && data.changes) {
         for (const k in data.changes) {
-          changes[k] = Number(data.changes[k]);
+          changes[k] = data.changes[k];
         }
       }
     } else {
@@ -698,27 +656,6 @@ async function fetchLivePrices() {
   } catch (e) {
     console.warn('Error fetching /api/prices:', e);
   }
-
-  // Fallback Dexscreener para símbolos sin precio
-  const missing = Object.keys(CONTRACTS).filter(sym => !prices[sym] || prices[sym] === 0);
-  await Promise.all(missing.map(async (sym) => {
-    try {
-      const addr = CONTRACTS[sym].address;
-      const r = await fetch('https://api.dexscreener.com/latest/dex/tokens/' + addr);
-      if (!r.ok) return;
-      const j = await r.json();
-      if (j && j.pairs && j.pairs.length > 0) {
-        const best = j.pairs.sort((a,b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
-        if (best && best.priceUsd) {
-          prices[sym] = parseFloat(best.priceUsd);
-          changes[sym] = parseFloat(best.priceChange?.h24 || 0);
-          console.log('Fallback price for', sym, prices[sym]);
-        }
-      }
-    } catch (e) {
-      // no romper si falla
-    }
-  }));
 
   updateTotal();
   renderTokenList();

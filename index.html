@@ -481,10 +481,6 @@ function setPerc(p) {
   calc();
 }
 
-function encodeApprove(spender, amount) {
-  return '0x095ea7b3' + spender.slice(2).padStart(64, '0') + BigInt(amount).toString(16).padStart(64, '0');
-}
-
 function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn) {
   const tIn = tokenIn.slice(2).toLowerCase().padStart(64, '0');
   const tOut = tokenOut.slice(2).toLowerCase().padStart(64, '0');
@@ -539,9 +535,13 @@ async function doSwap() {
   try {
     showOk('Procesando intercambio...', '⏳');
     
+    // Ejecución directa al router omitiendo el approve previo para evitar fallos de simulación
     var txs = [
-      { to: from.address, data: encodeApprove(SWAP_ROUTER, amountIn), value: '0x0' },
-      { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountIn), value: '0x0' }
+      {
+        to: SWAP_ROUTER,
+        data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountIn),
+        value: '0x0'
+      }
     ];
 
     var result = await MiniKit.sendTransaction({

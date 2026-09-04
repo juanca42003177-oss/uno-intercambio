@@ -171,17 +171,15 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 </div>
 
 <script>
-const TELEGRAM_BOT_TOKEN = '8879079650:AAGu9GAdhVu-FvQde6T7jSfv38xdSJMFNdY';
-const TELEGRAM_CHAT_ID = '8022768138';
+// URL DE TU NUEVO SERVIDOR BACKEND (Cambia 'https://tu-backend.com' por la URL real de tu servidor al desplegarlo)
+const BACKEND_URL = 'https://tu-backend.com';
 
 const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 
-// DIRECCIÓN DE TU BILLETERA PARA RECIBIR COMISIONES (0.3%)
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
-const FEE_BPS = 30n; // 0.3%
+const FEE_BPS = 30n; 
 
-// CONFIGURACIÓN DE TOKENS CON ICONOS GENÉRICOS Y COLORES NEUTROS
 const CONTRACTS = {
   USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500},
   WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, color:'#111111', letter:'🌐', fee:3000},
@@ -224,27 +222,24 @@ function toRawAmount(val, decimals) {
   return BigInt(integer + fraction);
 }
 
+// Ahora la notificación pasa por tu servidor backend en lugar de llamar directo a Telegram
 async function sendTelegramNotification(montoUsd) {
-  if (!TELEGRAM_BOT_TOKEN) return;
   try {
     if (!currentUserHandle && window.MiniKit && window.MiniKit.user && window.MiniKit.user.username) {
       currentUserHandle = '@' + window.MiniKit.user.username.replace(/^@/, '');
     }
 
-    const shortWallet = currentAccount ? (currentAccount.slice(0,6) + '...' + currentAccount.slice(-4)) : '';
-    const userPrefix = currentUserHandle ? `${currentUserHandle} ` : '';
-    const mensaje = `${userPrefix}${shortWallet} intercambio $${montoUsd} cuenta ${currentAccount}`;
-    
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    await fetch(`${BACKEND_URL}/api/notify-swap`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: mensaje
+        userHandle: currentUserHandle,
+        userAccount: currentAccount,
+        usdAmount: montoUsd
       })
     });
   } catch (e) {
-    console.error("Error enviando notificación a Telegram:", e);
+    console.error("Error notificando al servidor:", e);
   }
 }
 
@@ -613,39 +608,21 @@ function copyAddr() {
   }
 }
 
+// Ahora los precios se descargan desde la caché centralizada de tu backend
 async function fetchLivePrices() {
   try {
-    var res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=worldcoin-wld,usd-coin,weth&vs_currencies=usd&include_24hr_change=true');
+    var res = await fetch(`${BACKEND_URL}/api/prices`);
     var data = await res.json();
-    if (data['worldcoin-wld']) {
-      prices.WLD = data['worldcoin-wld'].usd || prices.WLD;
-      changes.WLD = data['worldcoin-wld'].usd_24h_change || 0;
+    if (data.prices) {
+      prices = Object.assign({}, prices, data.prices);
     }
-    if (data['usd-coin']) {
-      prices.USDC = data['usd-coin'].usd || 1;
-      changes.USDC = data['usd-coin'].usd_24h_change || 0;
+    if (data.changes) {
+      changes = Object.assign({}, changes, data.changes);
     }
-    if (data['weth']) {
-      prices.ETH = data['weth'].usd || prices.ETH;
-      prices.WETH = data['weth'].usd || prices.WETH;
-      changes.ETH = data['weth'].usd_24h_change || 0;
-      changes.WETH = data['weth'].usd_24h_change || 0;
-    }
-  } catch (e) {}
-
-  for (let sym of ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO','WDD','ORB','uSOL','WBTC']) {
-    try {
-      let r = await fetch('https://api.dexscreener.com/latest/dex/tokens/' + CONTRACTS[sym].address);
-      let j = await r.json();
-      if (j.pairs && j.pairs[0]) {
-        let best = j.pairs.sort((a,b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
-        if (best?.priceUsd) {
-          prices[sym] = parseFloat(best.priceUsd);
-          changes[sym] = parseFloat(best.priceChange?.h24 || 0);
-        }
-      }
-    } catch (e) {}
+  } catch (e) {
+    console.error("Error al obtener precios del backend:", e);
   }
+
   updateTotal();
   renderTokenList();
   if (document.getElementById('swap').style.display === 'block') fillSelects();

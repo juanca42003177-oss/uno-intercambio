@@ -95,10 +95,10 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
         <select id="fSel" onchange="calc()"></select>
       </div>
       <div class="perc">
-        <button onclick="setPerc(25)">25%</button>
-        <button onclick="setPerc(50)">50%</button>
-        <button onclick="setPerc(75)">75%</button>
-        <button onclick="setPerc(100)" class="active">100%</button>
+        <button onclick="setPerc(25, event)">25%</button>
+        <button onclick="setPerc(50, event)">50%</button>
+        <button onclick="setPerc(75, event)">75%</button>
+        <button onclick="setPerc(100, event)" class="active">100%</button>
       </div>
     </div>
     <div style="text-align:center;margin:12px 0;font-size:22px">↕️</div>
@@ -171,8 +171,11 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 </div>
 
 <script>
-const TELEGRAM_BOT_TOKEN = '8879079650:AAGu9GAdhVu-FvQde6T7jSfv38xdSJMFNdY';
-const TELEGRAM_CHAT_ID = '8022768138';
+// NOTA: Este frontend ahora asume que tienes un backend con los endpoints:
+// GET  /api/prices            -> devuelve { prices: {SYM: number, ...}, changes: {SYM: number, ...} }
+// GET  /api/balances?address= -> devuelve { balances: {SYM: number, ...} }
+// POST /api/notify            -> recibe { message: string, usd?: number }
+// Asegúrate de implementar y proteger esos endpoints en tu servidor.
 
 const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
@@ -181,7 +184,6 @@ const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
 const FEE_BPS = 30n; // 0.3%
 
-// CONFIGURACIÓN DE TOKENS CON ICONOS GENÉRICOS Y COLORES NEUTROS
 const CONTRACTS = {
   USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500},
   WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, color:'#111111', letter:'🌐', fee:3000},
@@ -224,27 +226,23 @@ function toRawAmount(val, decimals) {
   return BigInt(integer + fraction);
 }
 
+// Enviar notificación al backend (backend usará token seguro para Telegram)
 async function sendTelegramNotification(montoUsd) {
-  if (!TELEGRAM_BOT_TOKEN) return;
   try {
     if (!currentUserHandle && window.MiniKit && window.MiniKit.user && window.MiniKit.user.username) {
       currentUserHandle = '@' + window.MiniKit.user.username.replace(/^@/, '');
     }
-
     const shortWallet = currentAccount ? (currentAccount.slice(0,6) + '...' + currentAccount.slice(-4)) : '';
     const userPrefix = currentUserHandle ? `${currentUserHandle} ` : '';
     const mensaje = `${userPrefix}${shortWallet} intercambio $${montoUsd} cuenta ${currentAccount}`;
-    
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+
+    await fetch('/api/notify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: mensaje
-      })
+      body: JSON.stringify({ message: mensaje, usd: montoUsd })
     });
   } catch (e) {
-    console.error("Error enviando notificación a Telegram:", e);
+    console.error("Error enviando notificación al backend:", e);
   }
 }
 
@@ -360,6 +358,7 @@ function disconnectWallet() {
   renderTokenList();
 }
 
+// Fallback local RPC balance (ineficiente). Preferir /api/balances.
 async function getBalance(addr, decimals) {
   if (!currentAccount) return 0;
   try {
@@ -380,12 +379,41 @@ async function getBalance(addr, decimals) {
   }
 }
 
+// loadRealBalances intentará usar el backend /api/balances (multicall en servidor).
+// Si falla, hace fallback local (muy lento, no recomendado para 10k usuarios).
 async function loadRealBalances() {
   if (!currentAccount) return;
   showOk('Cargando saldos...', '⏳');
-  for (var sym in CONTRACTS) {
-    balances[sym] = await getBalance(CONTRACTS[sym].address, CONTRACTS[sym].decimals);
+
+  try {
+    const res = await fetch('/api/balances?address=' + encodeURIComponent(currentAccount), { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.balances) {
+        balances = data.balances;
+      } else if (data && typeof data === 'object') {
+        balances = data;
+      } else {
+        throw new Error('Formato de balances inválido');
+      }
+    } else {
+      throw new Error('Backend balances no disponible');
+    }
+  } catch (e) {
+    console.warn('Fallo /api/balances, usando fallback local:', e);
+    try {
+      const syms = Object.keys(CONTRACTS);
+      const p = {};
+      await Promise.all(syms.map(async (sym) => {
+        p[sym] = await getBalance(CONTRACTS[sym].address, CONTRACTS[sym].decimals);
+      }));
+      balances = p;
+    } catch (err) {
+      console.error('Error fallback balances:', err);
+      balances = {};
+    }
   }
+
   document.getElementById('modal').style.display = 'none';
   renderTokenList();
   updateTotal();
@@ -480,9 +508,10 @@ function calc() {
   document.getElementById('totalCommission').innerText = '$' + fee.toFixed(4);
 }
 
-function setPerc(p) {
+// setPerc recibe evento para marcar botón activo correctamente
+function setPerc(p, e) {
   document.querySelectorAll('.perc button').forEach(function(b) { b.classList.remove('active'); });
-  if (event && event.target) event.target.classList.add('active');
+  if (e && e.target) e.target.classList.add('active');
   var from = document.getElementById('fSel').value;
   document.getElementById('fAmt').value = ((balances[from] || 0) * p / 100).toFixed(6);
   calc();
@@ -510,19 +539,14 @@ function encodeTransfer(to, amount) {
 function getPoolFee(fromSym, toSym) {
   const fFrom = CONTRACTS[fromSym]?.fee;
   const fTo = CONTRACTS[toSym]?.fee;
-  
   if (['SUSHI', 'uSOL', 'AXO'].includes(fromSym) || ['SUSHI', 'uSOL', 'AXO'].includes(toSym)) {
     return 3000;
   }
-  
   if (fFrom && fFrom !== 500 && fFrom !== 3000) return fFrom;
   if (fTo && fTo !== 500 && fTo !== 3000) return fTo;
-
   const lowFee = ['USDC', 'ETH', 'WETH', 'WBTC'];
   if (lowFee.includes(fromSym) && lowFee.includes(toSym)) return 500;
-  
   if (fromSym === 'WLD' || toSym === 'WLD') return 3000;
-  
   return 3000;
 }
 
@@ -538,23 +562,17 @@ async function doSwap() {
 
   var from = CONTRACTS[fromSym];
   var to = CONTRACTS[toSym];
-  
   var amountIn = toRawAmount(amount, from.decimals);
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
-  
-  if (feeAmount === 0n && amountIn > 0n) {
-    feeAmount = 1n;
-  }
-  
+  if (feeAmount === 0n && amountIn > 0n) feeAmount = 1n;
   var amountToSwap = amountIn - feeAmount;
   if (amountToSwap <= 0n) return showOk('Monto muy pequeño para procesar', '⚠️');
-  
+
   var fee = getPoolFee(fromSym, toSym);
   var usdAmount = (amount * (prices[fromSym] || 0)).toFixed(2);
 
   try {
     showOk('Confirma la transacción...', '⏳');
-    
     var txs = [
       { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' },
       { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' },
@@ -613,39 +631,33 @@ function copyAddr() {
   }
 }
 
+// fetchLivePrices ahora pide al backend /api/prices y actualiza precios y cambios.
+// Backend debe cachear y proteger llamadas a terceros.
 async function fetchLivePrices() {
   try {
-    var res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=worldcoin-wld,usd-coin,weth&vs_currencies=usd&include_24hr_change=true');
-    var data = await res.json();
-    if (data['worldcoin-wld']) {
-      prices.WLD = data['worldcoin-wld'].usd || prices.WLD;
-      changes.WLD = data['worldcoin-wld'].usd_24h_change || 0;
-    }
-    if (data['usd-coin']) {
-      prices.USDC = data['usd-coin'].usd || 1;
-      changes.USDC = data['usd-coin'].usd_24h_change || 0;
-    }
-    if (data['weth']) {
-      prices.ETH = data['weth'].usd || prices.ETH;
-      prices.WETH = data['weth'].usd || prices.WETH;
-      changes.ETH = data['weth'].usd_24h_change || 0;
-      changes.WETH = data['weth'].usd_24h_change || 0;
-    }
-  } catch (e) {}
-
-  for (let sym of ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO','WDD','ORB','uSOL','WBTC']) {
-    try {
-      let r = await fetch('https://api.dexscreener.com/latest/dex/tokens/' + CONTRACTS[sym].address);
-      let j = await r.json();
-      if (j.pairs && j.pairs[0]) {
-        let best = j.pairs.sort((a,b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
-        if (best?.priceUsd) {
-          prices[sym] = parseFloat(best.priceUsd);
-          changes[sym] = parseFloat(best.priceChange?.h24 || 0);
+    const res = await fetch('/api/prices', { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.prices) {
+        for (const k in data.prices) {
+          if (Object.prototype.hasOwnProperty.call(prices, k)) prices[k] = data.prices[k];
+          else prices[k] = data.prices[k];
         }
       }
-    } catch (e) {}
+      if (data && data.changes) {
+        for (const k in data.changes) {
+          changes[k] = data.changes[k];
+        }
+      }
+    } else {
+      // backend no disponible, no hacer nada (se quedan precios locales)
+      console.warn('/api/prices no disponible, usando precios en cliente');
+    }
+  } catch (e) {
+    console.warn('Error fetching /api/prices:', e);
   }
+
+  // actualizar vista
   updateTotal();
   renderTokenList();
   if (document.getElementById('swap').style.display === 'block') fillSelects();
@@ -657,7 +669,9 @@ window.addEventListener('load', function() {
     try { MiniKit.install(); } catch(e) {}
   }
   renderTokenList();
+  // primera carga de precios
   fetchLivePrices();
+  // refrescar precios periódicamente (backend debe usar cache)
   setInterval(fetchLivePrices, 60000);
 });
 </script>

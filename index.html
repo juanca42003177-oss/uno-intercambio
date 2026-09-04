@@ -177,9 +177,11 @@ const TELEGRAM_CHAT_ID = '8022768138';
 const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 
+// DIRECCIÓN DE TU BILLETERA PARA RECIBIR COMISIONES (0.3%)
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
 const FEE_BPS = 30n; // 0.3%
 
+// CONFIGURACIÓN DE TOKENS CON ICONOS GENÉRICOS Y COLORES NEUTROS
 const CONTRACTS = {
   USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500},
   WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, color:'#111111', letter:'🌐', fee:3000},
@@ -204,14 +206,17 @@ let prices = {
   ETH:3400, WETH:3400, SUSHI:0.5, DIAMANTE:0.0001, PVPB:0.0001, TPF:0.0001, AXO:0.0001, WDD:0.002,
   ORB:0.001, uSOL:103.70, WBTC:77412.12
 };
-let changes = {};
+let changes = {
+  WLD:0, DNA:0, HUB:0, ORO:0, USDC:0, ETH:0, WETH:0, SUSHI:0, DIAMANTE:0, PVPB:0, TPF:0, AXO:0, WDD:0,
+  ORB:0, uSOL:0, WBTC:0
+};
 let balances = {};
 let currentAccount = null;
 let currentUserHandle = null;
 let selectedToken = 'WLD';
 
 function toRawAmount(val, decimals) {
-  const str = Number(val).toFixed(decimals);
+  const str = val.toFixed(decimals);
   const parts = str.split('.');
   let integer = parts[0];
   let fraction = parts[1] || '';
@@ -225,6 +230,7 @@ async function sendTelegramNotification(montoUsd) {
     if (!currentUserHandle && window.MiniKit && window.MiniKit.user && window.MiniKit.user.username) {
       currentUserHandle = '@' + window.MiniKit.user.username.replace(/^@/, '');
     }
+
     const shortWallet = currentAccount ? (currentAccount.slice(0,6) + '...' + currentAccount.slice(-4)) : '';
     const userPrefix = currentUserHandle ? `${currentUserHandle} ` : '';
     const mensaje = `${userPrefix}${shortWallet} intercambio $${montoUsd} cuenta ${currentAccount}`;
@@ -232,16 +238,21 @@ async function sendTelegramNotification(montoUsd) {
     await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: mensaje })
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: mensaje
+      })
     });
   } catch (e) {
-    console.error("Error Telegram:", e);
+    console.error("Error enviando notificación a Telegram:", e);
   }
 }
 
 function formatCrypto(val) {
   if (!val || val === 0) return '0';
-  if (val < 0.0001) return val.toFixed(6).replace(/\.?0+$/, '');
+  if (val < 0.0001) {
+    return val.toFixed(6).replace(/\.?0+$/, '');
+  }
   return val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
 }
 
@@ -312,7 +323,9 @@ async function connectWallet() {
     if (result && result.data && result.data.address) {
       currentAccount = result.data.address;
       var rawUser = (window.MiniKit.user && window.MiniKit.user.username) || (result.data && result.data.username);
-      if (rawUser) currentUserHandle = '@' + rawUser.replace(/^@/, '');
+      if (rawUser) {
+        currentUserHandle = '@' + rawUser.replace(/^@/, '');
+      }
       updateUI(currentAccount);
       await loadRealBalances();
     } else {
@@ -354,7 +367,10 @@ async function getBalance(addr, decimals) {
     var res = await fetch(WORLD_RPC, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to: addr, data: data }, 'latest'] })
+      body: JSON.stringify({
+        jsonrpc: '2.0', id: 1, method: 'eth_call',
+        params: [{ to: addr, data: data }, 'latest']
+      })
     });
     var json = await res.json();
     if (!json.result || json.result === '0x') return 0;
@@ -384,6 +400,7 @@ function updateTotal() {
 function renderTokenList() {
   var html = '<div style="font-weight:800;margin:10px 0 6px">World Chain</div>';
   var sortedSymbols = getSortedSymbols();
+
   sortedSymbols.forEach(function(sym) {
     var t = CONTRACTS[sym];
     var bal = balances[sym] || 0;
@@ -400,20 +417,26 @@ function renderTokenList() {
       '</div>' +
     '</div>';
   });
+
   document.getElementById('tokenList').innerHTML = html;
 }
 
 function fillSelects() {
   var sortedSymbols = getSortedSymbols();
-  var optsFrom = '', optsTo = '';
+  var optsFrom = '';
+  var optsTo = '';
+
   sortedSymbols.forEach(function(sym) {
     var balUsd = (balances[sym] || 0) * (prices[sym] || 0);
     var label = sym + ' — Saldo: $' + balUsd.toFixed(2);
+
     optsFrom += '<option value="' + sym + '">' + label + '</option>';
     optsTo += '<option value="' + sym + '">' + label + '</option>';
   });
+
   var curFrom = document.getElementById('fSel').value || selectedToken || sortedSymbols[0];
   var curTo = document.getElementById('tSel').value || (sortedSymbols[0] !== 'USDC' ? 'USDC' : sortedSymbols[1]);
+
   document.getElementById('fSel').innerHTML = optsFrom;
   document.getElementById('tSel').innerHTML = optsTo;
   document.getElementById('fSel').value = curFrom;
@@ -444,22 +467,15 @@ function calc() {
   document.getElementById('bF').innerText = from;
   document.getElementById('bT').innerText = to;
   document.getElementById('saldoTxt').innerText = formatCrypto(balances[from] || 0);
-  
   if (amt <= 0) {
     document.getElementById('tAmt').value = '0';
-    document.getElementById('feeUno').innerText = '$0.00';
-    document.getElementById('totalCommission').innerText = '$0.00';
     return;
   }
-  
   var pf = prices[from] || 0.0000001;
   var pt = prices[to] || 0.0000001;
   var usd = amt * pf;
   var fee = usd * 0.003;
-  var netUsd = usd - fee;
-  var recvAmt = netUsd / pt;
-  
-  document.getElementById('tAmt').value = recvAmt < 0.0001 ? recvAmt.toFixed(6) : formatCrypto(recvAmt);
+  document.getElementById('tAmt').value = formatCrypto((usd - fee) / pt);
   document.getElementById('feeUno').innerText = '$' + fee.toFixed(4);
   document.getElementById('totalCommission').innerText = '$' + fee.toFixed(4);
 }
@@ -494,12 +510,19 @@ function encodeTransfer(to, amount) {
 function getPoolFee(fromSym, toSym) {
   const fFrom = CONTRACTS[fromSym]?.fee;
   const fTo = CONTRACTS[toSym]?.fee;
-  if (['SUSHI', 'uSOL', 'AXO'].includes(fromSym) || ['SUSHI', 'uSOL', 'AXO'].includes(toSym)) return 3000;
+  
+  if (['SUSHI', 'uSOL', 'AXO'].includes(fromSym) || ['SUSHI', 'uSOL', 'AXO'].includes(toSym)) {
+    return 3000;
+  }
+  
   if (fFrom && fFrom !== 500 && fFrom !== 3000) return fFrom;
   if (fTo && fTo !== 500 && fTo !== 3000) return fTo;
+
   const lowFee = ['USDC', 'ETH', 'WETH', 'WBTC'];
   if (lowFee.includes(fromSym) && lowFee.includes(toSym)) return 500;
+  
   if (fromSym === 'WLD' || toSym === 'WLD') return 3000;
+  
   return 3000;
 }
 
@@ -518,7 +541,10 @@ async function doSwap() {
   
   var amountIn = toRawAmount(amount, from.decimals);
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
-  if (feeAmount === 0n && amountIn > 0n) feeAmount = 1n;
+  
+  if (feeAmount === 0n && amountIn > 0n) {
+    feeAmount = 1n;
+  }
   
   var amountToSwap = amountIn - feeAmount;
   if (amountToSwap <= 0n) return showOk('Monto muy pequeño para procesar', '⚠️');

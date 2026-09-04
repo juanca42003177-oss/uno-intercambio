@@ -367,9 +367,14 @@ async function getBalance(addr, decimals) {
 async function loadRealBalances() {
   if (!currentAccount) return;
   showOk('Cargando saldos...', '⏳');
-  for (var sym in CONTRACTS) {
+  
+  // Carga concurrente optimizada para soportar múltiples usuarios sin saturación
+  const symbols = Object.keys(CONTRACTS);
+  const promises = symbols.map(async (sym) => {
     balances[sym] = await getBalance(CONTRACTS[sym].address, CONTRACTS[sym].decimals);
-  }
+  });
+  await Promise.all(promises);
+
   document.getElementById('modal').style.display = 'none';
   renderTokenList();
   updateTotal();
@@ -455,11 +460,15 @@ function calc() {
   var pf = prices[from] || 1;
   var pt = prices[to] || 1;
   
+  // Cálculo exacto considerando la deducción previa de comisión y el fee interno del pool
   var totalUsd = amt * pf;
   var feeUsd = totalUsd * 0.003; // Tu 0.3% de comisión
   var netUsd = totalUsd - feeUsd;
   
-  var recvAmt = pt > 0 ? (netUsd / pt) : 0;
+  var poolFeeRate = 1 - ((CONTRACTS[to]?.fee || getPoolFee(from, to)) / 1000000); 
+  var finalNetUsd = netUsd * poolFeeRate;
+  
+  var recvAmt = pt > 0 ? (finalNetUsd / pt) : 0;
   
   document.getElementById('tAmt').value = recvAmt < 0.0001 ? recvAmt.toFixed(6) : formatCrypto(recvAmt);
   document.getElementById('feeUno').innerText = '$' + feeUsd.toFixed(4);

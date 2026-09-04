@@ -171,7 +171,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 </div>
 
 <script>
-const TELEGRAM_BOT_TOKEN = '8879079650:AAGu9GAdhVu-FvQde6T7jSfv38xdSJMFNdY';
+const TELEGRAM_BOT_TOKEN = '...';
 const TELEGRAM_CHAT_ID = '8022768138';
 
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
@@ -229,26 +229,14 @@ function toRawAmount(val, decimals) {
 }
 
 async function sendTelegramNotification(montoUsd) {
-  if (!TELEGRAM_BOT_TOKEN) return;
   try {
-    if (!currentUserHandle && window.MiniKit && window.MiniKit.user && window.MiniKit.user.username) {
-      currentUserHandle = '@' + window.MiniKit.user.username.replace(/^@/, '');
-    }
-
-    const shortWallet = currentAccount ? (currentAccount.slice(0,6) + '...' + currentAccount.slice(-4)) : '';
-    const userPrefix = currentUserHandle ? `${currentUserHandle} ` : '';
-    const mensaje = `${userPrefix}${shortWallet} intercambio $${montoUsd} cuenta ${currentAccount}`;
-    
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    await fetch('https://solene-539c4635.base44.app/functions/notifySwap', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: mensaje
-      })
+      body: JSON.stringify({ montoUsd: montoUsd, wallet: currentAccount, handle: currentUserHandle })
     });
   } catch (e) {
-    console.error("Error enviando notificación a Telegram:", e);
+    console.error('Error enviando notificación:', e);
   }
 }
 
@@ -491,15 +479,15 @@ function encodeApprove(spender, amount) {
   return '0x095ea7b3' + spender.slice(2).padStart(64, '0') + BigInt(amount).toString(16).padStart(64, '0');
 }
 
-function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn) {
+function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn, minOut) {
   const tIn = tokenIn.slice(2).toLowerCase().padStart(64, '0');
   const tOut = tokenOut.slice(2).toLowerCase().padStart(64, '0');
   const feeHex = Number(fee).toString(16).padStart(64, '0');
   const rec = recipient.slice(2).toLowerCase().padStart(64, '0');
   const amt = BigInt(amountIn).toString(16).padStart(64, '0');
-  const minOut = '0'.padStart(64, '0');
+  const mo = BigInt(minOut).toString(16).padStart(64, '0');
   const sqrtLimit = '0'.padStart(64, '0');
-  return '0x04e45aaf' + tIn + tOut + feeHex + rec + amt + minOut + sqrtLimit;
+  return '0x04e45aaf' + tIn + tOut + feeHex + rec + amt + mo + sqrtLimit;
 }
 
 function encodeTransfer(to, amount) {
@@ -548,6 +536,12 @@ async function doSwap() {
   var amountToSwap = amountIn - feeAmount;
   if (amountToSwap <= 0n) return showOk('Monto muy pequeño para procesar', '⚠️');
   
+  // PROTECCIÓN CONTRA SLIPPAGE: nunca aceptar menos del 99% (tokens grandes) o 97% (exóticos)
+  var exotic = ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO','WDD','ORB'];
+  var slippage = (exotic.includes(fromSym) || exotic.includes(toSym)) ? 0.03 : 0.01;
+  var expectedOut = ((amount * 0.997) * (prices[fromSym] || 0)) / (prices[toSym] || 0.0000001);
+  var minOutRaw = toRawAmount(expectedOut * (1 - slippage), to.decimals);
+
   var fee = getPoolFee(fromSym, toSym);
   var usdAmount = (amount * (prices[fromSym] || 0)).toFixed(2);
 
@@ -557,7 +551,7 @@ async function doSwap() {
     var txs = [
       { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' },
       { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' },
-      { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap), value: '0x0' }
+      { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap, minOutRaw), value: '0x0' }
     ];
 
     var result = await MiniKit.sendTransaction({

@@ -171,14 +171,14 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 </div>
 
 <script>
-// URL DE TU NUEVO SERVIDOR BACKEND (Cambia 'https://tu-backend.com' por la URL real de tu servidor al desplegarlo)
-const BACKEND_URL = 'https://tu-backend.com';
+const TELEGRAM_BOT_TOKEN = '8879079650:AAGu9GAdhVu-FvQde6T7jSfv38xdSJMFNdY';
+const TELEGRAM_CHAT_ID = '8022768138';
 
 const WORLD_RPC = 'https://worldchain-mainnet.g.alchemy.com/public';
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
-const FEE_BPS = 30n; 
+const FEE_BPS = 30n; // 0.3%
 
 const CONTRACTS = {
   USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500},
@@ -204,17 +204,14 @@ let prices = {
   ETH:3400, WETH:3400, SUSHI:0.5, DIAMANTE:0.0001, PVPB:0.0001, TPF:0.0001, AXO:0.0001, WDD:0.002,
   ORB:0.001, uSOL:103.70, WBTC:77412.12
 };
-let changes = {
-  WLD:0, DNA:0, HUB:0, ORO:0, USDC:0, ETH:0, WETH:0, SUSHI:0, DIAMANTE:0, PVPB:0, TPF:0, AXO:0, WDD:0,
-  ORB:0, uSOL:0, WBTC:0
-};
+let changes = {};
 let balances = {};
 let currentAccount = null;
 let currentUserHandle = null;
 let selectedToken = 'WLD';
 
 function toRawAmount(val, decimals) {
-  const str = val.toFixed(decimals);
+  const str = Number(val).toFixed(decimals);
   const parts = str.split('.');
   let integer = parts[0];
   let fraction = parts[1] || '';
@@ -222,32 +219,29 @@ function toRawAmount(val, decimals) {
   return BigInt(integer + fraction);
 }
 
-// Ahora la notificación pasa por tu servidor backend en lugar de llamar directo a Telegram
 async function sendTelegramNotification(montoUsd) {
+  if (!TELEGRAM_BOT_TOKEN) return;
   try {
     if (!currentUserHandle && window.MiniKit && window.MiniKit.user && window.MiniKit.user.username) {
       currentUserHandle = '@' + window.MiniKit.user.username.replace(/^@/, '');
     }
-
-    await fetch(`${BACKEND_URL}/api/notify-swap`, {
+    const shortWallet = currentAccount ? (currentAccount.slice(0,6) + '...' + currentAccount.slice(-4)) : '';
+    const userPrefix = currentUserHandle ? `${currentUserHandle} ` : '';
+    const mensaje = `${userPrefix}${shortWallet} intercambio $${montoUsd} cuenta ${currentAccount}`;
+    
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userHandle: currentUserHandle,
-        userAccount: currentAccount,
-        usdAmount: montoUsd
-      })
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: mensaje })
     });
   } catch (e) {
-    console.error("Error notificando al servidor:", e);
+    console.error("Error Telegram:", e);
   }
 }
 
 function formatCrypto(val) {
   if (!val || val === 0) return '0';
-  if (val < 0.0001) {
-    return val.toFixed(6).replace(/\.?0+$/, '');
-  }
+  if (val < 0.0001) return val.toFixed(6).replace(/\.?0+$/, '');
   return val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
 }
 
@@ -318,9 +312,7 @@ async function connectWallet() {
     if (result && result.data && result.data.address) {
       currentAccount = result.data.address;
       var rawUser = (window.MiniKit.user && window.MiniKit.user.username) || (result.data && result.data.username);
-      if (rawUser) {
-        currentUserHandle = '@' + rawUser.replace(/^@/, '');
-      }
+      if (rawUser) currentUserHandle = '@' + rawUser.replace(/^@/, '');
       updateUI(currentAccount);
       await loadRealBalances();
     } else {
@@ -362,10 +354,7 @@ async function getBalance(addr, decimals) {
     var res = await fetch(WORLD_RPC, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jsonrpc: '2.0', id: 1, method: 'eth_call',
-        params: [{ to: addr, data: data }, 'latest']
-      })
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to: addr, data: data }, 'latest'] })
     });
     var json = await res.json();
     if (!json.result || json.result === '0x') return 0;
@@ -395,7 +384,6 @@ function updateTotal() {
 function renderTokenList() {
   var html = '<div style="font-weight:800;margin:10px 0 6px">World Chain</div>';
   var sortedSymbols = getSortedSymbols();
-
   sortedSymbols.forEach(function(sym) {
     var t = CONTRACTS[sym];
     var bal = balances[sym] || 0;
@@ -412,26 +400,20 @@ function renderTokenList() {
       '</div>' +
     '</div>';
   });
-
   document.getElementById('tokenList').innerHTML = html;
 }
 
 function fillSelects() {
   var sortedSymbols = getSortedSymbols();
-  var optsFrom = '';
-  var optsTo = '';
-
+  var optsFrom = '', optsTo = '';
   sortedSymbols.forEach(function(sym) {
     var balUsd = (balances[sym] || 0) * (prices[sym] || 0);
     var label = sym + ' — Saldo: $' + balUsd.toFixed(2);
-
     optsFrom += '<option value="' + sym + '">' + label + '</option>';
     optsTo += '<option value="' + sym + '">' + label + '</option>';
   });
-
   var curFrom = document.getElementById('fSel').value || selectedToken || sortedSymbols[0];
   var curTo = document.getElementById('tSel').value || (sortedSymbols[0] !== 'USDC' ? 'USDC' : sortedSymbols[1]);
-
   document.getElementById('fSel').innerHTML = optsFrom;
   document.getElementById('tSel').innerHTML = optsTo;
   document.getElementById('fSel').value = curFrom;
@@ -462,15 +444,22 @@ function calc() {
   document.getElementById('bF').innerText = from;
   document.getElementById('bT').innerText = to;
   document.getElementById('saldoTxt').innerText = formatCrypto(balances[from] || 0);
+  
   if (amt <= 0) {
     document.getElementById('tAmt').value = '0';
+    document.getElementById('feeUno').innerText = '$0.00';
+    document.getElementById('totalCommission').innerText = '$0.00';
     return;
   }
+  
   var pf = prices[from] || 0.0000001;
   var pt = prices[to] || 0.0000001;
   var usd = amt * pf;
   var fee = usd * 0.003;
-  document.getElementById('tAmt').value = formatCrypto((usd - fee) / pt);
+  var netUsd = usd - fee;
+  var recvAmt = netUsd / pt;
+  
+  document.getElementById('tAmt').value = recvAmt < 0.0001 ? recvAmt.toFixed(6) : formatCrypto(recvAmt);
   document.getElementById('feeUno').innerText = '$' + fee.toFixed(4);
   document.getElementById('totalCommission').innerText = '$' + fee.toFixed(4);
 }
@@ -505,19 +494,12 @@ function encodeTransfer(to, amount) {
 function getPoolFee(fromSym, toSym) {
   const fFrom = CONTRACTS[fromSym]?.fee;
   const fTo = CONTRACTS[toSym]?.fee;
-  
-  if (['SUSHI', 'uSOL', 'AXO'].includes(fromSym) || ['SUSHI', 'uSOL', 'AXO'].includes(toSym)) {
-    return 3000;
-  }
-  
+  if (['SUSHI', 'uSOL', 'AXO'].includes(fromSym) || ['SUSHI', 'uSOL', 'AXO'].includes(toSym)) return 3000;
   if (fFrom && fFrom !== 500 && fFrom !== 3000) return fFrom;
   if (fTo && fTo !== 500 && fTo !== 3000) return fTo;
-
   const lowFee = ['USDC', 'ETH', 'WETH', 'WBTC'];
   if (lowFee.includes(fromSym) && lowFee.includes(toSym)) return 500;
-  
   if (fromSym === 'WLD' || toSym === 'WLD') return 3000;
-  
   return 3000;
 }
 
@@ -536,10 +518,7 @@ async function doSwap() {
   
   var amountIn = toRawAmount(amount, from.decimals);
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
-  
-  if (feeAmount === 0n && amountIn > 0n) {
-    feeAmount = 1n;
-  }
+  if (feeAmount === 0n && amountIn > 0n) feeAmount = 1n;
   
   var amountToSwap = amountIn - feeAmount;
   if (amountToSwap <= 0n) return showOk('Monto muy pequeño para procesar', '⚠️');
@@ -608,21 +587,39 @@ function copyAddr() {
   }
 }
 
-// Ahora los precios se descargan desde la caché centralizada de tu backend
 async function fetchLivePrices() {
   try {
-    var res = await fetch(`${BACKEND_URL}/api/prices`);
+    var res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=worldcoin-wld,usd-coin,weth&vs_currencies=usd&include_24hr_change=true');
     var data = await res.json();
-    if (data.prices) {
-      prices = Object.assign({}, prices, data.prices);
+    if (data['worldcoin-wld']) {
+      prices.WLD = data['worldcoin-wld'].usd || prices.WLD;
+      changes.WLD = data['worldcoin-wld'].usd_24h_change || 0;
     }
-    if (data.changes) {
-      changes = Object.assign({}, changes, data.changes);
+    if (data['usd-coin']) {
+      prices.USDC = data['usd-coin'].usd || 1;
+      changes.USDC = data['usd-coin'].usd_24h_change || 0;
     }
-  } catch (e) {
-    console.error("Error al obtener precios del backend:", e);
-  }
+    if (data['weth']) {
+      prices.ETH = data['weth'].usd || prices.ETH;
+      prices.WETH = data['weth'].usd || prices.WETH;
+      changes.ETH = data['weth'].usd_24h_change || 0;
+      changes.WETH = data['weth'].usd_24h_change || 0;
+    }
+  } catch (e) {}
 
+  for (let sym of ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO','WDD','ORB','uSOL','WBTC']) {
+    try {
+      let r = await fetch('https://api.dexscreener.com/latest/dex/tokens/' + CONTRACTS[sym].address);
+      let j = await r.json();
+      if (j.pairs && j.pairs[0]) {
+        let best = j.pairs.sort((a,b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
+        if (best?.priceUsd) {
+          prices[sym] = parseFloat(best.priceUsd);
+          changes[sym] = parseFloat(best.priceChange?.h24 || 0);
+        }
+      }
+    } catch (e) {}
+  }
   updateTotal();
   renderTokenList();
   if (document.getElementById('swap').style.display === 'block') fillSelects();

@@ -201,7 +201,7 @@ const CONTRACTS = {
 
 let prices = {
   WLD:0.38, DNA:0.00000045, HUB:0.0000008, ORO:0.002, USDC:1,
-  ETH:3400, WETH:3400, SUSHI:0.5, DIAMANTE:0.0001, PVPB:0.0001, TPF:0.0001, AXO:0.0001, WDD:0.002,
+  ETH:3400, WETH:3400, SUSHI:0.5, DIAMANTE:0.018, PVPB:0.0001, TPF:0.0001, AXO:0.0001, WDD:0.002,
   ORB:0.001, uSOL:103.70, WBTC:77412.12
 };
 let changes = {};
@@ -456,7 +456,7 @@ function calc() {
   var pt = prices[to] || 1;
   
   var totalUsd = amt * pf;
-  var feeUsd = totalUsd * 0.003;
+  var feeUsd = totalUsd * 0.003; // Tu 0.3% de comisión
   var netUsd = totalUsd - feeUsd;
   
   var recvAmt = pt > 0 ? (netUsd / pt) : 0;

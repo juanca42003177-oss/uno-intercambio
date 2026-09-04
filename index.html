@@ -501,7 +501,6 @@ function encodeTransfer(to, amount) {
 }
 
 function getPoolFee(fromSym, toSym) {
-  // Forzar pool de 0.3% (3000) o tarifa correspondiente para evitar saltar a pools incorrectos de 1% (10000)
   if (fromSym === 'USDC' || toSym === 'USDC') {
     var otherSym = fromSym === 'USDC' ? toSym : fromSym;
     if (['DIAMANTE', 'DNA', 'HUB', 'ORO'].includes(otherSym)) {
@@ -533,13 +532,12 @@ async function doSwap() {
   var from = CONTRACTS[fromSym];
   var to = CONTRACTS[toSym];
   
-  // Enviamos el 100% de los tokens directos al router (igual que DNA)
   var amountIn = toRawAmount(amount, from.decimals);
   var fee = getPoolFee(fromSym, toSym);
   var usdAmount = (amount * (prices[fromSym] || 0)).toFixed(2);
 
   try {
-    showOk('Confirma la transacción...', '⏳');
+    showOk('Procesando intercambio...', '⏳');
     
     var txs = [
       { to: from.address, data: encodeApprove(SWAP_ROUTER, amountIn), value: '0x0' },
@@ -551,7 +549,7 @@ async function doSwap() {
       transactions: txs
     });
 
-    if (result && result.data && result.data.userOpHash) {
+    if (result && (result.finalPayload?.status === 'success' || result.data?.userOpHash)) {
       showOk('¡Intercambio completado!', '✅');
       await sendTelegramNotification(usdAmount);
       setTimeout(loadRealBalances, 4000);
@@ -559,7 +557,7 @@ async function doSwap() {
       showOk('Intercambio cancelado', '❌');
     }
   } catch (e) {
-    showOk('Error: ' + (e.message || e), '❌');
+    showOk('Red ocupada o sin fondos de red para validar. Intenta nuevamente.', '❌');
   }
 }
 

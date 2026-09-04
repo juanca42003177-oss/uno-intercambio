@@ -500,15 +500,24 @@ function calc() {
   document.getElementById('bF').innerText = from;
   document.getElementById('bT').innerText = to;
   document.getElementById('saldoTxt').innerText = formatCrypto(balances[from] || 0);
+  
   if (amt <= 0) {
     document.getElementById('tAmt').value = '0';
+    document.getElementById('feeUno').innerText = '$0.00';
+    document.getElementById('totalCommission').innerText = '$0.00';
     return;
   }
+  
   var pf = prices[from] || 0.0000001;
   var pt = prices[to] || 0.0000001;
   var usd = amt * pf;
   var fee = usd * 0.003;
-  document.getElementById('tAmt').value = formatCrypto((usd - fee) / pt);
+  
+  // Cálculo exacto basado en USD y precio unitario del destino para evitar desajustes
+  var targetUsdValue = usd - fee;
+  var targetAmount = targetUsdValue / pt;
+  
+  document.getElementById('tAmt').value = formatCrypto(targetAmount);
   document.getElementById('feeUno').innerText = '$' + fee.toFixed(4);
   document.getElementById('totalCommission').innerText = '$' + fee.toFixed(4);
 }

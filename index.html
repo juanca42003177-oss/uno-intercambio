@@ -47,35 +47,35 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 <body>
 <div id="home">
   <div class="top">
-    <div class="avatar">⚡</div>
-    <div style="flex:1"><b>Uno Intercambio</b><div class="small" id="walletInfo">No conectado • World Chain</div></div>
+    <div class="avatar">âš¡</div>
+    <div style="flex:1"><b>Uno Intercambio</b><div class="small" id="walletInfo">No conectado â€¢ World Chain</div></div>
     <button class="btnConnect" id="btnConnect" onclick="connectWallet()">Conectar</button>
   </div>
   <div style="padding:16px"><div class="big" id="totalUsd">$0.00</div><div class="small"><span class="green">Precios en vivo</span> <span class="live">LIVE</span></div></div>
   <div class="btns">
-    <div class="btn" onclick="go('swap')">⇆ Swap</div>
-    <div class="btn" onclick="go('earn')">↗ Ganar</div>
-    <div class="btn" onclick="go('send')">↗ Enviar</div>
-    <div class="btn" onclick="go('recv')">↓ Recibir</div>
+    <div class="btn" onclick="go('swap')">â‡† Swap</div>
+    <div class="btn" onclick="go('earn')">â†— Ganar</div>
+    <div class="btn" onclick="go('send')">â†— Enviar</div>
+    <div class="btn" onclick="go('recv')">â†“ Recibir</div>
   </div>
   <div class="tokens" id="tokenList"></div>
 </div>
 
 <div id="tokenDetail" style="display:none">
   <div class="main">
-    <button onclick="go('home')" style="border:0;background:#f0f0f0;padding:10px 16px;border-radius:20px;font-weight:700;margin-bottom:16px">← Volver</button>
+    <button onclick="go('home')" style="border:0;background:#f0f0f0;padding:10px 16px;border-radius:20px;font-weight:700;margin-bottom:16px">â† Volver</button>
     <div style="text-align:center">
-      <div class="detailIcon" id="dIcon">🌐</div>
+      <div class="detailIcon" id="dIcon">ðŸŒ</div>
       <h2 style="margin:12px 0 4px" id="dName">WLD</h2>
       <div class="small" id="dBalText">0 WLD</div>
       <div style="font-size:32px;font-weight:900;margin-top:10px" id="dPrice">$0.00</div>
-      <div id="dChange" class="small">—</div>
+      <div id="dChange" class="small">â€”</div>
       <div class="box" style="margin-top:18px;display:flex;justify-content:space-between;font-weight:800;font-size:17px">
         <span id="dBal">0</span><span id="dUsd">$0.00</span>
       </div>
       <div style="display:flex;gap:10px;margin-top:16px">
-        <button class="btnY" style="flex:1" onclick="openSwapFromDetail()">⇆ Intercambiar</button>
-        <button class="btnY" style="flex:1;background:#111;color:#fff" onclick="openSendFromDetail()">↗ Enviar</button>
+        <button class="btnY" style="flex:1" onclick="openSwapFromDetail()">â‡† Intercambiar</button>
+        <button class="btnY" style="flex:1;background:#111;color:#fff" onclick="openSendFromDetail()">â†— Enviar</button>
       </div>
     </div>
   </div>
@@ -101,7 +101,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
         <button onclick="setPerc(100)" class="active">100%</button>
       </div>
     </div>
-    <div style="text-align:center;margin:12px 0;font-size:22px">↕️</div>
+    <div style="text-align:center;margin:12px 0;font-size:22px">â†•ï¸</div>
     <div class="box">
       <div class="small" style="margin-bottom:8px">Recibes <b id="bT">USDC</b></div>
       <div style="display:flex;gap:8px;align-items:center">
@@ -110,11 +110,11 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
       </div>
     </div>
     <div class="box" style="font-size:13px">
-      <div style="display:flex;justify-content:space-between"><span>Comisión (0.3%):</span><b id="feeUno">$0.00</b></div>
-      <div style="display:flex;justify-content:space-between;margin-top:6px;font-weight:800;border-top:1px dashed #ccc;padding-top:6px"><span>Total comisión:</span><b id="totalCommission">$0.00</b></div>
+      <div style="display:flex;justify-content:space-between"><span>ComisiÃ³n (0.3%):</span><b id="feeUno">$0.00</b></div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;font-weight:800;border-top:1px dashed #ccc;padding-top:6px"><span>Total comisiÃ³n:</span><b id="totalCommission">$0.00</b></div>
     </div>
     <button class="btnY" onclick="doSwap()">Intercambiar Ahora</button>
-    <button onclick="go('home')" style="width:100%;border:0;background:transparent;margin-top:10px;cursor:pointer">← Volver</button>
+    <button onclick="go('home')" style="width:100%;border:0;background:transparent;margin-top:10px;cursor:pointer">â† Volver</button>
   </div>
 </div>
 
@@ -131,15 +131,15 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
       <div class="small">Saldo: <span id="sendBal">0</span></div>
     </div>
     <button class="btnY" onclick="doSend()">Enviar ahora</button>
-    <button onclick="go('home')" class="btnY" style="background:#eee;color:#111;margin-top:10px">← Volver</button>
+    <button onclick="go('home')" class="btnY" style="background:#eee;color:#111;margin-top:10px">â† Volver</button>
   </div>
 </div>
 
 <div id="earn" style="display:none">
   <div class="main">
     <h3 style="text-align:center">Ganar</h3>
-    <p class="small" style="text-align:center;margin:40px 0">Próximamente</p>
-    <button onclick="go('home')" class="btnY" style="background:#eee;color:#111">← Volver</button>
+    <p class="small" style="text-align:center;margin:40px 0">PrÃ³ximamente</p>
+    <button onclick="go('home')" class="btnY" style="background:#eee;color:#111">â† Volver</button>
   </div>
 </div>
 
@@ -148,59 +148,56 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
     <h3 style="text-align:center">Recibir</h3>
     <div style="text-align:center;margin-top:8px">
       <img id="qrImg" src="" alt="QR Code">
-      <div style="font-size:12px;font-weight:700;background:#f5f5f5;padding:12px;border-radius:12px;word-break:break-all;margin-top:8px" id="recvAddr">—</div>
-      <button class="btnY" onclick="copyAddr()">📋 Copiar dirección</button>
+      <div style="font-size:12px;font-weight:700;background:#f5f5f5;padding:12px;border-radius:12px;word-break:break-all;margin-top:8px" id="recvAddr">â€”</div>
+      <button class="btnY" onclick="copyAddr()">ðŸ“‹ Copiar direcciÃ³n</button>
     </div>
-    <button onclick="go('home')" class="btnY" style="background:#eee;color:#111;margin-top:12px">← Volver</button>
+    <button onclick="go('home')" class="btnY" style="background:#eee;color:#111;margin-top:12px">â† Volver</button>
   </div>
 </div>
 
 <div class="nav">
-  <div id="navHome" class="active" onclick="go('home')">🏠</div>
-  <div onclick="go('swap')">⇆</div>
-  <div onclick="go('earn')">💰</div>
-  <div style="background:#ff3ab2;color:#fff" onclick="go('recv')">↓</div>
+  <div id="navHome" class="active" onclick="go('home')">ðŸ </div>
+  <div onclick="go('swap')">â‡†</div>
+  <div onclick="go('earn')">ðŸ’°</div>
+  <div style="background:#ff3ab2;color:#fff" onclick="go('recv')">â†“</div>
 </div>
 
 <div id="modal" class="modal" onclick="this.style.display='none'">
   <div class="modalBox">
-    <div style="font-size:32px" id="modalIcon">✅</div>
+    <div style="font-size:32px" id="modalIcon">âœ…</div>
     <div id="modalTxt" style="font-weight:800;margin:12px 0"></div>
     <button class="btnY" onclick="document.getElementById('modal').style.display='none'">Cerrar</button>
   </div>
 </div>
 
 <script>
-const TELEGRAM_BOT_TOKEN = '8879079650:AAGu9GAdhVu-FvQde6T7jSfv38xdSJMFNdY';
-const TELEGRAM_CHAT_ID = '8022768138';
-
-const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
+const SWAP_ROUTER = 'ðŸ”’ Secreto detectado y guardado como $SWAP_ROUTER_2 â€” gestiÃ³nalo o desactÃ­valo cuando quieras en ConfiguraciÃ³n de seguridad.';
 
 // BILLETERA PARA COMISIONES (0.3%)
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
 const FEE_BPS = 30n; // 0.3%
 
-// CONFIGURACIÓN DE TOKENS (CON TUS LOGOS Y DATOS ESENCIALES)
+// CONFIGURACIÃ“N DE TOKENS (CON TUS LOGOS Y DATOS ESENCIALES)
 const CONTRACTS = {
-  USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500},
-  WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, color:'#111111', letter:'🌐', fee:3000},
-  HUB:      {address:'0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals:18, color:'#ff7a00', letter:'⬡', fee:10000},
-  ORB:      {address:'0xF3F92A60e6004f3982F0FdE0d43602fC0a30a0dB', decimals:18, color:'#9b59b6', letter:'🔮', fee:10000},
-  uSOL:     {address:'0x9B8Df6E244526ab5F6e6400d331DB28C8fdDdb55', decimals:9,  color:'#14f195', letter:'⚡', fee:3000},
-  WBTC:     {address:'0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3', decimals:8,  color:'#f7931a', letter:'🪙', fee:500},
-  DNA:      {address:'0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals:18, color:'#ffcc00', letter:'🧬', fee:10000},
-  ORO:      {address:'0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals:18, color:'#ffd700', letter:'🏆', fee:10000},
-  ETH:      {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'◇', fee:500},
-  WETH:     {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#4a5d9e', letter:'◆', fee:500},
-  SUSHI:    {address:'0xab09A728E53d3d6BC438BE95eeD46Da0Bbe7FB38', decimals:18, color:'#fa52a0', letter:'🍣', fee:3000},
-  DIAMANTE: {address:'0x2ba918fec90Ca7AaC5753a2551593470815866e6', decimals:18, color:'#00d2ff', letter:'💎', fee:10000},
-  PVPB:     {address:'0xBC69990A060cC5AF40942f579BdF82A69A9CFf93', decimals:18, color:'#8e44ad', letter:'⚔️', fee:10000},
-  TPF:      {address:'0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45', decimals:18, color:'#1abc9c', letter:'✦', fee:10000},
-  AXO:      {address:'0x249820C0479D0A7feE6A2A3a14583267550F3caF', decimals:18, color:'#e67e22', letter:'🔥', fee:3000},
-  WDD:      {address:'0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B', decimals:18, color:'#00c853', letter:'🛡️', fee:10000}
+  USDC:     {address:'ðŸ”’ Secreto detectado y guardado como $USDC_TOKEN_ADDRESS â€” gestiÃ³nalo o desactÃ­valo cuando quieras en ConfiguraciÃ³n de seguridad.', decimals:6,  color:'#2775ca', letter:'ðŸ’µ', fee:500},
+  WLD:      {address:'ðŸ”’ Secreto detectado y guardado como $WLD_TOKEN_ADDRESS â€” gestiÃ³nalo o desactÃ­valo cuando quieras en ConfiguraciÃ³n de seguridad.', decimals:18, color:'#111111', letter:'ðŸŒ', fee:3000},
+  HUB:      {address:'ðŸ”’ Secreto detectado y guardado como $HUB_TOKEN_ADDRESS â€” gestiÃ³nalo o desactÃ­valo cuando quieras en ConfiguraciÃ³n de seguridad.', decimals:18, color:'#ff7a00', letter:'â¬¡', fee:10000},
+  ORB:      {address:'ðŸ”’ Secreto detectado y guardado como $ORB_TOKEN_ADDRESS â€” gestiÃ³nalo o desactÃ­valo cuando quieras en ConfiguraciÃ³n de seguridad.', decimals:18, color:'#9b59b6', letter:'ðŸ”®', fee:10000},
+  uSOL:     {address:'ðŸ”’ Secreto detectado y guardado como $USOL_TOKEN_ADDRESS â€” gestiÃ³nalo o desactÃ­valo cuando quieras en ConfiguraciÃ³n de seguridad.', decimals:9,  color:'#14f195', letter:'âš¡', fee:3000},
+  WBTC:     {address:'ðŸ”’ Secreto detectado y guardado como $WBTC_TOKEN_ADDRESS â€” gestiÃ³nalo o desactÃ­valo cuando quieras en ConfiguraciÃ³n de seguridad.', decimals:8,  color:'#f7931a', letter:'ðŸª™', fee:500},
+  DNA:      {address:'ðŸ”’ Secreto detectado y guardado como $DNA_TOKEN_ADDRESS â€” gestiÃ³nalo o desactÃ­valo cuando quieras en ConfiguraciÃ³n de seguridad.', decimals:18, color:'#ffcc00', letter:'ðŸ§¬', fee:10000},
+  ORO:      {address:'ðŸ”’ Secreto detectado y guardado como $ORO_TOKEN_ADDRESS â€” gestiÃ³nalo o desactÃ­valo cuando quieras en ConfiguraciÃ³n de seguridad.', decimals:18, color:'#ffd700', letter:'ðŸ†', fee:10000},
+  ETH:      {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'â—‡', fee:500},
+  WETH:     {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#4a5d9e', letter:'â—†', fee:500},
+  SUSHI:    {address:'ðŸ”’ Secreto detectado y guardado como $SUSHI_TOKEN_ADDRESS â€” gestiÃ³nalo o desactÃ­valo cuando quieras en ConfiguraciÃ³n de seguridad.', decimals:18, color:'#fa52a0', letter:'ðŸ£', fee:3000},
+  DIAMANTE: {address:'ðŸ”’ Secreto detectado y guardado como $DIAMANTE_TOKEN_ADDRESS â€” gestiÃ³nalo o desactÃ­valo cuando quieras en ConfiguraciÃ³n de seguridad.', decimals:18, color:'#00d2ff', letter:'ðŸ’Ž', fee:10000},
+  PVPB:     {address:'ðŸ”’ Secreto detectado y guardado como $PVPB_TOKEN_ADDRESS â€” gestiÃ³nalo o desactÃ­valo cuando quieras en ConfiguraciÃ³n de seguridad.', decimals:18, color:'#8e44ad', letter:'âš”ï¸', fee:10000},
+  TPF:      {address:'ðŸ”’ Secreto detectado y guardado como $TPF_TOKEN_ADDRESS â€” gestiÃ³nalo o desactÃ­valo cuando quieras en ConfiguraciÃ³n de seguridad.', decimals:18, color:'#1abc9c', letter:'âœ¦', fee:10000},
+  AXO:      {address:'ðŸ”’ Secreto detectado y guardado como $AXO_TOKEN_ADDRESS â€” gestiÃ³nalo o desactÃ­valo cuando quieras en ConfiguraciÃ³n de seguridad.', decimals:18, color:'#e67e22', letter:'ðŸ”¥', fee:3000},
+  WDD:      {address:'ðŸ”’ Secreto detectado y guardado como $WDD_TOKEN_ADDRESS â€” gestiÃ³nalo o desactÃ­valo cuando quieras en ConfiguraciÃ³n de seguridad.', decimals:18, color:'#00c853', letter:'ðŸ›¡ï¸', fee:10000}
 };
 
-// ENDPOINTS CENTRALIZADOS (Evita saturar RPCs con 10,000+ usuarios simultáneos)
+// ENDPOINTS CENTRALIZADOS (Evita saturar RPCs con 10,000+ usuarios simultÃ¡neos)
 const API_PRICES   = 'https://solene-539c4635.base44.app/functions/getMarketPrices';
 const API_BALANCES = 'https://solene-539c4635.base44.app/functions/getWalletBalances';
 
@@ -229,26 +226,15 @@ function toRawAmount(val, decimals) {
 }
 
 async function sendTelegramNotification(montoUsd) {
-  if (!TELEGRAM_BOT_TOKEN) return;
+  // NotificaciÃ³n segura: el token del bot vive SOLO en el backend, nunca en este archivo
   try {
-    if (!currentUserHandle && window.MiniKit && window.MiniKit.user && window.MiniKit.user.username) {
-      currentUserHandle = '@' + window.MiniKit.user.username.replace(/^@/, '');
-    }
-
-    const shortWallet = currentAccount ? (currentAccount.slice(0,6) + '...' + currentAccount.slice(-4)) : '';
-    const userPrefix = currentUserHandle ? `${currentUserHandle} ` : '';
-    const mensaje = `${userPrefix}${shortWallet} intercambio $${montoUsd} cuenta ${currentAccount}`;
-    
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    await fetch('https://solene-539c4635.base44.app/functions/notifySwap', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: mensaje
-      })
+      body: JSON.stringify({ montoUsd: montoUsd, wallet: currentAccount, handle: currentUserHandle })
     });
   } catch (e) {
-    console.error("Error enviando notificación a Telegram:", e);
+    console.error('Error enviando notificaciÃ³n:', e);
   }
 }
 
@@ -261,7 +247,7 @@ function formatCrypto(val) {
 }
 
 function showOk(msg, icon) {
-  document.getElementById('modalIcon').innerText = icon || '✅';
+  document.getElementById('modalIcon').innerText = icon || 'âœ…';
   document.getElementById('modalTxt').innerText = msg;
   document.getElementById('modal').style.display = 'flex';
 }
@@ -300,7 +286,7 @@ function openToken(sym) {
   document.getElementById('dName').innerText = sym;
   document.getElementById('dBalText').innerText = formatCrypto(bal) + ' ' + sym;
   document.getElementById('dPrice').innerText = '$' + price.toFixed(price < 0.01 ? 6 : 2);
-  document.getElementById('dChange').innerText = (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%';
+  document.getElementById('dChange').innerText = (ch >= 0 ? 'â–² +' : 'â–¼ ') + Math.abs(ch).toFixed(2) + '%';
   document.getElementById('dBal').innerText = formatCrypto(bal) + ' ' + sym;
   document.getElementById('dUsd').innerText = '$' + (bal * price).toFixed(2);
   go('tokenDetail');
@@ -320,7 +306,7 @@ function openSendFromDetail() {
 
 async function connectWallet() {
   try {
-    if (!window.MiniKit) return showOk('Abre dentro de World App', '⚠️');
+    if (!window.MiniKit) return showOk('Abre dentro de World App', 'âš ï¸');
     MiniKit.install();
     var nonce = Math.random().toString(36).slice(2) + Date.now().toString(36);
     var result = await MiniKit.walletAuth({ nonce: nonce, statement: 'Conectar Uno Intercambio' });
@@ -333,16 +319,16 @@ async function connectWallet() {
       updateUI(currentAccount);
       await loadRealBalances();
     } else {
-      showOk('No se pudo conectar', '❌');
+      showOk('No se pudo conectar', 'âŒ');
     }
   } catch (e) {
-    showOk('Error: ' + (e.message || e), '❌');
+    showOk('Error: ' + (e.message || e), 'âŒ');
   }
 }
 
 function updateUI(addr) {
   const displayLabel = currentUserHandle || (addr.slice(0,6) + '...' + addr.slice(-4));
-  document.getElementById('walletInfo').innerHTML = displayLabel + ' • World Chain';
+  document.getElementById('walletInfo').innerHTML = displayLabel + ' â€¢ World Chain';
   var btn = document.getElementById('btnConnect');
   btn.innerText = 'Desconectar';
   btn.onclick = disconnectWallet;
@@ -354,7 +340,7 @@ function disconnectWallet() {
   currentAccount = null;
   currentUserHandle = null;
   balances = {};
-  document.getElementById('walletInfo').innerHTML = 'No conectado • World Chain';
+  document.getElementById('walletInfo').innerHTML = 'No conectado â€¢ World Chain';
   document.getElementById('totalUsd').innerText = '$0.00';
   var btn = document.getElementById('btnConnect');
   btn.innerText = 'Conectar';
@@ -364,11 +350,11 @@ function disconnectWallet() {
   renderTokenList();
 }
 
-// CARGA DE SALDOS OPTIMIZADA (Backend Centralizado para alto tráfico)
+// CARGA DE SALDOS OPTIMIZADA (Backend Centralizado para alto trÃ¡fico)
 async function loadRealBalances() {
   if (!currentAccount || loadingBalances) return;
   loadingBalances = true;
-  showOk('Cargando saldos...', '⏳');
+  showOk('Cargando saldos...', 'â³');
   try {
     var res = await fetch(API_BALANCES, {
       method: 'POST',
@@ -412,7 +398,7 @@ function renderTokenList() {
       '</div>' +
       '<div style="text-align:right">' +
         '<b>$' + usd.toFixed(2) + '</b>' +
-        '<div class="small ' + (ch >= 0 ? 'green' : 'red') + '">' + (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%</div>' +
+        '<div class="small ' + (ch >= 0 ? 'green' : 'red') + '">' + (ch >= 0 ? 'â–² +' : 'â–¼ ') + Math.abs(ch).toFixed(2) + '%</div>' +
       '</div>' +
     '</div>';
   });
@@ -427,7 +413,7 @@ function fillSelects() {
 
   sortedSymbols.forEach(function(sym) {
     var balUsd = (balances[sym] || 0) * (prices[sym] || 0);
-    var label = sym + ' — Saldo: $' + balUsd.toFixed(2);
+    var label = sym + ' â€” Saldo: $' + balUsd.toFixed(2);
 
     optsFrom += '<option value="' + sym + '">' + label + '</option>';
     optsTo += '<option value="' + sym + '">' + label + '</option>';
@@ -447,7 +433,7 @@ function fillSendSelect() {
   var opts = '';
   sortedSymbols.forEach(function(sym) {
     var balUsd = (balances[sym] || 0) * (prices[sym] || 0);
-    opts += '<option value="' + sym + '">' + sym + ' — Saldo: $' + balUsd.toFixed(2) + '</option>';
+    opts += '<option value="' + sym + '">' + sym + ' â€” Saldo: $' + balUsd.toFixed(2) + '</option>';
   });
   var cur = document.getElementById('sendToken').value || selectedToken || sortedSymbols[0];
   document.getElementById('sendToken').innerHTML = opts;
@@ -491,15 +477,15 @@ function encodeApprove(spender, amount) {
   return '0x095ea7b3' + spender.slice(2).padStart(64, '0') + BigInt(amount).toString(16).padStart(64, '0');
 }
 
-function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn) {
+function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn, minOut) {
   const tIn = tokenIn.slice(2).toLowerCase().padStart(64, '0');
   const tOut = tokenOut.slice(2).toLowerCase().padStart(64, '0');
   const feeHex = Number(fee).toString(16).padStart(64, '0');
   const rec = recipient.slice(2).toLowerCase().padStart(64, '0');
   const amt = BigInt(amountIn).toString(16).padStart(64, '0');
-  const minOut = '0'.padStart(64, '0');
+  const mo = BigInt(minOut).toString(16).padStart(64, '0');
   const sqrtLimit = '0'.padStart(64, '0');
-  return '0x04e45aaf' + tIn + tOut + feeHex + rec + amt + minOut + sqrtLimit;
+  return '0x04e45aaf' + tIn + tOut + feeHex + rec + amt + mo + sqrtLimit;
 }
 
 function encodeTransfer(to, amount) {
@@ -509,55 +495,62 @@ function encodeTransfer(to, amount) {
 function getPoolFee(fromSym, toSym) {
   const fFrom = CONTRACTS[fromSym]?.fee;
   const fTo = CONTRACTS[toSym]?.fee;
-  
+
   if (['SUSHI', 'uSOL', 'AXO'].includes(fromSym) || ['SUSHI', 'uSOL', 'AXO'].includes(toSym)) {
     return 3000;
   }
-  
+
   if (fFrom && fFrom !== 500 && fFrom !== 3000) return fFrom;
   if (fTo && fTo !== 500 && fTo !== 3000) return fTo;
 
   const lowFee = ['USDC', 'ETH', 'WETH', 'WBTC'];
   if (lowFee.includes(fromSym) && lowFee.includes(toSym)) return 500;
-  
+
   if (fromSym === 'WLD' || toSym === 'WLD') return 3000;
-  
+
   return 3000;
 }
 
 async function doSwap() {
-  if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
+  if (!currentAccount) return showOk('Conecta tu wallet', 'âš ï¸');
   var fromSym = document.getElementById('fSel').value;
   var toSym = document.getElementById('tSel').value;
   var amount = parseFloat(document.getElementById('fAmt').value);
 
-  if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
-  if (fromSym === toSym) return showOk('Elige tokens diferentes', '⚠️');
-  if ((balances[fromSym] || 0) < amount) return showOk('Saldo insuficiente', '⚠️');
+  if (!amount || amount <= 0) return showOk('Cantidad invÃ¡lida', 'âš ï¸');
+  if (fromSym === toSym) return showOk('Elige tokens diferentes', 'âš ï¸');
+  if ((balances[fromSym] || 0) < amount) return showOk('Saldo insuficiente', 'âš ï¸');
 
   var from = CONTRACTS[fromSym];
   var to = CONTRACTS[toSym];
-  
+
   var amountIn = toRawAmount(amount, from.decimals);
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
-  
+
   if (feeAmount === 0n && amountIn > 0n) {
     feeAmount = 1n;
   }
-  
+
   var amountToSwap = amountIn - feeAmount;
-  if (amountToSwap <= 0n) return showOk('Monto muy pequeño para procesar', '⚠️');
-  
+  if (amountToSwap <= 0n) return showOk('Monto muy pequeÃ±o para procesar', 'âš ï¸');
+
   var fee = getPoolFee(fromSym, toSym);
   var usdAmount = (amount * (prices[fromSym] || 0)).toFixed(2);
 
   try {
-    showOk('Confirma la transacción...', '⏳');
-    
+    showOk('Confirma la transacciÃ³n...', 'â³');
+
+    // PROTECCIÃ“N CONTRA SLIPPAGE: si un bot intenta abusar del swap, la transacciÃ³n
+    // se rechaza sola y el usuario recibe TODO su dinero de vuelta.
+    var exotic = ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO','WDD','ORB'];
+    var slippage = (exotic.includes(fromSym) || exotic.includes(toSym)) ? 0.03 : 0.01;
+    var expectedOut = ((amount * 0.997) * (prices[fromSym] || 0)) / (prices[toSym] || 0.0000001);
+    var minOutRaw = toRawAmount(expectedOut * (1 - slippage), to.decimals);
+
     var txs = [
       { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' },
       { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' },
-      { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap), value: '0x0' }
+      { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap, minOutRaw), value: '0x0' }
     ];
 
     var result = await MiniKit.sendTransaction({
@@ -566,53 +559,53 @@ async function doSwap() {
     });
 
     if (result && result.data && result.data.userOpHash) {
-      showOk('¡Intercambio completado!', '✅');
+      showOk('Â¡Intercambio completado!', 'âœ…');
       await sendTelegramNotification(usdAmount);
       setTimeout(loadRealBalances, 4000);
     } else {
-      showOk('Intercambio cancelado', '❌');
+      showOk('Intercambio cancelado', 'âŒ');
     }
   } catch (e) {
-    showOk('Error: ' + (e.message || e), '❌');
+    showOk('Error: ' + (e.message || e), 'âŒ');
   }
 }
 
 async function doSend() {
-  if (!currentAccount) return showOk('Conecta', '⚠️');
+  if (!currentAccount) return showOk('Conecta', 'âš ï¸');
   var sym = document.getElementById('sendToken').value;
   var toAddr = document.getElementById('sendTo').value.trim();
   var amount = parseFloat(document.getElementById('sendAmount').value);
-  if (!toAddr || !toAddr.startsWith('0x') || toAddr.length !== 42) return showOk('Dirección inválida', '⚠️');
-  if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
-  if ((balances[sym] || 0) < amount) return showOk('Saldo insuficiente', '⚠️');
+  if (!toAddr || !toAddr.startsWith('0x') || toAddr.length !== 42) return showOk('DirecciÃ³n invÃ¡lida', 'âš ï¸');
+  if (!amount || amount <= 0) return showOk('Cantidad invÃ¡lida', 'âš ï¸');
+  if ((balances[sym] || 0) < amount) return showOk('Saldo insuficiente', 'âš ï¸');
 
   var token = CONTRACTS[sym];
   var amountRaw = toRawAmount(amount, token.decimals);
   try {
-    showOk('Confirma el envío...', '⏳');
+    showOk('Confirma el envÃ­o...', 'â³');
     var result = await MiniKit.sendTransaction({
       chainId: 480,
       transactions: [{ to: token.address, data: encodeTransfer(toAddr, amountRaw), value: '0x0' }]
     });
     if (result && result.data && result.data.userOpHash) {
-      showOk('¡Envío realizado!');
+      showOk('Â¡EnvÃ­o realizado!');
       setTimeout(loadRealBalances, 4000);
     } else {
-      showOk('Envío cancelado', '❌');
+      showOk('EnvÃ­o cancelado', 'âŒ');
     }
   } catch (e) {
-    showOk('Error: ' + (e.message || e), '❌');
+    showOk('Error: ' + (e.message || e), 'âŒ');
   }
 }
 
 function copyAddr() {
   if (currentAccount) {
     navigator.clipboard.writeText(currentAccount);
-    showOk('Dirección copiada');
+    showOk('DirecciÃ³n copiada');
   }
 }
 
-// OBTENCIÓN DE PRECIOS CENTRALIZADA (Evita bloqueos de CORS o límites de peticiones)
+// OBTENCIÃ“N DE PRECIOS CENTRALIZADA (Evita bloqueos de CORS o lÃ­mites de peticiones)
 async function fetchLivePrices() {
   if (document.hidden) return;
   try {

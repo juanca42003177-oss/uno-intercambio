@@ -1,27 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
-<head><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style>
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -192,28 +171,36 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 </div>
 
 <script>
-const SWAP_ROUTER = '0x63aB97F393C750853CE5494914aC18e4d96b2763';
+const TELEGRAM_BOT_TOKEN = '8879079650:AAGu9GAdhVu-FvQde6T7jSfv38xdSJMFNdY';
+const TELEGRAM_CHAT_ID = '8022768138';
 
-// CONFIGURACIÓN DE TOKENS
+const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
+
+// BILLETERA PARA COMISIONES (0.3%)
+const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
+const FEE_BPS = 30n; // 0.3%
+
+// CONFIGURACIÓN DE TOKENS (CON TUS LOGOS Y DATOS ESENCIALES)
 const CONTRACTS = {
-  USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d', decimals:6,  color:'#2775ca', letter:'💵', fee:500, logo:'https://coin-images.coingecko.com/coins/images/6319/large/USDC.png?1769615602'},
-  WLD:      {address:'0x2cFc9817d7c4Dfa701490dA5437777D951d44b95d', decimals:18, color:'#111111', letter:'🌐', fee:3000, logo:'https://cdn.dexscreener.com/cms/images/ef98025f53486ef2022ffb19c5da9225ad28931344b4549a6265dfc22fd74d76?width=800&height=800&quality=95&format=auto'},
-  HUB:      {address:'0xB12e82C79B5eA01d4c8d0FCC2aB4e3A4E6E8c3d2', decimals:18, color:'#ff7a00', letter:'⬡', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/429b21f63_generated_image.png'},
-  ORB:      {address:'0xBe8B5DCb44C19E9E5a1F0d8B9F0C9a1b2c3d4e5f', decimals:18, color:'#9b59b6', letter:'🔮', fee:10000, logo:'https://cdn.dexscreener.com/cms/images/6b364af0717941d3bbab268fd40e6eb424671813008662b76c16921e25bc1d27?width=800&height=800&quality=95&format=auto'},
-  uSOL:     {address:'0xF0A2A8227936fCFfA1Aa1e2AbEaC4c89E6f3d0a2', decimals:9,  color:'#14f195', letter:'⚡', fee:3000, logo:'https://coin-images.coingecko.com/coins/images/4128/large/solana.png?1718769756'},
-  WBTC:     {address:'0x0F7aF1D56184c322D3C9d4E4B0B5C9d4E4B0B5C9d4', decimals:8,  color:'#f7931a', letter:'🪙', fee:500, logo:'https://coin-images.coingecko.com/coins/images/7598/large/WBTCLOGO.png?1764496367'},
-  DNA:      {address:'0xA1b2C3D4E5F6a7B8C9D0E1F2a3b4c5d6e7f8a9b0', decimals:18, color:'#ffcc00', letter:'🧬', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/c487b9b51_generated_image.png'},
-  ORO:      {address:'0xB2c3D4E5F6a7B8C9D0E1F2a3B4C5D6E7F8a9b0c1', decimals:18, color:'#ffd700', letter:'🏆', fee:10000, logo:'https://cdn.dexscreener.com/cms/images/90bdc660b15f747a9291399e454528674815dd48a0d21a38ae5489193dfa22df?width=800&height=800&quality=95&format=auto'},
-  ETH:      {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'◇', fee:500, logo:'https://coin-images.coingecko.com/coins/images/2518/large/weth.png?1696503332'},
-  WETH:     {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#4a5d9e', letter:'◆', fee:500, logo:'https://coin-images.coingecko.com/coins/images/2518/large/weth.png?1696503332'},
-  SUSHI:    {address:'0xC3d4E5F6a7B8C9D0E1F2a3B4C5D6E7F8a9b0c1d2', decimals:18, color:'#fa52a0', letter:'🍣', fee:3000, logo:'https://cdn.dexscreener.com/cms/images/v5qg8mXdATqSKsv0?width=800&height=800&quality=95&format=auto'},
-  DIAMANTE: {address:'0xD4e5F6a7B8C9D0E1F2a3B4C5D6E7F8a9b0c1d2e3', decimals:18, color:'#00d2ff', letter:'💎', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/f412f7a43_generated_image.png'},
-  PVPB:     {address:'0xE5f6a7B8C9D0E1F2a3B4C5D6E7F8a9b0c1d2e3f4', decimals:18, color:'#8e44ad', letter:'⚔️', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/c98ac0dd7_generated_image.png'},
-  TPF:      {address:'0xF6a7B8C9D0E1F2a3B4C5D6E7F8a9b0c1d2e3f4a5', decimals:18, color:'#1abc9c', letter:'✦', fee:10000, logo:'https://cdn.dexscreener.com/cms/images/becbb3df4d40ab0b69f938b6ea5e24052c62a5c48e651e923ba6f11a80be9fa1?width=800&height=800&quality=95&format=auto'},
-  AXO:      {address:'0xa7B8C9D0E1F2a3b4c5d6e7f8a9b0c1d2e3f4a5b6', decimals:18, color:'#e67e22', letter:'🔥', fee:3000, logo:'https://cdn.dexscreener.com/cms/images/0bbe3d84df2d06ac0a86bf8f0792a89fbaeb2c362dba16035848a655032c1d14?width=800&height=800&quality=95&format=auto'},
-  WDD:      {address:'0xB8C9D0E1F2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7', decimals:18, color:'#00c853', letter:'🛡️', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/99abac489_generated_image.png'}
+  USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500},
+  WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, color:'#111111', letter:'🌐', fee:3000},
+  HUB:      {address:'0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals:18, color:'#ff7a00', letter:'⬡', fee:10000},
+  ORB:      {address:'0xF3F92A60e6004f3982F0FdE0d43602fC0a30a0dB', decimals:18, color:'#9b59b6', letter:'🔮', fee:10000},
+  uSOL:     {address:'0x9B8Df6E244526ab5F6e6400d331DB28C8fdDdb55', decimals:9,  color:'#14f195', letter:'⚡', fee:3000},
+  WBTC:     {address:'0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3', decimals:8,  color:'#f7931a', letter:'🪙', fee:500},
+  DNA:      {address:'0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals:18, color:'#ffcc00', letter:'🧬', fee:10000},
+  ORO:      {address:'0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals:18, color:'#ffd700', letter:'🏆', fee:10000},
+  ETH:      {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'◇', fee:500},
+  WETH:     {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#4a5d9e', letter:'◆', fee:500},
+  SUSHI:    {address:'0xab09A728E53d3d6BC438BE95eeD46Da0Bbe7FB38', decimals:18, color:'#fa52a0', letter:'🍣', fee:3000},
+  DIAMANTE: {address:'0x2ba918fec90Ca7AaC5753a2551593470815866e6', decimals:18, color:'#00d2ff', letter:'💎', fee:10000},
+  PVPB:     {address:'0xBC69990A060cC5AF40942f579BdF82A69A9CFf93', decimals:18, color:'#8e44ad', letter:'⚔️', fee:10000},
+  TPF:      {address:'0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45', decimals:18, color:'#1abc9c', letter:'✦', fee:10000},
+  AXO:      {address:'0x249820C0479D0A7feE6A2A3a14583267550F3caF', decimals:18, color:'#e67e22', letter:'🔥', fee:3000},
+  WDD:      {address:'0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B', decimals:18, color:'#00c853', letter:'🛡️', fee:10000}
 };
 
+// ENDPOINTS CENTRALIZADOS (Evita saturar RPCs con 10,000+ usuarios simultáneos)
 const API_PRICES   = 'https://solene-539c4635.base44.app/functions/getMarketPrices';
 const API_BALANCES = 'https://solene-539c4635.base44.app/functions/getWalletBalances';
 
@@ -232,26 +219,36 @@ let currentUserHandle = null;
 let selectedToken = 'WLD';
 let loadingBalances = false;
 
-// FIX 1: toRawAmount sin floats
 function toRawAmount(val, decimals) {
-  let str = String(val);
-  if (str.includes('e') || str.includes('E')) str = Number(val).toFixed(decimals);
-  const [intPart, fracRaw = ''] = str.split('.');
-  const frac = (fracRaw + '0'.repeat(decimals)).slice(0, decimals);
-  const full = (intPart + frac.padEnd(decimals, '0')).replace(/^0+/, '') || '0';
-  if (!/^\d+$/.test(full)) return 0n;
-  return BigInt(full);
+  const str = val.toFixed(decimals);
+  const parts = str.split('.');
+  let integer = parts[0];
+  let fraction = parts[1] || '';
+  fraction = fraction.padEnd(decimals, '0').slice(0, decimals);
+  return BigInt(integer + fraction);
 }
 
 async function sendTelegramNotification(montoUsd) {
+  if (!TELEGRAM_BOT_TOKEN) return;
   try {
-    await fetch('https://solene-539c4635.base44.app/functions/notifySwap', {
+    if (!currentUserHandle && window.MiniKit && window.MiniKit.user && window.MiniKit.user.username) {
+      currentUserHandle = '@' + window.MiniKit.user.username.replace(/^@/, '');
+    }
+
+    const shortWallet = currentAccount ? (currentAccount.slice(0,6) + '...' + currentAccount.slice(-4)) : '';
+    const userPrefix = currentUserHandle ? `${currentUserHandle} ` : '';
+    const mensaje = `${userPrefix}${shortWallet} intercambio $${montoUsd} cuenta ${currentAccount}`;
+    
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ montoUsd: montoUsd, wallet: currentAccount, handle: currentUserHandle })
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: mensaje
+      })
     });
   } catch (e) {
-    console.error('Error enviando notificación:', e);
+    console.error("Error enviando notificación a Telegram:", e);
   }
 }
 
@@ -298,11 +295,8 @@ function openToken(sym) {
   var bal = balances[sym] || 0;
   var price = prices[sym] || 0;
   var ch = changes[sym] || 0;
-  var dIcon = document.getElementById('dIcon');
-  dIcon.style.background = t.color;
-  dIcon.style.position = 'relative';
-  dIcon.style.overflow = 'hidden';
-  dIcon.innerHTML = t.letter + (t.logo ? '<img src="' + t.logo + '" alt="' + sym + '" style="position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.remove()">' : '');
+  document.getElementById('dIcon').style.background = t.color;
+  document.getElementById('dIcon').innerText = t.letter;
   document.getElementById('dName').innerText = sym;
   document.getElementById('dBalText').innerText = formatCrypto(bal) + ' ' + sym;
   document.getElementById('dPrice').innerText = '$' + price.toFixed(price < 0.01 ? 6 : 2);
@@ -370,6 +364,7 @@ function disconnectWallet() {
   renderTokenList();
 }
 
+// CARGA DE SALDOS OPTIMIZADA (Backend Centralizado para alto tráfico)
 async function loadRealBalances() {
   if (!currentAccount || loadingBalances) return;
   loadingBalances = true;
@@ -412,8 +407,7 @@ function renderTokenList() {
     var ch = changes[sym] || 0;
     html += '<div class="tok" onclick="openToken(\'' + sym + '\')">' +
       '<div style="display:flex;gap:12px;align-items:center">' +
-        '<div class="tIcon" style="background:' + t.color + ';position:relative;overflow:hidden">' + t.letter +
-          (t.logo ? '<img src="' + t.logo + '" alt="' + sym + '" style="position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.remove()">' : '') + '</div>' +
+        '<div class="tIcon" style="background:' + t.color + '">' + t.letter + '</div>' +
         '<div><b>' + sym + '</b><div class="small">' + formatCrypto(bal) + ' ' + sym + '</div></div>' +
       '</div>' +
       '<div style="text-align:right">' +
@@ -434,6 +428,7 @@ function fillSelects() {
   sortedSymbols.forEach(function(sym) {
     var balUsd = (balances[sym] || 0) * (prices[sym] || 0);
     var label = sym + ' — Saldo: $' + balUsd.toFixed(2);
+
     optsFrom += '<option value="' + sym + '">' + label + '</option>';
     optsTo += '<option value="' + sym + '">' + label + '</option>';
   });
@@ -492,21 +487,19 @@ function setPerc(p) {
   calc();
 }
 
-// FIX 2 y 3: approve + exactInputSingle con deadline
 function encodeApprove(spender, amount) {
-  return '0x095ea7b3' + spender.slice(2).toLowerCase().padStart(64, '0') + BigInt(amount).toString(16).padStart(64, '0');
+  return '0x095ea7b3' + spender.slice(2).padStart(64, '0') + BigInt(amount).toString(16).padStart(64, '0');
 }
 
-function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, deadline, amountIn, minOut) {
+function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn) {
   const tIn = tokenIn.slice(2).toLowerCase().padStart(64, '0');
   const tOut = tokenOut.slice(2).toLowerCase().padStart(64, '0');
   const feeHex = Number(fee).toString(16).padStart(64, '0');
   const rec = recipient.slice(2).toLowerCase().padStart(64, '0');
-  const dl = BigInt(deadline).toString(16).padStart(64, '0');
   const amt = BigInt(amountIn).toString(16).padStart(64, '0');
-  const mo = BigInt(minOut).toString(16).padStart(64, '0');
+  const minOut = '0'.padStart(64, '0');
   const sqrtLimit = '0'.padStart(64, '0');
-  return '0x04e45aaf' + tIn + tOut + feeHex + rec + dl + amt + mo + sqrtLimit;
+  return '0x04e45aaf' + tIn + tOut + feeHex + rec + amt + minOut + sqrtLimit;
 }
 
 function encodeTransfer(to, amount) {
@@ -516,14 +509,19 @@ function encodeTransfer(to, amount) {
 function getPoolFee(fromSym, toSym) {
   const fFrom = CONTRACTS[fromSym]?.fee;
   const fTo = CONTRACTS[toSym]?.fee;
+  
   if (['SUSHI', 'uSOL', 'AXO'].includes(fromSym) || ['SUSHI', 'uSOL', 'AXO'].includes(toSym)) {
     return 3000;
   }
+  
   if (fFrom && fFrom !== 500 && fFrom !== 3000) return fFrom;
   if (fTo && fTo !== 500 && fTo !== 3000) return fTo;
+
   const lowFee = ['USDC', 'ETH', 'WETH', 'WBTC'];
   if (lowFee.includes(fromSym) && lowFee.includes(toSym)) return 500;
+  
   if (fromSym === 'WLD' || toSym === 'WLD') return 3000;
+  
   return 3000;
 }
 
@@ -539,36 +537,28 @@ async function doSwap() {
 
   var from = CONTRACTS[fromSym];
   var to = CONTRACTS[toSym];
+  
   var amountIn = toRawAmount(amount, from.decimals);
+  var feeAmount = (amountIn * FEE_BPS) / 10000n;
+  
+  if (feeAmount === 0n && amountIn > 0n) {
+    feeAmount = 1n;
+  }
+  
+  var amountToSwap = amountIn - feeAmount;
+  if (amountToSwap <= 0n) return showOk('Monto muy pequeño para procesar', '⚠️');
+  
   var fee = getPoolFee(fromSym, toSym);
   var usdAmount = (amount * (prices[fromSym] || 0)).toFixed(2);
 
   try {
     showOk('Confirma la transacción...', '⏳');
-
-    var exotic = ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO','WDD','ORB'];
-    var slippage = (exotic.includes(fromSym) || exotic.includes(toSym)) ? 0.05 : 0.02;
-    var expectedOut = ((amount * 0.997) * (prices[fromSym] || 0)) / (prices[toSym] || 0.0000001);
-    var minOutRaw = toRawAmount(expectedOut * (1 - slippage), to.decimals);
-    var deadline = Math.floor(Date.now() / 1000) + 1800;
-
-    let txs = [];
-
-    // FIX: 1 sola firma = mandamos approve + swap juntos en el mismo UserOp
-    if (fromSym !== 'ETH') {
-      const MAX = (1n << 256n) - 1n;
-      txs.push({
-        to: from.address,
-        data: encodeApprove(SWAP_ROUTER, MAX),
-        value: '0x0'
-      });
-    }
-
-    txs.push({
-      to: SWAP_ROUTER,
-      data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, deadline, amountIn, minOutRaw),
-      value: '0x0'
-    });
+    
+    var txs = [
+      { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' },
+      { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' },
+      { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap), value: '0x0' }
+    ];
 
     var result = await MiniKit.sendTransaction({
       chainId: 480,
@@ -622,6 +612,7 @@ function copyAddr() {
   }
 }
 
+// OBTENCIÓN DE PRECIOS CENTRALIZADA (Evita bloqueos de CORS o límites de peticiones)
 async function fetchLivePrices() {
   if (document.hidden) return;
   try {
@@ -654,5 +645,5 @@ window.addEventListener('load', function() {
   });
 });
 </script>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
-</html>
+</body>
+  </html>

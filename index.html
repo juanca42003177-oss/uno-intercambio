@@ -171,10 +171,9 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 </div>
 
 <script>
-// ====================== CONFIGURACIÓN ======================
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 const FEE_WALLET  = '0x019001d46cd3155ef045a41f4c359c040595438c';
-const FEE_BPS     = 30n; // 0.3%
+const FEE_BPS     = 30n;
 
 const CONTRACTS = {
   USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500,  logo:'https://coin-images.coingecko.com/coins/images/6319/large/USDC.png?1769615602'},
@@ -474,6 +473,11 @@ function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn, min
 }
 
 function getPoolFee(fromSym, toSym) {
+  // Forzar 1% para DIAMANTE y PVPB
+  if (fromSym === 'DIAMANTE' || toSym === 'DIAMANTE' || fromSym === 'PVPB' || toSym === 'PVPB') {
+    return 10000;
+  }
+
   const fFrom = CONTRACTS[fromSym]?.fee;
   const fTo = CONTRACTS[toSym]?.fee;
   if (['SUSHI', 'uSOL', 'AXO'].includes(fromSym) || ['SUSHI', 'uSOL', 'AXO'].includes(toSym)) return 3000;
@@ -510,8 +514,16 @@ async function doSwap() {
   try {
     showOk('Confirma la transacción...', '⏳');
 
-    var exotic = ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO','WDD','ORB'];
-    var slippage = (exotic.includes(fromSym) || exotic.includes(toSym)) ? 0.10 : 0.05;
+    // Slippage especial para DIAMANTE y PVPB
+    var highSlippageTokens = ['DIAMANTE', 'PVPB'];
+    var exotic = ['DNA','HUB','ORO','SUSHI','TPF','AXO','WDD','ORB','uSOL'];
+    
+    var slippage = 0.05;
+    if (highSlippageTokens.includes(fromSym) || highSlippageTokens.includes(toSym)) {
+      slippage = 0.40; // 40% para DIAMANTE y PVPB
+    } else if (exotic.includes(fromSym) || exotic.includes(toSym)) {
+      slippage = 0.15;
+    }
 
     var expectedOut = ((amount * 0.997) * (prices[fromSym] || 0)) / (prices[toSym] || 0.0000001);
     var minOutRaw = toRawAmount(expectedOut * (1 - slippage), to.decimals);
@@ -610,4 +622,4 @@ window.addEventListener('load', function() {
 });
 </script>
 </body>
-</html>
+  </html>

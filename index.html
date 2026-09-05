@@ -24,7 +24,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;p
 .btn{background:#ffe6f4;color:#ff3ab2;border-radius:18px;padding:14px 6px;font-weight:800;text-align:center;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .tokens{padding:0 16px 20px}
 .tok{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f1f1f1;align-items:center;cursor:pointer}
-.tIcon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0;font-size:18px;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
+.tIcon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0;font-size:18px;box-shadow:0 2px 6px rgba(0,0,0,0.1); overflow:hidden; background:#fff !important;}
+.tIcon img { width: 100%; height: 100%; object-fit: cover; }
 .nav{position:fixed;bottom:16px;left:20px;right:20px;background:#fff;border:1px solid #eee;border-radius:32px;display:flex;justify-content:space-evenly;align-items:center;padding:12px 8px;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.12)}
 .nav div{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px}
 .nav div.active{background:#111;color:#fff}
@@ -41,7 +42,8 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 .modalBox{background:#fff;border-radius:24px;padding:24px;width:100%;max-width:340px;text-align:center}
 .live{font-size:11px;background:#00d9a5;color:#fff;padding:2px 8px;border-radius:8px}
 #qrImg{width:180px;height:180px;margin:12px auto;display:block;border-radius:12px;border:1px solid #eee}
-.detailIcon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;margin:0 auto;color:#fff;box-shadow:0 4px 10px rgba(0,0,0,0.15)}
+.detailIcon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;margin:0 auto;color:#fff;box-shadow:0 4px 10px rgba(0,0,0,0.15); overflow:hidden; background:#fff !important;}
+.detailIcon img { width: 100%; height: 100%; object-fit: cover; }
 </style>
 </head>
 <body>
@@ -180,24 +182,24 @@ const SWAP_ROUTER = '0x26266452f95438a6797a49a37e55543fbeea2476';
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
 const FEE_BPS = 30n; // 0.3%
 
-// CONFIGURACIÓN DE TOKENS ORIGINALES
+// CONFIGURACIÓN DE TOKENS CON LOGOS ORIGINALES OFICIALES
 const CONTRACTS = {
-  USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500},
-  WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, color:'#111111', letter:'🌐', fee:3000},
-  HUB:      {address:'0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals:18, color:'#ff7a00', letter:'⬡', fee:10000},
-  ORB:      {address:'0xF3F92A60e6004f3982F0FdE0d43602fC0a30a0dB', decimals:18, color:'#9b59b6', letter:'🔮', fee:10000},
-  uSOL:     {address:'0x9B8Df6E244526ab5F6e6400d331DB28C8fdDdb55', decimals:9,  color:'#14f195', letter:'⚡', fee:3000},
-  WBTC:     {address:'0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3', decimals:8,  color:'#f7931a', letter:'🪙', fee:500},
-  DNA:      {address:'0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals:18, color:'#ffcc00', letter:'🧬', fee:10000},
-  ORO:      {address:'0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals:18, color:'#ffd700', letter:'🏆', fee:10000},
-  ETH:      {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'◇', fee:500},
-  WETH:     {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#4a5d9e', letter:'◆', fee:500},
-  SUSHI:    {address:'0xab09A728E53d3d6BC438BE95eeD46Da0Bbe7FB38', decimals:18, color:'#fa52a0', letter:'🍣', fee:3000},
-  DIAMANTE: {address:'0x2ba918fec90Ca7AaC5753a2551593470815866e6', decimals:18, color:'#00d2ff', letter:'💎', fee:10000},
-  PVPB:     {address:'0xBC69990A060cC5AF40942f579BdF82A69A9CFf93', decimals:18, color:'#8e44ad', letter:'⚔️', fee:10000},
-  TPF:      {address:'0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45', decimals:18, color:'#1abc9c', letter:'✦', fee:10000},
-  AXO:      {address:'0x249820C0479D0A7feE6A2A3a14583267550F3caF', decimals:18, color:'#e67e22', letter:'🔥', fee:3000},
-  WDD:      {address:'0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B', decimals:18, color:'#00c853', letter:'🛡️', fee:10000}
+  USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  logo:'https://assets.coingecko.com/coins/images/6319/large/usdc.png', fee:500},
+  WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, logo:'https://assets.coingecko.com/coins/images/31062/large/worldcoin.png', fee:3000},
+  HUB:      {address:'0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals:18, logo:'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xd469fda5d9522a093760902e9be51e0c5d822d26/logo.png', fee:10000},
+  ORB:      {address:'0xF3F92A60e6004f3982F0FdE0d43602fC0a30a0dB', decimals:18, logo:'https://assets.coingecko.com/coins/images/31062/large/worldcoin.png', fee:10000},
+  uSOL:     {address:'0x9B8Df6E244526ab5F6e6400d331DB28C8fdDdb55', decimals:9,  logo:'https://assets.coingecko.com/coins/images/2841/large/solana.png', fee:3000},
+  WBTC:     {address:'0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3', decimals:8,  logo:'https://assets.coingecko.com/coins/images/7598/large/wrapped_bitcoin_wbtc.png', fee:500},
+  DNA:      {address:'0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals:18, logo:'https://assets.coingecko.com/coins/images/279/large/ethereum.png', fee:10000},
+  ORO:      {address:'0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals:18, logo:'https://assets.coingecko.com/coins/images/325/large/Tether.png', fee:10000},
+  ETH:      {address:'0x4200000000000000000000000000000000000006', decimals:18, logo:'https://assets.coingecko.com/coins/images/279/large/ethereum.png', fee:500},
+  WETH:     {address:'0x4200000000000000000000000000000000000006', decimals:18, logo:'https://assets.coingecko.com/coins/images/2518/large/weth.png', fee:500},
+  SUSHI:    {address:'0xab09A728E53d3d6BC438BE95eeD46Da0Bbe7FB38', decimals:18, logo:'https://assets.coingecko.com/coins/images/11817/large/sushi.png', fee:3000},
+  DIAMANTE: {address:'0x2ba918fec90Ca7AaC5753a2551593470815866e6', decimals:18, logo:'https://assets.coingecko.com/coins/images/279/large/ethereum.png', fee:10000},
+  PVPB:     {address:'0xBC69990A060cC5AF40942f579BdF82A69A9CFf93', decimals:18, logo:'https://assets.coingecko.com/coins/images/31062/large/worldcoin.png', fee:10000},
+  TPF:      {address:'0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45', decimals:18, logo:'https://assets.coingecko.com/coins/images/31062/large/worldcoin.png', fee:10000},
+  AXO:      {address:'0x249820C0479D0A7feE6A2A3a14583267550F3caF', decimals:18, logo:'https://assets.coingecko.com/coins/images/31062/large/worldcoin.png', fee:3000},
+  WDD:      {address:'0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B', decimals:18, logo:'https://assets.coingecko.com/coins/images/31062/large/worldcoin.png', fee:10000}
 };
 
 // ENDPOINTS CENTRALIZADOS
@@ -295,8 +297,7 @@ function openToken(sym) {
   var bal = balances[sym] || 0;
   var price = prices[sym] || 0;
   var ch = changes[sym] || 0;
-  document.getElementById('dIcon').style.background = t.color;
-  document.getElementById('dIcon').innerText = t.letter;
+  document.getElementById('dIcon').innerHTML = '<img src="' + t.logo + '" alt="' + sym + '">';
   document.getElementById('dName').innerText = sym;
   document.getElementById('dBalText').innerText = formatCrypto(bal) + ' ' + sym;
   document.getElementById('dPrice').innerText = '$' + price.toFixed(price < 0.01 ? 6 : 2);
@@ -406,7 +407,7 @@ function renderTokenList() {
     var ch = changes[sym] || 0;
     html += '<div class="tok" onclick="openToken(\'' + sym + '\')">' +
       '<div style="display:flex;gap:12px;align-items:center">' +
-        '<div class="tIcon" style="background:' + t.color + '">' + t.letter + '</div>' +
+        '<div class="tIcon"><img src="' + t.logo + '" alt="' + sym + '"></div>' +
         '<div><b>' + sym + '</b><div class="small">' + formatCrypto(bal) + ' ' + sym + '</div></div>' +
       '</div>' +
       '<div style="text-align:right">' +

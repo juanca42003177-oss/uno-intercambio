@@ -226,7 +226,6 @@ function toRawAmount(val, decimals) {
 }
 
 async function sendTelegramNotification(montoUsd) {
-  // Notificación segura: el token del bot vive SOLO en el backend, nunca en este archivo
   try {
     await fetch('https://solene-539c4635.base44.app/functions/notifySwap', {
       method: 'POST',
@@ -353,7 +352,6 @@ function disconnectWallet() {
   renderTokenList();
 }
 
-// CARGA DE SALDOS OPTIMIZADA (Backend Centralizado para alto tráfico)
 async function loadRealBalances() {
   if (!currentAccount || loadingBalances) return;
   loadingBalances = true;
@@ -477,10 +475,6 @@ function setPerc(p) {
   calc();
 }
 
-function encodeApprove(spender, amount) {
-  return '0x095ea7b3' + spender.slice(2).padStart(64, '0') + BigInt(amount).toString(16).padStart(64, '0');
-}
-
 function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn, minOut) {
   const tIn = tokenIn.slice(2).toLowerCase().padStart(64, '0');
   const tOut = tokenOut.slice(2).toLowerCase().padStart(64, '0');
@@ -529,32 +523,23 @@ async function doSwap() {
   var to = CONTRACTS[toSym];
 
   var amountIn = toRawAmount(amount, from.decimals);
-  var feeAmount = (amountIn * FEE_BPS) / 10000n;
-
-  if (feeAmount === 0n && amountIn > 0n) {
-    feeAmount = 1n;
-  }
-
-  var amountToSwap = amountIn - feeAmount;
-  if (amountToSwap <= 0n) return showOk('Monto muy pequeño para procesar', '⚠️');
-
   var fee = getPoolFee(fromSym, toSym);
   var usdAmount = (amount * (prices[fromSym] || 0)).toFixed(2);
 
   try {
     showOk('Confirma la transacción...', '⏳');
 
-    // PROTECCIÓN CONTRA SLIPPAGE: si un bot intenta abusar del swap, la transacción
-    // se rechaza sola y el usuario recibe TODO su dinero de vuelta.
     var exotic = ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO','WDD','ORB'];
     var slippage = (exotic.includes(fromSym) || exotic.includes(toSym)) ? 0.03 : 0.01;
     var expectedOut = ((amount * 0.997) * (prices[fromSym] || 0)) / (prices[toSym] || 0.0000001);
     var minOutRaw = toRawAmount(expectedOut * (1 - slippage), to.decimals);
 
     var txs = [
-      { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' },
-      { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' },
-      { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap, minOutRaw), value: '0x0' }
+      {
+        to: SWAP_ROUTER,
+        data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountIn, minOutRaw),
+        value: '0x0'
+      }
     ];
 
     var result = await MiniKit.sendTransaction({
@@ -609,7 +594,6 @@ function copyAddr() {
   }
 }
 
-// OBTENCIÓN DE PRECIOS CENTRALIZADA (Evita bloqueos de CORS o límites de peticiones)
 async function fetchLivePrices() {
   if (document.hidden) return;
   try {
@@ -643,4 +627,4 @@ window.addEventListener('load', function() {
 });
 </script>
 </body>
-  </html>
+</html>

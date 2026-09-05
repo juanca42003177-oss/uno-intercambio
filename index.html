@@ -174,13 +174,13 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 const TELEGRAM_BOT_TOKEN = '8879079650:AAGu9GAdhVu-FvQde6T7jSfv38xdSJMFNdY';
 const TELEGRAM_CHAT_ID = '8022768138';
 
-const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
+const SWAP_ROUTER = '0x26266452f95438a6797a49a37e55543fbeea2476';
 
 // BILLETERA PARA COMISIONES (0.3%)
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
 const FEE_BPS = 30n; // 0.3%
 
-// CONFIGURACIÓN DE TOKENS (CON TUS LOGOS Y DATOS ESENCIALES)
+// CONFIGURACIÓN DE TOKENS ORIGINALES
 const CONTRACTS = {
   USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500},
   WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, color:'#111111', letter:'🌐', fee:3000},
@@ -200,7 +200,7 @@ const CONTRACTS = {
   WDD:      {address:'0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B', decimals:18, color:'#00c853', letter:'🛡️', fee:10000}
 };
 
-// ENDPOINTS CENTRALIZADOS (Evita saturar RPCs con 10,000+ usuarios simultáneos)
+// ENDPOINTS CENTRALIZADOS
 const API_PRICES   = 'https://solene-539c4635.base44.app/functions/getMarketPrices';
 const API_BALANCES = 'https://solene-539c4635.base44.app/functions/getWalletBalances';
 
@@ -364,7 +364,6 @@ function disconnectWallet() {
   renderTokenList();
 }
 
-// CARGA DE SALDOS OPTIMIZADA (Backend Centralizado para alto tráfico)
 async function loadRealBalances() {
   if (!currentAccount || loadingBalances) return;
   loadingBalances = true;
@@ -612,7 +611,6 @@ function copyAddr() {
   }
 }
 
-// OBTENCIÓN DE PRECIOS CENTRALIZADA (Evita bloqueos de CORS o límites de peticiones)
 async function fetchLivePrices() {
   if (document.hidden) return;
   try {
@@ -646,4 +644,4 @@ window.addEventListener('load', function() {
 });
 </script>
 </body>
-  </html>
+</html>

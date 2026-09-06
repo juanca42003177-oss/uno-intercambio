@@ -178,25 +178,25 @@ const WETH_ADDRESS   = '0x4200000000000000000000000000000000000006';
 const WLD_ADDRESS    = '0x2cFc85d8E48F8EAB294be644d9E25C3030863003';
 const FEE_WALLET     = '0x019001d46cd3155ef045a41f4c359c040595438c';
 
-// Comisión base 0.3%. Tokens difíciles 0.5% (más margen si fallan a veces)
-const FEE_BPS_NORMAL  = 30n;  // 0.3%
-const FEE_BPS_HARD    = 50n;  // 0.5%
-const HARD_FEE_TOKENS = new Set(['DNA', 'AXO', 'DIAMANTE', 'PVPB', 'HUB']);
+const FEE_BPS_NORMAL  = 30n;   // 0.3%
+const FEE_BPS_HARD    = 100n;  // 1% tokens difíciles
+const HARD_FEE_TOKENS = new Set(['DNA', 'AXO', 'DIAMANTE', 'PVPB', 'HUB', 'SUSHI']);
+const V2_TOKENS       = new Set(['DNA', 'AXO']);
+const PROBLEM_TOKENS  = new Set(['DNA', 'AXO', 'DIAMANTE']);
 
-const V2_TOKENS = new Set(['DNA', 'AXO']);
-const PROBLEM_TOKENS = new Set(['DNA', 'AXO', 'DIAMANTE']);
+const ETH_LOGO = 'https://assets.coingecko.com/coins/images/279/large/ethereum.png';
 
 const CONTRACTS = {
-  USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500, logo:'https://coin-images.coingecko.com/coins/images/6319/large/USDC.png?1769615602'},
+  USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500,  logo:'https://coin-images.coingecko.com/coins/images/6319/large/USDC.png?1769615602'},
   WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, color:'#111111', letter:'🌐', fee:3000, logo:'https://cdn.dexscreener.com/cms/images/ef98025f53486ef2022ffb19c5da9225ad28931344b4549a6265dfc22fd74d76?width=800&height=800&quality=95&format=auto'},
+  ETH:      {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'Ξ', fee:500,  logo:ETH_LOGO},
+  WETH:     {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'Ξ', fee:500,  logo:ETH_LOGO},
   HUB:      {address:'0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals:18, color:'#ff7a00', letter:'⬡', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/429b21f63_generated_image.png'},
   ORB:      {address:'0xF3F92A60e6004f3982F0FdE0d43602fC0a30a0dB', decimals:18, color:'#9b59b6', letter:'🔮', fee:10000, logo:'https://cdn.dexscreener.com/cms/images/6b364af0717941d3bbab268fd40e6eb424671813008662b76c16921e25bc1d27?width=800&height=800&quality=95&format=auto'},
   uSOL:     {address:'0x9B8Df6E244526ab5F6e6400d331DB28C8fdDdb55', decimals:9,  color:'#14f195', letter:'⚡', fee:3000, logo:'https://coin-images.coingecko.com/coins/images/4128/large/solana.png?1718769756'},
-  WBTC:     {address:'0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3', decimals:8,  color:'#f7931a', letter:'🪙', fee:500, logo:'https://coin-images.coingecko.com/coins/images/7598/large/WBTCLOGO.png?1764496367'},
+  WBTC:     {address:'0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3', decimals:8,  color:'#f7931a', letter:'🪙', fee:500,  logo:'https://coin-images.coingecko.com/coins/images/7598/large/WBTCLOGO.png?1764496367'},
   DNA:      {address:'0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals:18, color:'#ffcc00', letter:'🧬', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/c487b9b51_generated_image.png'},
   ORO:      {address:'0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals:18, color:'#ffd700', letter:'🏆', fee:10000, logo:'https://cdn.dexscreener.com/cms/images/90bdc660b15f747a9291399e454528674815dd48a0d21a38ae5489193dfa22df?width=800&height=800&quality=95&format=auto'},
-  ETH:      {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'◇', fee:500, logo:'https://coin-images.coingecko.com/coins/images/2518/large/weth.png?1696503332'},
-  WETH:     {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#4a5d9e', letter:'◆', fee:500, logo:'https://coin-images.coingecko.com/coins/images/2518/large/weth.png?1696503332'},
   SUSHI:    {address:'0xab09A728E53d3d6BC438BE95eeD46Da0Bbe7FB38', decimals:18, color:'#fa52a0', letter:'🍣', fee:3000, logo:'https://cdn.dexscreener.com/cms/images/v5qg8mXdATqSKsv0?width=800&height=800&quality=95&format=auto'},
   DIAMANTE: {address:'0x2ba918fec90Ca7AaC5753a2551593470815866e6', decimals:18, color:'#00d2ff', letter:'💎', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/f412f7a43_generated_image.png'},
   PVPB:     {address:'0xBC69990A060cC5AF40942f579BdF82A69A9CFf93', decimals:18, color:'#8e44ad', letter:'⚔️', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/c98ac0dd7_generated_image.png'},
@@ -211,12 +211,13 @@ const API_NOTIFY   = 'https://solene-539c4635.base44.app/functions/notifySwap';
 
 let prices = {
   WLD:0.38, DNA:0.00000039, HUB:0.0000008, ORO:0.002, USDC:1,
-  ETH:3400, WETH:3400, SUSHI:0.5, DIAMANTE:0.032, PVPB:0.0001, TPF:0.0001,
-  AXO:0.000045, WDD:0.002, ORB:0.001, uSOL:100, WBTC:77412
+  ETH:3400, WETH:3400, SUSHI:0.0000021, DIAMANTE:0.032,
+  PVPB:0.0001, TPF:0.0001, AXO:0.000045, WDD:0.002,
+  ORB:0.001, uSOL:100, WBTC:77412
 };
 let changes = {
-  WLD:0, DNA:0, HUB:0, ORO:0, USDC:0, ETH:0, WETH:0, SUSHI:0, DIAMANTE:0, PVPB:0, TPF:0, AXO:0, WDD:0,
-  ORB:0, uSOL:0, WBTC:0
+  WLD:0, DNA:0, HUB:0, ORO:0, USDC:0, ETH:0, WETH:0, SUSHI:0, DIAMANTE:0,
+  PVPB:0, TPF:0, AXO:0, WDD:0, ORB:0, uSOL:0, WBTC:0
 };
 let balances = {};
 let currentAccount = null;
@@ -380,6 +381,9 @@ async function loadRealBalances() {
       for (var sym in CONTRACTS) {
         if (data.balances[sym] !== undefined) balances[sym] = data.balances[sym];
       }
+      // ETH y WETH son el mismo token
+      if (data.balances.ETH !== undefined) balances.WETH = data.balances.ETH;
+      if (data.balances.WETH !== undefined) balances.ETH = data.balances.WETH;
     }
   } catch (e) {
     console.error('Error cargando saldos:', e);
@@ -392,16 +396,24 @@ async function loadRealBalances() {
 
 function updateTotal() {
   var total = 0;
-  for (var sym in balances) total += (balances[sym] || 0) * (prices[sym] || 0);
+  var seen = {};
+  for (var sym in balances) {
+    // No contar ETH y WETH dos veces
+    var key = (sym === 'ETH' || sym === 'WETH') ? 'ETH' : sym;
+    if (seen[key]) continue;
+    seen[key] = true;
+    total += (balances[sym] || 0) * (prices[sym] || 0);
+  }
   document.getElementById('totalUsd').innerText = '$' + total.toFixed(2);
 }
 
 function renderTokenList() {
   var html = '<div style="font-weight:800;margin:10px 0 6px">World Chain</div>';
-  var sortedSymbols = getSortedSymbols();
+  var sortedSymbols = getSortedSymbols().filter(function(s) { return s !== 'WETH'; }); // mostrar solo ETH, no duplicar WETH
   sortedSymbols.forEach(function(sym) {
     var t = CONTRACTS[sym];
     var bal = balances[sym] || 0;
+    if (sym === 'ETH') bal = balances.ETH || balances.WETH || 0;
     var usd = bal * (prices[sym] || 0);
     var ch = changes[sym] || 0;
     html += '<div class="tok" onclick="openToken(\'' + sym + '\')">' +
@@ -419,16 +431,20 @@ function renderTokenList() {
 }
 
 function fillSelects() {
-  var sortedSymbols = getSortedSymbols();
+  var sortedSymbols = getSortedSymbols().filter(function(s) { return s !== 'WETH'; });
   var optsFrom = '', optsTo = '';
   sortedSymbols.forEach(function(sym) {
-    var balUsd = (balances[sym] || 0) * (prices[sym] || 0);
+    var bal = balances[sym] || 0;
+    if (sym === 'ETH') bal = balances.ETH || balances.WETH || 0;
+    var balUsd = bal * (prices[sym] || 0);
     var label = sym + ' — Saldo: $' + balUsd.toFixed(2);
     optsFrom += '<option value="' + sym + '">' + label + '</option>';
     optsTo += '<option value="' + sym + '">' + label + '</option>';
   });
   var curFrom = document.getElementById('fSel').value || selectedToken || sortedSymbols[0];
+  if (curFrom === 'WETH') curFrom = 'ETH';
   var curTo = document.getElementById('tSel').value || (sortedSymbols[0] !== 'USDC' ? 'USDC' : sortedSymbols[1]);
+  if (curTo === 'WETH') curTo = 'ETH';
   document.getElementById('fSel').innerHTML = optsFrom;
   document.getElementById('tSel').innerHTML = optsTo;
   document.getElementById('fSel').value = curFrom;
@@ -436,20 +452,25 @@ function fillSelects() {
 }
 
 function fillSendSelect() {
-  var sortedSymbols = getSortedSymbols();
+  var sortedSymbols = getSortedSymbols().filter(function(s) { return s !== 'WETH'; });
   var opts = '';
   sortedSymbols.forEach(function(sym) {
-    var balUsd = (balances[sym] || 0) * (prices[sym] || 0);
+    var bal = balances[sym] || 0;
+    if (sym === 'ETH') bal = balances.ETH || balances.WETH || 0;
+    var balUsd = bal * (prices[sym] || 0);
     opts += '<option value="' + sym + '">' + sym + ' — Saldo: $' + balUsd.toFixed(2) + '</option>';
   });
   var cur = document.getElementById('sendToken').value || selectedToken || sortedSymbols[0];
+  if (cur === 'WETH') cur = 'ETH';
   document.getElementById('sendToken').innerHTML = opts;
   document.getElementById('sendToken').value = cur;
 }
 
 function updateSendBal() {
   var sym = document.getElementById('sendToken').value;
-  document.getElementById('sendBal').innerText = formatCrypto(balances[sym] || 0) + ' ' + sym;
+  var bal = balances[sym] || 0;
+  if (sym === 'ETH') bal = balances.ETH || balances.WETH || 0;
+  document.getElementById('sendBal').innerText = formatCrypto(bal) + ' ' + sym;
 }
 
 function calc() {
@@ -458,14 +479,23 @@ function calc() {
   var amt = parseFloat(document.getElementById('fAmt').value) || 0;
   document.getElementById('bF').innerText = from;
   document.getElementById('bT').innerText = to;
-  document.getElementById('saldoTxt').innerText = formatCrypto(balances[from] || 0);
+
+  var balFrom = balances[from] || 0;
+  if (from === 'ETH') balFrom = balances.ETH || balances.WETH || 0;
+  document.getElementById('saldoTxt').innerText = formatCrypto(balFrom);
 
   var feeBps = getFeeBps(from, to);
   var feePct = Number(feeBps) / 100;
   document.getElementById('feePctLabel').innerText = feePct.toFixed(1);
 
   var warn = document.getElementById('lowLiqWarn');
-  if (PROBLEM_TOKENS.has(from) || PROBLEM_TOKENS.has(to)) {
+  if (from === 'DNA' || to === 'DNA') {
+    warn.style.display = 'block';
+    warn.innerText = 'DNA solo se intercambia con ETH/WETH. Usa montos pequeños.';
+  } else if (from === 'AXO' || to === 'AXO') {
+    warn.style.display = 'block';
+    warn.innerText = 'AXO solo se intercambia con WLD. Usa montos pequeños.';
+  } else if (PROBLEM_TOKENS.has(from) || PROBLEM_TOKENS.has(to)) {
     warn.style.display = 'block';
     warn.innerText = 'Este token puede tener poca liquidez. Usa montos pequeños.';
   } else {
@@ -491,7 +521,9 @@ function setPerc(p) {
   document.querySelectorAll('.perc button').forEach(function(b) { b.classList.remove('active'); });
   if (event && event.target) event.target.classList.add('active');
   var from = document.getElementById('fSel').value;
-  document.getElementById('fAmt').value = ((balances[from] || 0) * p / 100).toFixed(6);
+  var bal = balances[from] || 0;
+  if (from === 'ETH') bal = balances.ETH || balances.WETH || 0;
+  document.getElementById('fAmt').value = (bal * p / 100).toFixed(6);
   calc();
 }
 
@@ -540,6 +572,11 @@ function getPoolFee(fromSym, toSym) {
   return 3000;
 }
 
+function resolveAddr(sym) {
+  if (sym === 'ETH' || sym === 'WETH') return WETH_ADDRESS;
+  return CONTRACTS[sym].address;
+}
+
 async function doSwap() {
   if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
   var fromSym = document.getElementById('fSel').value;
@@ -548,11 +585,18 @@ async function doSwap() {
 
   if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
   if (fromSym === toSym) return showOk('Elige tokens diferentes', '⚠️');
-  if ((balances[fromSym] || 0) < amount) return showOk('Saldo insuficiente', '⚠️');
+  if ((fromSym === 'ETH' && toSym === 'WETH') || (fromSym === 'WETH' && toSym === 'ETH')) {
+    return showOk('ETH y WETH son el mismo token', '⚠️');
+  }
 
-  var from = CONTRACTS[fromSym];
-  var to = CONTRACTS[toSym];
-  var amountIn = toRawAmount(amount, from.decimals);
+  var balFrom = balances[fromSym] || 0;
+  if (fromSym === 'ETH') balFrom = balances.ETH || balances.WETH || 0;
+  if (balFrom < amount) return showOk('Saldo insuficiente', '⚠️');
+
+  var fromAddr = resolveAddr(fromSym);
+  var toAddr = resolveAddr(toSym);
+  var fromDec = CONTRACTS[fromSym].decimals;
+  var amountIn = toRawAmount(amount, fromDec);
   var feeBps = getFeeBps(fromSym, toSym);
   var feeAmount = (amountIn * feeBps) / 10000n;
   if (feeAmount === 0n && amountIn > 0n) feeAmount = 1n;
@@ -565,29 +609,37 @@ async function doSwap() {
     showOk('Confirma la transacción...', '⏳');
 
     var txs = [
-      { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' }
+      { to: fromAddr, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' }
     ];
 
+    // DNA / AXO → Uniswap V2 (solo rutas reales)
     if (V2_TOKENS.has(fromSym) || V2_TOKENS.has(toSym)) {
-      // DNA → V2 vía WETH | AXO → V2 vía WLD
-      var path;
-      if (fromSym === 'DNA' || toSym === 'DNA') {
-        if (fromSym === 'DNA' && (toSym === 'WETH' || toSym === 'ETH')) path = [from.address, WETH_ADDRESS];
-        else if ((fromSym === 'WETH' || fromSym === 'ETH') && toSym === 'DNA') path = [WETH_ADDRESS, to.address];
-        else if (fromSym === 'DNA') path = [from.address, WETH_ADDRESS, to.address];
-        else path = [from.address, WETH_ADDRESS, to.address];
-      } else {
-        if (fromSym === 'AXO' && toSym === 'WLD') path = [from.address, WLD_ADDRESS];
-        else if (fromSym === 'WLD' && toSym === 'AXO') path = [WLD_ADDRESS, to.address];
-        else if (fromSym === 'AXO') path = [from.address, WLD_ADDRESS, to.address];
-        else path = [from.address, WLD_ADDRESS, to.address];
+      var path = null;
+
+      if (fromSym === 'DNA' && (toSym === 'ETH' || toSym === 'WETH')) {
+        path = [fromAddr, WETH_ADDRESS];
+      } else if ((fromSym === 'ETH' || fromSym === 'WETH') && toSym === 'DNA') {
+        path = [WETH_ADDRESS, toAddr];
+      } else if (fromSym === 'AXO' && toSym === 'WLD') {
+        path = [fromAddr, WLD_ADDRESS];
+      } else if (fromSym === 'WLD' && toSym === 'AXO') {
+        path = [WLD_ADDRESS, toAddr];
       }
-      txs.push({ to: from.address, data: encodeApprove(SWAP_ROUTER_V2, amountToSwap), value: '0x0' });
+
+      if (!path) {
+        if (fromSym === 'DNA' || toSym === 'DNA') {
+          return showOk('DNA solo se intercambia con ETH.\nPrimero cambia a ETH y luego a DNA.', '⚠️');
+        }
+        return showOk('AXO solo se intercambia con WLD.\nPrimero cambia a WLD y luego a AXO.', '⚠️');
+      }
+
+      txs.push({ to: fromAddr, data: encodeApprove(SWAP_ROUTER_V2, amountToSwap), value: '0x0' });
       txs.push({ to: SWAP_ROUTER_V2, data: encodeV2SwapExactTokensForTokens(amountToSwap, path, currentAccount), value: '0x0' });
     } else {
+      // Uniswap V3
       var fee = getPoolFee(fromSym, toSym);
-      txs.push({ to: from.address, data: encodeApprove(SWAP_ROUTER_V3, amountToSwap), value: '0x0' });
-      txs.push({ to: SWAP_ROUTER_V3, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap, 0n), value: '0x0' });
+      txs.push({ to: fromAddr, data: encodeApprove(SWAP_ROUTER_V3, amountToSwap), value: '0x0' });
+      txs.push({ to: SWAP_ROUTER_V3, data: encodeExactInputSingle(fromAddr, toAddr, fee, currentAccount, amountToSwap, 0n), value: '0x0' });
     }
 
     var result = await MiniKit.sendTransaction({ chainId: 480, transactions: txs });
@@ -616,15 +668,18 @@ async function doSend() {
   var amount = parseFloat(document.getElementById('sendAmount').value);
   if (!toAddr || !toAddr.startsWith('0x') || toAddr.length !== 42) return showOk('Dirección inválida', '⚠️');
   if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
-  if ((balances[sym] || 0) < amount) return showOk('Saldo insuficiente', '⚠️');
 
-  var token = CONTRACTS[sym];
-  var amountRaw = toRawAmount(amount, token.decimals);
+  var bal = balances[sym] || 0;
+  if (sym === 'ETH') bal = balances.ETH || balances.WETH || 0;
+  if (bal < amount) return showOk('Saldo insuficiente', '⚠️');
+
+  var tokenAddr = resolveAddr(sym);
+  var amountRaw = toRawAmount(amount, CONTRACTS[sym].decimals);
   try {
     showOk('Confirma el envío...', '⏳');
     var result = await MiniKit.sendTransaction({
       chainId: 480,
-      transactions: [{ to: token.address, data: encodeTransfer(toAddr, amountRaw), value: '0x0' }]
+      transactions: [{ to: tokenAddr, data: encodeTransfer(toAddr, amountRaw), value: '0x0' }]
     });
     if (result && result.data && result.data.userOpHash) {
       showOk('¡Envío realizado!');
@@ -651,12 +706,17 @@ async function fetchLivePrices() {
     var data = await res.json();
     if (data && data.prices) {
       for (var sym in data.prices) {
-        // No sobrescribir DIAMANTE con un valor absurdo del API si viene mal
         if (sym === 'DIAMANTE' && data.prices[sym] < 0.001) continue;
+        if (sym === 'SUSHI' && data.prices[sym] > 0.01) continue;
         prices[sym] = data.prices[sym];
       }
+      if (prices.ETH) prices.WETH = prices.ETH;
+      if (prices.WETH) prices.ETH = prices.WETH;
     }
-    if (data && data.changes) for (var sym in data.changes) changes[sym] = data.changes[sym];
+    if (data && data.changes) {
+      for (var sym in data.changes) changes[sym] = data.changes[sym];
+      if (changes.ETH !== undefined) changes.WETH = changes.ETH;
+    }
   } catch (e) {
     console.error('Error obteniendo precios:', e);
   }

@@ -532,9 +532,46 @@ function calc() {
   var pt = prices[to] || 0.0000001;
   var usd = amt * pf;
   var fee = usd * (Number(feeBps) / 10000);
+  // Estimado instantáneo con precios de referencia (puede ser impreciso en
+  // tokens poco líquidos). Se corrige abajo con la cotización real del pool.
   document.getElementById('tAmt').value = formatCrypto((usd - fee) / pt);
   document.getElementById('feeUno').innerText = '$' + fee.toFixed(4);
   document.getElementById('totalCommission').innerText = '$' + fee.toFixed(4);
+
+  // Cotización REAL contra el pool (misma que se usa al firmar), para que lo
+  // que ves en pantalla coincida con lo que World App te va a pedir firmar.
+  scheduleRealQuote(from, to, amt, feeBps);
+}
+
+var calcQuoteTimer = null;
+var calcQuoteSeq = 0;
+
+function scheduleRealQuote(from, to, amt, feeBps) {
+  clearTimeout(calcQuoteTimer);
+  if (!amt || amt <= 0) return;
+  if (from === to) return;
+  if ((from === 'ETH' && to === 'WETH') || (from === 'WETH' && to === 'ETH')) return;
+  var mySeq = ++calcQuoteSeq;
+  calcQuoteTimer = setTimeout(async function() {
+    try {
+      var fromAddr = resolveAddr(from);
+      var toAddr = resolveAddr(to);
+      if (fromAddr.toLowerCase() === toAddr.toLowerCase()) return;
+      var fromDec = CONTRACTS[from].decimals;
+      var amountIn = toRawAmount(amt, fromDec);
+      var feeAmount = (amountIn * feeBps) / 10000n;
+      if (feeAmount === 0n && amountIn > 0n) feeAmount = 1n;
+      var amountToSwap = amountIn - feeAmount;
+      if (amountToSwap <= 0n) return;
+      var q = await quoteBestPrice(fromAddr, toAddr, amountToSwap);
+      if (mySeq !== calcQuoteSeq) return; // el usuario ya cambió algo, descartar
+      if (q && q.ok && q.expectedOut) {
+        var toDec = CONTRACTS[to].decimals;
+        var realOut = Number(q.expectedOut) / Math.pow(10, toDec);
+        document.getElementById('tAmt').value = formatCrypto(realOut);
+      }
+    } catch (e) { /* silencioso: se queda con el estimado por precios */ }
+  }, 450);
 }
 
 function setPerc(p) {

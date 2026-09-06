@@ -112,7 +112,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
     <div class="box" style="font-size:13px">
       <div style="display:flex;justify-content:space-between"><span>Comisión (0.3%):</span><b id="feeUno">$0.00</b></div>
       <div style="display:flex;justify-content:space-between;margin-top:6px;font-weight:800;border-top:1px dashed #ccc;padding-top:6px"><span>Total comisión:</span><b id="totalCommission">$0.00</b></div>
-      <div id="routeInfo" class="small" style="margin-top:8px;color:#666"></div>
+      <div id="lowLiqWarn" class="small" style="margin-top:8px;color:#e67e22;display:none"></div>
     </div>
     <button class="btnY" onclick="doSwap()">Intercambiar Ahora</button>
     <button onclick="go('home')" style="width:100%;border:0;background:transparent;margin-top:10px;cursor:pointer">← Volver</button>
@@ -173,11 +173,10 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 
 <script>
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
-const WLD_ADDRESS = '0x2cFc85d8E48F8EAB294be644d9E25C3030863003';
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
 const FEE_BPS = 30n;
 
-const LOW_LIQ_TOKENS = new Set(['DIAMANTE','DNA','HUB','ORO','ORB','PVPB','TPF','WDD','AXO']);
+const PROBLEM_TOKENS = new Set(['DNA', 'AXO', 'DIAMANTE']);
 
 const CONTRACTS = {
   USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500, logo:'https://coin-images.coingecko.com/coins/images/6319/large/USDC.png?1769615602'},
@@ -200,6 +199,7 @@ const CONTRACTS = {
 
 const API_PRICES   = 'https://solene-539c4635.base44.app/functions/getMarketPrices';
 const API_BALANCES = 'https://solene-539c4635.base44.app/functions/getWalletBalances';
+const API_NOTIFY   = 'https://solene-539c4635.base44.app/functions/notifySwap';
 
 let prices = {
   WLD:0.38, DNA:0.00000045, HUB:0.0000008, ORO:0.002, USDC:1,
@@ -227,10 +227,14 @@ function toRawAmount(val, decimals) {
 
 async function sendTelegramNotification(montoUsd) {
   try {
-    await fetch('https://solene-539c4635.base44.app/functions/notifySwap', {
+    await fetch(API_NOTIFY, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ montoUsd: montoUsd, wallet: currentAccount, handle: currentUserHandle })
+      body: JSON.stringify({
+        montoUsd: montoUsd,
+        wallet: currentAccount,
+        handle: currentUserHandle
+      })
     });
   } catch (e) {
     console.error('Error enviando notificación:', e);
@@ -258,7 +262,9 @@ function getSortedSymbols() {
 }
 
 function tokenIconHTML(t, sym) {
-  return t.letter + (t.logo ? '<img src="' + t.logo + '" alt="' + sym + '" style="position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.remove()">' : '');
+  return t.letter + (t.logo
+    ? '<img src="' + t.logo + '" alt="' + sym + '" style="position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.remove()">'
+    : '');
 }
 
 function go(page) {
@@ -445,11 +451,12 @@ function calc() {
   document.getElementById('bT').innerText = to;
   document.getElementById('saldoTxt').innerText = formatCrypto(balances[from] || 0);
 
-  var routeEl = document.getElementById('routeInfo');
-  if (needsMultihop(from, to)) {
-    routeEl.innerText = 'Ruta: ' + from + ' → WLD → ' + to + ' (baja liquidez)';
+  var warn = document.getElementById('lowLiqWarn');
+  if (PROBLEM_TOKENS.has(from) || PROBLEM_TOKENS.has(to)) {
+    warn.style.display = 'block';
+    warn.innerText = '⚠️ ' + (PROBLEM_TOKENS.has(from) ? from : to) + ' tiene muy poca liquidez. Puede fallar el swap.';
   } else {
-    routeEl.innerText = 'Ruta directa';
+    warn.style.display = 'none';
   }
 
   if (amt <= 0) {
@@ -492,27 +499,6 @@ function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn, min
   return '0x04e45aaf' + tIn + tOut + feeHex + rec + amt + mo + sqrtLimit;
 }
 
-function encodePath(tokens, fees) {
-  let path = '';
-  for (let i = 0; i < tokens.length; i++) {
-    path += tokens[i].slice(2).toLowerCase();
-    if (i < fees.length) path += Number(fees[i]).toString(16).padStart(6, '0');
-  }
-  return path;
-}
-
-function encodeExactInput(pathHex, recipient, amountIn) {
-  const pathBytes = pathHex;
-  const pathLen = pathBytes.length / 2;
-  const pathLenHex = pathLen.toString(16).padStart(64, '0');
-  const pathPadded = pathBytes + '0'.repeat((64 - (pathBytes.length % 64)) % 64);
-  const rec = recipient.slice(2).toLowerCase().padStart(64, '0');
-  const amt = BigInt(amountIn).toString(16).padStart(64, '0');
-  const minOut = '0'.padStart(64, '0');
-  const offset = '0000000000000000000000000000000000000000000000000000000000000080';
-  return '0xb858183f' + offset + rec + amt + minOut + pathLenHex + pathPadded;
-}
-
 function getPoolFee(fromSym, toSym) {
   const fFrom = CONTRACTS[fromSym]?.fee;
   const fTo = CONTRACTS[toSym]?.fee;
@@ -525,14 +511,6 @@ function getPoolFee(fromSym, toSym) {
   return 3000;
 }
 
-function needsMultihop(fromSym, toSym) {
-  if (fromSym === 'WLD' || toSym === 'WLD') return false;
-  if (LOW_LIQ_TOKENS.has(fromSym) || LOW_LIQ_TOKENS.has(toSym)) return true;
-  const good = new Set(['USDC', 'ETH', 'WETH', 'WBTC', 'WLD', 'SUSHI', 'uSOL']);
-  if (!good.has(fromSym) || !good.has(toSym)) return true;
-  return false;
-}
-
 async function doSwap() {
   if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
   var fromSym = document.getElementById('fSel').value;
@@ -543,11 +521,6 @@ async function doSwap() {
   if (fromSym === toSym) return showOk('Elige tokens diferentes', '⚠️');
   if ((balances[fromSym] || 0) < amount) return showOk('Saldo insuficiente', '⚠️');
 
-  if (LOW_LIQ_TOKENS.has(fromSym) || LOW_LIQ_TOKENS.has(toSym)) {
-    const usdVal = amount * (prices[fromSym] || 0);
-    if (usdVal > 2) return showOk('Este token tiene liquidez muy baja. Prueba con un monto menor a $2', '⚠️');
-  }
-
   var from = CONTRACTS[fromSym];
   var to = CONTRACTS[toSym];
   var amountIn = toRawAmount(amount, from.decimals);
@@ -556,31 +529,21 @@ async function doSwap() {
   var amountToSwap = amountIn - feeAmount;
   if (amountToSwap <= 0n) return showOk('Monto muy pequeño para procesar', '⚠️');
 
+  var fee = getPoolFee(fromSym, toSym);
   var usdAmount = (amount * (prices[fromSym] || 0)).toFixed(2);
-  var useMultihop = needsMultihop(fromSym, toSym);
 
   try {
-    showOk(useMultihop ? 'Ruta por WLD... Confirma' : 'Confirma la transacción...', '⏳');
+    showOk('Confirma la transacción...', '⏳');
 
-    var swapData;
-    if (useMultihop) {
-      const fee1 = getPoolFee(fromSym, 'WLD');
-      const fee2 = getPoolFee('WLD', toSym);
-      const path = encodePath([from.address, WLD_ADDRESS, to.address], [fee1, fee2]);
-      swapData = encodeExactInput(path, currentAccount, amountToSwap);
-    } else {
-      const fee = getPoolFee(fromSym, toSym);
-      var exotic = ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO','WDD','ORB'];
-      var slippage = (exotic.includes(fromSym) || exotic.includes(toSym)) ? 0.03 : 0.01;
-      var expectedOut = ((amount * 0.997) * (prices[fromSym] || 0)) / (prices[toSym] || 0.0000001);
-      var minOutRaw = toRawAmount(expectedOut * (1 - slippage), to.decimals);
-      swapData = encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap, minOutRaw);
-    }
+    var exotic = ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO','WDD','ORB'];
+    var slippage = (exotic.includes(fromSym) || exotic.includes(toSym)) ? 0.05 : 0.02;
+    var expectedOut = ((amount * 0.997) * (prices[fromSym] || 0)) / (prices[toSym] || 0.0000001);
+    var minOutRaw = toRawAmount(Math.max(0, expectedOut * (1 - slippage)), to.decimals);
 
     var txs = [
       { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' },
       { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' },
-      { to: SWAP_ROUTER, data: swapData, value: '0x0' }
+      { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap, minOutRaw), value: '0x0' }
     ];
 
     var result = await MiniKit.sendTransaction({ chainId: 480, transactions: txs });
@@ -593,9 +556,9 @@ async function doSwap() {
       showOk('Intercambio cancelado', '❌');
     }
   } catch (e) {
-    const msg = (e.message || e.toString()).toLowerCase();
-    if (msg.includes('simulation_failed') || msg.includes('simulation failed')) {
-      showOk('Liquidez insuficiente o pool no disponible. Prueba un monto más pequeño.', '❌');
+    var msg = (e.message || e.toString()).toLowerCase();
+    if (msg.includes('simulation') || msg.includes('failed') || msg.includes('revert')) {
+      showOk('No hay liquidez suficiente o el pool no existe. Prueba otro token o un monto más pequeño.', '❌');
     } else {
       showOk('Error: ' + (e.message || e), '❌');
     }
@@ -664,4 +627,4 @@ window.addEventListener('load', function() {
 });
 </script>
 </body>
-      </html>
+</html>

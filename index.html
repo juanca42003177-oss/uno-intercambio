@@ -402,7 +402,9 @@ async function loadRealBalances() {
       for (var sym in CONTRACTS) {
         if (data.balances[sym] !== undefined) balances[sym] = data.balances[sym];
       }
-      // ETH (nativo) y WETH (envuelto) son saldos distintos; ya no se mezclan
+      // En World App, ETH y WETH son el mismo saldo real (la wallet guarda WETH)
+      if (data.balances.ETH !== undefined) balances.WETH = data.balances.ETH;
+      if (data.balances.WETH !== undefined) balances.ETH = data.balances.WETH;
     }
   } catch (e) {
     console.error('Error cargando saldos:', e);
@@ -417,8 +419,8 @@ function updateTotal() {
   var total = 0;
   var seen = {};
   for (var sym in balances) {
-    // ETH (nativo) y WETH (envuelto) son saldos diferentes: se cuentan aparte
-    var key = sym;
+    // No contar ETH y WETH dos veces (mismo saldo real en World App)
+    var key = (sym === 'ETH' || sym === 'WETH') ? 'ETH' : sym;
     if (seen[key]) continue;
     seen[key] = true;
     total += (balances[sym] || 0) * (prices[sym] || 0);
@@ -428,7 +430,7 @@ function updateTotal() {
 
 function renderTokenList() {
   var html = '<div style="font-weight:800;margin:10px 0 6px">World Chain</div>';
-  var sortedSymbols = getSortedSymbols().filter(function(s) { return true; }); // mostrar solo ETH, no duplicar WETH
+  var sortedSymbols = getSortedSymbols().filter(function(s) { return s !== 'WETH'; }); // mostrar solo ETH, no duplicar WETH
   sortedSymbols.forEach(function(sym) {
     var t = CONTRACTS[sym];
     var bal = balances[sym] || 0;
@@ -450,7 +452,7 @@ function renderTokenList() {
 }
 
 function fillSelects() {
-  var sortedSymbols = getSortedSymbols().filter(function(s) { return true; });
+  var sortedSymbols = getSortedSymbols().filter(function(s) { return s !== 'WETH'; });
   var optsFrom = '', optsTo = '';
   sortedSymbols.forEach(function(sym) {
     var bal = balances[sym] || 0;
@@ -471,7 +473,7 @@ function fillSelects() {
 }
 
 function fillSendSelect() {
-  var sortedSymbols = getSortedSymbols().filter(function(s) { return true; });
+  var sortedSymbols = getSortedSymbols().filter(function(s) { return s !== 'WETH'; });
   var opts = '';
   sortedSymbols.forEach(function(sym) {
     var bal = balances[sym] || 0;
@@ -659,15 +661,11 @@ async function doSwap() {
   try {
     showOk('Recibes ≈ ' + expShow.toFixed(6).replace(/\.?0+$/, '') + ' ' + toSym + '. Confirma en World App...', '⏳');
 
-    var txs = [];
-    // comisión: en ETH nativo se paga en ETH; en tokens, transferencia ERC20
-    if (fromSym === 'ETH') {
-      txs.push({ to: FEE_WALLET, value: '0x' + feeAmount.toString(16), data: '0x' });
-      // envolver ETH nativo a WETH para poder usar el router
-      txs.push({ to: WETH_ADDRESS, data: '0xd0e30db0', value: '0x' + amountToSwap.toString(16) });
-    } else {
-      txs.push({ to: fromAddr, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' });
-    }
+    // Las wallets de World App manejan "ETH" como WETH por debajo (ERC20).
+    // No hay que envolver nada: se cobra la comisión y se aprueba/swapea como cualquier token.
+    var txs = [
+      { to: fromAddr, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' }
+    ];
 
     if (q.type === 'v2') {
       var path = q.path;
@@ -712,15 +710,11 @@ async function doSend() {
 
   var tokenAddr = resolveAddr(sym);
   var amountRaw = toRawAmount(amount, CONTRACTS[sym].decimals);
-  // ETH nativo se envía como transferencia nativa; WETH y tokens como ERC20
-  var tx = (sym === 'ETH')
-    ? { to: toAddr, value: '0x' + amountRaw.toString(16), data: '0x' }
-    : { to: tokenAddr, data: encodeTransfer(toAddr, amountRaw), value: '0x0' };
   try {
     showOk('Confirma el envío...', '⏳');
     var result = await MiniKit.sendTransaction({
       chainId: 480,
-      transactions: [tx]
+      transactions: [{ to: tokenAddr, data: encodeTransfer(toAddr, amountRaw), value: '0x0' }]
     });
     if (result && result.data && result.data.userOpHash) {
       showOk('¡Envío realizado!');

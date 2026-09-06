@@ -322,6 +322,23 @@ function openSendFromDetail() {
   updateSendBal();
 }
 
+async function resolveUsername(address) {
+  // MiniKit ya no siempre devuelve el username directo en walletAuth.
+  // 1) probamos el estado cacheado, 2) si no, lo resolvemos por dirección.
+  try {
+    if (window.MiniKit && window.MiniKit.user && window.MiniKit.user.username) {
+      return window.MiniKit.user.username;
+    }
+  } catch (e) {}
+  try {
+    var u = await MiniKit.getUserByAddress(address);
+    if (u && u.username) return u.username;
+  } catch (e) {
+    console.warn('No se pudo resolver username:', e);
+  }
+  return null;
+}
+
 async function connectWallet() {
   try {
     if (!window.MiniKit) return showOk('Abre dentro de World App', '⚠️');
@@ -330,10 +347,14 @@ async function connectWallet() {
     var result = await MiniKit.walletAuth({ nonce: nonce, statement: 'Conectar Uno Intercambio' });
     if (result && result.data && result.data.address) {
       currentAccount = result.data.address;
-      var rawUser = (window.MiniKit.user && window.MiniKit.user.username) || (result.data && result.data.username);
-      if (rawUser) currentUserHandle = '@' + rawUser.replace(/^@/, '');
       updateUI(currentAccount);
       await loadRealBalances();
+      // Resolver el username en paralelo, sin bloquear la conexión
+      var rawUser = await resolveUsername(currentAccount);
+      if (rawUser) {
+        currentUserHandle = '@' + rawUser.replace(/^@/, '');
+        updateUI(currentAccount);
+      }
     } else {
       showOk('No se pudo conectar', '❌');
     }

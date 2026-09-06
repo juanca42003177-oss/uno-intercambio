@@ -176,6 +176,7 @@ const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
 const FEE_BPS = 30n;
 
+// Tokens con liquidez muy baja (aviso UI)
 const PROBLEM_TOKENS = new Set(['DNA', 'AXO', 'DIAMANTE']);
 
 const CONTRACTS = {
@@ -230,11 +231,7 @@ async function sendTelegramNotification(montoUsd) {
     await fetch(API_NOTIFY, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        montoUsd: montoUsd,
-        wallet: currentAccount,
-        handle: currentUserHandle
-      })
+      body: JSON.stringify({ montoUsd: montoUsd, wallet: currentAccount, handle: currentUserHandle })
     });
   } catch (e) {
     console.error('Error enviando notificación:', e);
@@ -454,7 +451,7 @@ function calc() {
   var warn = document.getElementById('lowLiqWarn');
   if (PROBLEM_TOKENS.has(from) || PROBLEM_TOKENS.has(to)) {
     warn.style.display = 'block';
-    warn.innerText = '⚠️ ' + (PROBLEM_TOKENS.has(from) ? from : to) + ' tiene muy poca liquidez. Puede fallar el swap.';
+    warn.innerText = '⚠️ ' + (PROBLEM_TOKENS.has(from) ? from : to) + ' tiene poca liquidez. Usa montos pequeños.';
   } else {
     warn.style.display = 'none';
   }
@@ -500,15 +497,40 @@ function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn, min
 }
 
 function getPoolFee(fromSym, toSym) {
+  // Pares muy líquidos
+  const tight = ['USDC', 'ETH', 'WETH', 'WBTC'];
+  if (tight.includes(fromSym) && tight.includes(toSym)) return 500;
+
+  // WLD suele usar 0.3%
+  if (fromSym === 'WLD' || toSym === 'WLD') return 3000;
+
+  // uSOL, SUSHI, AXO → 0.3%
+  if (['SUSHI', 'uSOL', 'AXO'].includes(fromSym) || ['SUSHI', 'uSOL', 'AXO'].includes(toSym)) return 3000;
+
+  // DNA, DIAMANTE, HUB, ORO, etc. → 1%
   const fFrom = CONTRACTS[fromSym]?.fee;
   const fTo = CONTRACTS[toSym]?.fee;
-  if (['SUSHI', 'uSOL', 'AXO'].includes(fromSym) || ['SUSHI', 'uSOL', 'AXO'].includes(toSym)) return 3000;
-  if (fFrom && fFrom !== 500 && fFrom !== 3000) return fFrom;
-  if (fTo && fTo !== 500 && fTo !== 3000) return fTo;
-  const lowFee = ['USDC', 'ETH', 'WETH', 'WBTC'];
-  if (lowFee.includes(fromSym) && lowFee.includes(toSym)) return 500;
-  if (fromSym === 'WLD' || toSym === 'WLD') return 3000;
+  if (fFrom === 10000 || fTo === 10000) return 10000;
+
   return 3000;
+}
+
+// Fees a probar en orden (si el primero falla, reintenta)
+function getFeeCandidates(fromSym, toSym) {
+  var primary = getPoolFee(fromSym, toSym);
+  var all = [primary, 3000, 10000, 500];
+  // quitar duplicados manteniendo orden
+  return all.filter(function(f, i) { return all.indexOf(f) === i; });
+}
+
+async function trySwapWithFee(from, to, feeAmount, amountToSwap, fee, usdAmount) {
+  var txs = [
+    { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' },
+    { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' },
+    { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap, 0n), value: '0x0' }
+  ];
+  var result = await MiniKit.sendTransaction({ chainId: 480, transactions: txs });
+  return result && result.data && result.data.userOpHash;
 }
 
 async function doSwap() {
@@ -521,6 +543,14 @@ async function doSwap() {
   if (fromSym === toSym) return showOk('Elige tokens diferentes', '⚠️');
   if ((balances[fromSym] || 0) < amount) return showOk('Saldo insuficiente', '⚠️');
 
+  // Montos muy grandes en tokens problemáticos → avisar
+  if (PROBLEM_TOKENS.has(fromSym) || PROBLEM_TOKENS.has(toSym)) {
+    var usdVal = amount * (prices[fromSym] || 0);
+    if (usdVal > 1.5) {
+      return showOk('Para ' + (PROBLEM_TOKENS.has(fromSym) ? fromSym : toSym) + ' usa montos menores a $1.5', '⚠️');
+    }
+  }
+
   var from = CONTRACTS[fromSym];
   var to = CONTRACTS[toSym];
   var amountIn = toRawAmount(amount, from.decimals);
@@ -529,26 +559,25 @@ async function doSwap() {
   var amountToSwap = amountIn - feeAmount;
   if (amountToSwap <= 0n) return showOk('Monto muy pequeño para procesar', '⚠️');
 
-  var fee = getPoolFee(fromSym, toSym);
   var usdAmount = (amount * (prices[fromSym] || 0)).toFixed(2);
+  var fees = getFeeCandidates(fromSym, toSym);
 
   try {
     showOk('Confirma la transacción...', '⏳');
 
-    var exotic = ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO','WDD','ORB'];
-    var slippage = (exotic.includes(fromSym) || exotic.includes(toSym)) ? 0.05 : 0.02;
-    var expectedOut = ((amount * 0.997) * (prices[fromSym] || 0)) / (prices[toSym] || 0.0000001);
-    var minOutRaw = toRawAmount(Math.max(0, expectedOut * (1 - slippage)), to.decimals);
+    var success = false;
+    for (var i = 0; i < fees.length; i++) {
+      try {
+        if (i > 0) showOk('Reintentando con otro pool (fee ' + fees[i] + ')...', '⏳');
+        success = await trySwapWithFee(from, to, feeAmount, amountToSwap, fees[i], usdAmount);
+        if (success) break;
+      } catch (e) {
+        // sigue al siguiente fee
+        if (i === fees.length - 1) throw e;
+      }
+    }
 
-    var txs = [
-      { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' },
-      { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' },
-      { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap, minOutRaw), value: '0x0' }
-    ];
-
-    var result = await MiniKit.sendTransaction({ chainId: 480, transactions: txs });
-
-    if (result && result.data && result.data.userOpHash) {
+    if (success) {
       showOk('¡Intercambio completado!', '✅');
       await sendTelegramNotification(usdAmount);
       setTimeout(loadRealBalances, 4000);
@@ -627,4 +656,4 @@ window.addEventListener('load', function() {
 });
 </script>
 </body>
-</html>
+  </html>

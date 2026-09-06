@@ -546,9 +546,9 @@ function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn, min
   return '0x04e45aaf' + tIn + tOut + feeHex + rec + amt + mo + sqrtLimit;
 }
 
-function encodeV2SwapExactTokensForTokens(amountIn, path, to) {
+function encodeV2SwapExactTokensForTokens(amountIn, path, to, amountOutMin) {
   const sel = '38ed1739';
-  const amountOutMin = '0'.padStart(64, '0');
+  const amountOutMinHex = BigInt(amountOutMin || 0).toString(16).padStart(64, '0');
   const toPad = to.slice(2).toLowerCase().padStart(64, '0');
   const deadline = (Math.floor(Date.now() / 1000) + 1800).toString(16).padStart(64, '0');
   const amountInHex = BigInt(amountIn).toString(16).padStart(64, '0');
@@ -558,7 +558,7 @@ function encodeV2SwapExactTokensForTokens(amountIn, path, to) {
   path.forEach(function(addr) {
     pathData += addr.slice(2).toLowerCase().padStart(64, '0');
   });
-  return '0x' + sel + amountInHex + amountOutMin + offset + toPad + deadline + pathLen + pathData;
+  return '0x' + sel + amountInHex + amountOutMinHex + offset + toPad + deadline + pathLen + pathData;
 }
 
 function getPoolFee(fromSym, toSym) {
@@ -605,6 +605,15 @@ async function doSwap() {
 
   var usdAmount = (amount * (prices[fromSym] || 0)).toFixed(2);
 
+  // PROTECCIÓN CONTRA SLIPPAGE: nunca aceptar menos del 99% (tokens grandes)
+  // o 97% (tokens exóticos) de lo que la pantalla prometió. Si un bot intenta
+  // abusar, la transacción se rechaza sola y el usuario recibe todo de vuelta.
+  var exotic = ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO','WDD','ORB'];
+  var slippage = (exotic.includes(fromSym) || exotic.includes(toSym)) ? 0.03 : 0.01;
+  var feeRate = Number(feeBps) / 10000;
+  var expectedOut = (amount * (1 - feeRate) * (prices[fromSym] || 0)) / (prices[toSym] || 0.0000001);
+  var minOutRaw = toRawAmount(Math.max(expectedOut * (1 - slippage), 0), CONTRACTS[toSym].decimals);
+
   try {
     showOk('Confirma la transacción...', '⏳');
 
@@ -634,12 +643,12 @@ async function doSwap() {
       }
 
       txs.push({ to: fromAddr, data: encodeApprove(SWAP_ROUTER_V2, amountToSwap), value: '0x0' });
-      txs.push({ to: SWAP_ROUTER_V2, data: encodeV2SwapExactTokensForTokens(amountToSwap, path, currentAccount), value: '0x0' });
+      txs.push({ to: SWAP_ROUTER_V2, data: encodeV2SwapExactTokensForTokens(amountToSwap, path, currentAccount, minOutRaw), value: '0x0' });
     } else {
       // Uniswap V3
       var fee = getPoolFee(fromSym, toSym);
       txs.push({ to: fromAddr, data: encodeApprove(SWAP_ROUTER_V3, amountToSwap), value: '0x0' });
-      txs.push({ to: SWAP_ROUTER_V3, data: encodeExactInputSingle(fromAddr, toAddr, fee, currentAccount, amountToSwap, 0n), value: '0x0' });
+      txs.push({ to: SWAP_ROUTER_V3, data: encodeExactInputSingle(fromAddr, toAddr, fee, currentAccount, amountToSwap, minOutRaw), value: '0x0' });
     }
 
     var result = await MiniKit.sendTransaction({ chainId: 480, transactions: txs });

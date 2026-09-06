@@ -24,7 +24,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#111;p
 .btn{background:#ffe6f4;color:#ff3ab2;border-radius:18px;padding:14px 6px;font-weight:800;text-align:center;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .tokens{padding:0 16px 20px}
 .tok{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f1f1f1;align-items:center;cursor:pointer}
-.tIcon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0;font-size:18px;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
+.tIcon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0;font-size:18px;box-shadow:0 2px 6px rgba(0,0,0,0.1);position:relative;overflow:hidden}
 .nav{position:fixed;bottom:16px;left:20px;right:20px;background:#fff;border:1px solid #eee;border-radius:32px;display:flex;justify-content:space-evenly;align-items:center;padding:12px 8px;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.12)}
 .nav div{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px}
 .nav div.active{background:#111;color:#fff}
@@ -41,7 +41,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 .modalBox{background:#fff;border-radius:24px;padding:24px;width:100%;max-width:340px;text-align:center}
 .live{font-size:11px;background:#00d9a5;color:#fff;padding:2px 8px;border-radius:8px}
 #qrImg{width:180px;height:180px;margin:12px auto;display:block;border-radius:12px;border:1px solid #eee}
-.detailIcon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;margin:0 auto;color:#fff;box-shadow:0 4px 10px rgba(0,0,0,0.15)}
+.detailIcon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;margin:0 auto;color:#fff;box-shadow:0 4px 10px rgba(0,0,0,0.15);position:relative;overflow:hidden}
 </style>
 </head>
 <body>
@@ -112,6 +112,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
     <div class="box" style="font-size:13px">
       <div style="display:flex;justify-content:space-between"><span>Comisión (0.3%):</span><b id="feeUno">$0.00</b></div>
       <div style="display:flex;justify-content:space-between;margin-top:6px;font-weight:800;border-top:1px dashed #ccc;padding-top:6px"><span>Total comisión:</span><b id="totalCommission">$0.00</b></div>
+      <div id="routeInfo" class="small" style="margin-top:8px;color:#666"></div>
     </div>
     <button class="btnY" onclick="doSwap()">Intercambiar Ahora</button>
     <button onclick="go('home')" style="width:100%;border:0;background:transparent;margin-top:10px;cursor:pointer">← Volver</button>
@@ -171,36 +172,32 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 </div>
 
 <script>
-const TELEGRAM_BOT_TOKEN = '8879079650:AAGu9GAdhVu-FvQde6T7jSfv38xdSJMFNdY';
-const TELEGRAM_CHAT_ID = '8022768138';
-
 const SWAP_ROUTER = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
-
-// BILLETERA PARA COMISIONES (0.3%)
+const WLD_ADDRESS = '0x2cFc85d8E48F8EAB294be644d9E25C3030863003';
 const FEE_WALLET = '0x019001d46cd3155ef045a41f4c359c040595438c';
-const FEE_BPS = 30n; // 0.3%
+const FEE_BPS = 30n;
 
-// CONFIGURACIÓN DE TOKENS (CON TUS LOGOS Y DATOS ESENCIALES)
+const LOW_LIQ_TOKENS = new Set(['DIAMANTE','DNA','HUB','ORO','ORB','PVPB','TPF','WDD','AXO']);
+
 const CONTRACTS = {
-  USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500},
-  WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, color:'#111111', letter:'🌐', fee:3000},
-  HUB:      {address:'0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals:18, color:'#ff7a00', letter:'⬡', fee:10000},
-  ORB:      {address:'0xF3F92A60e6004f3982F0FdE0d43602fC0a30a0dB', decimals:18, color:'#9b59b6', letter:'🔮', fee:10000},
-  uSOL:     {address:'0x9B8Df6E244526ab5F6e6400d331DB28C8fdDdb55', decimals:9,  color:'#14f195', letter:'⚡', fee:3000},
-  WBTC:     {address:'0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3', decimals:8,  color:'#f7931a', letter:'🪙', fee:500},
-  DNA:      {address:'0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals:18, color:'#ffcc00', letter:'🧬', fee:10000},
-  ORO:      {address:'0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals:18, color:'#ffd700', letter:'🏆', fee:10000},
-  ETH:      {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'◇', fee:500},
-  WETH:     {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#4a5d9e', letter:'◆', fee:500},
-  SUSHI:    {address:'0xab09A728E53d3d6BC438BE95eeD46Da0Bbe7FB38', decimals:18, color:'#fa52a0', letter:'🍣', fee:3000},
-  DIAMANTE: {address:'0x2ba918fec90Ca7AaC5753a2551593470815866e6', decimals:18, color:'#00d2ff', letter:'💎', fee:10000},
-  PVPB:     {address:'0xBC69990A060cC5AF40942f579BdF82A69A9CFf93', decimals:18, color:'#8e44ad', letter:'⚔️', fee:10000},
-  TPF:      {address:'0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45', decimals:18, color:'#1abc9c', letter:'✦', fee:10000},
-  AXO:      {address:'0x249820C0479D0A7feE6A2A3a14583267550F3caF', decimals:18, color:'#e67e22', letter:'🔥', fee:3000},
-  WDD:      {address:'0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B', decimals:18, color:'#00c853', letter:'🛡️', fee:10000}
+  USDC:     {address:'0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', decimals:6,  color:'#2775ca', letter:'💵', fee:500, logo:'https://coin-images.coingecko.com/coins/images/6319/large/USDC.png?1769615602'},
+  WLD:      {address:'0x2cFc85d8E48F8EAB294be644d9E25C3030863003', decimals:18, color:'#111111', letter:'🌐', fee:3000, logo:'https://cdn.dexscreener.com/cms/images/ef98025f53486ef2022ffb19c5da9225ad28931344b4549a6265dfc22fd74d76?width=800&height=800&quality=95&format=auto'},
+  HUB:      {address:'0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals:18, color:'#ff7a00', letter:'⬡', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/429b21f63_generated_image.png'},
+  ORB:      {address:'0xF3F92A60e6004f3982F0FdE0d43602fC0a30a0dB', decimals:18, color:'#9b59b6', letter:'🔮', fee:10000, logo:'https://cdn.dexscreener.com/cms/images/6b364af0717941d3bbab268fd40e6eb424671813008662b76c16921e25bc1d27?width=800&height=800&quality=95&format=auto'},
+  uSOL:     {address:'0x9B8Df6E244526ab5F6e6400d331DB28C8fdDdb55', decimals:9,  color:'#14f195', letter:'⚡', fee:3000, logo:'https://coin-images.coingecko.com/coins/images/4128/large/solana.png?1718769756'},
+  WBTC:     {address:'0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3', decimals:8,  color:'#f7931a', letter:'🪙', fee:500, logo:'https://coin-images.coingecko.com/coins/images/7598/large/WBTCLOGO.png?1764496367'},
+  DNA:      {address:'0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals:18, color:'#ffcc00', letter:'🧬', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/c487b9b51_generated_image.png'},
+  ORO:      {address:'0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals:18, color:'#ffd700', letter:'🏆', fee:10000, logo:'https://cdn.dexscreener.com/cms/images/90bdc660b15f747a9291399e454528674815dd48a0d21a38ae5489193dfa22df?width=800&height=800&quality=95&format=auto'},
+  ETH:      {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'◇', fee:500, logo:'https://coin-images.coingecko.com/coins/images/2518/large/weth.png?1696503332'},
+  WETH:     {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#4a5d9e', letter:'◆', fee:500, logo:'https://coin-images.coingecko.com/coins/images/2518/large/weth.png?1696503332'},
+  SUSHI:    {address:'0xab09A728E53d3d6BC438BE95eeD46Da0Bbe7FB38', decimals:18, color:'#fa52a0', letter:'🍣', fee:3000, logo:'https://cdn.dexscreener.com/cms/images/v5qg8mXdATqSKsv0?width=800&height=800&quality=95&format=auto'},
+  DIAMANTE: {address:'0x2ba918fec90Ca7AaC5753a2551593470815866e6', decimals:18, color:'#00d2ff', letter:'💎', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/f412f7a43_generated_image.png'},
+  PVPB:     {address:'0xBC69990A060cC5AF40942f579BdF82A69A9CFf93', decimals:18, color:'#8e44ad', letter:'⚔️', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/c98ac0dd7_generated_image.png'},
+  TPF:      {address:'0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45', decimals:18, color:'#1abc9c', letter:'✦', fee:10000, logo:'https://cdn.dexscreener.com/cms/images/becbb3df4d40ab0b69f938b6ea5e24052c62a5c48e651e923ba6f11a80be9fa1?width=800&height=800&quality=95&format=auto'},
+  AXO:      {address:'0x249820C0479D0A7feE6A2A3a14583267550F3caF', decimals:18, color:'#e67e22', letter:'🔥', fee:3000, logo:'https://cdn.dexscreener.com/cms/images/0bbe3d84df2d06ac0a86bf8f0792a89fbaeb2c362dba16035848a655032c1d14?width=800&height=800&quality=95&format=auto'},
+  WDD:      {address:'0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B', decimals:18, color:'#00c853', letter:'🛡️', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/99abac489_generated_image.png'}
 };
 
-// ENDPOINTS CENTRALIZADOS (Evita saturar RPCs con 10,000+ usuarios simultáneos)
 const API_PRICES   = 'https://solene-539c4635.base44.app/functions/getMarketPrices';
 const API_BALANCES = 'https://solene-539c4635.base44.app/functions/getWalletBalances';
 
@@ -229,34 +226,20 @@ function toRawAmount(val, decimals) {
 }
 
 async function sendTelegramNotification(montoUsd) {
-  if (!TELEGRAM_BOT_TOKEN) return;
   try {
-    if (!currentUserHandle && window.MiniKit && window.MiniKit.user && window.MiniKit.user.username) {
-      currentUserHandle = '@' + window.MiniKit.user.username.replace(/^@/, '');
-    }
-
-    const shortWallet = currentAccount ? (currentAccount.slice(0,6) + '...' + currentAccount.slice(-4)) : '';
-    const userPrefix = currentUserHandle ? `${currentUserHandle} ` : '';
-    const mensaje = `${userPrefix}${shortWallet} intercambio $${montoUsd} cuenta ${currentAccount}`;
-    
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    await fetch('https://solene-539c4635.base44.app/functions/notifySwap', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: mensaje
-      })
+      body: JSON.stringify({ montoUsd: montoUsd, wallet: currentAccount, handle: currentUserHandle })
     });
   } catch (e) {
-    console.error("Error enviando notificación a Telegram:", e);
+    console.error('Error enviando notificación:', e);
   }
 }
 
 function formatCrypto(val) {
   if (!val || val === 0) return '0';
-  if (val < 0.0001) {
-    return val.toFixed(6).replace(/\.?0+$/, '');
-  }
+  if (val < 0.0001) return val.toFixed(6).replace(/\.?0+$/, '');
   return val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
 }
 
@@ -272,6 +255,10 @@ function getSortedSymbols() {
     const usdValB = (balances[b] || 0) * (prices[b] || 0);
     return usdValB - usdValA;
   });
+}
+
+function tokenIconHTML(t, sym) {
+  return t.letter + (t.logo ? '<img src="' + t.logo + '" alt="' + sym + '" style="position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.remove()">' : '');
 }
 
 function go(page) {
@@ -295,8 +282,9 @@ function openToken(sym) {
   var bal = balances[sym] || 0;
   var price = prices[sym] || 0;
   var ch = changes[sym] || 0;
-  document.getElementById('dIcon').style.background = t.color;
-  document.getElementById('dIcon').innerText = t.letter;
+  var dIcon = document.getElementById('dIcon');
+  dIcon.style.background = t.color;
+  dIcon.innerHTML = tokenIconHTML(t, sym);
   document.getElementById('dName').innerText = sym;
   document.getElementById('dBalText').innerText = formatCrypto(bal) + ' ' + sym;
   document.getElementById('dPrice').innerText = '$' + price.toFixed(price < 0.01 ? 6 : 2);
@@ -327,9 +315,7 @@ async function connectWallet() {
     if (result && result.data && result.data.address) {
       currentAccount = result.data.address;
       var rawUser = (window.MiniKit.user && window.MiniKit.user.username) || (result.data && result.data.username);
-      if (rawUser) {
-        currentUserHandle = '@' + rawUser.replace(/^@/, '');
-      }
+      if (rawUser) currentUserHandle = '@' + rawUser.replace(/^@/, '');
       updateUI(currentAccount);
       await loadRealBalances();
     } else {
@@ -364,7 +350,6 @@ function disconnectWallet() {
   renderTokenList();
 }
 
-// CARGA DE SALDOS OPTIMIZADA (Backend Centralizado para alto tráfico)
 async function loadRealBalances() {
   if (!currentAccount || loadingBalances) return;
   loadingBalances = true;
@@ -399,7 +384,6 @@ function updateTotal() {
 function renderTokenList() {
   var html = '<div style="font-weight:800;margin:10px 0 6px">World Chain</div>';
   var sortedSymbols = getSortedSymbols();
-
   sortedSymbols.forEach(function(sym) {
     var t = CONTRACTS[sym];
     var bal = balances[sym] || 0;
@@ -407,7 +391,7 @@ function renderTokenList() {
     var ch = changes[sym] || 0;
     html += '<div class="tok" onclick="openToken(\'' + sym + '\')">' +
       '<div style="display:flex;gap:12px;align-items:center">' +
-        '<div class="tIcon" style="background:' + t.color + '">' + t.letter + '</div>' +
+        '<div class="tIcon" style="background:' + t.color + '">' + tokenIconHTML(t, sym) + '</div>' +
         '<div><b>' + sym + '</b><div class="small">' + formatCrypto(bal) + ' ' + sym + '</div></div>' +
       '</div>' +
       '<div style="text-align:right">' +
@@ -416,26 +400,20 @@ function renderTokenList() {
       '</div>' +
     '</div>';
   });
-
   document.getElementById('tokenList').innerHTML = html;
 }
 
 function fillSelects() {
   var sortedSymbols = getSortedSymbols();
-  var optsFrom = '';
-  var optsTo = '';
-
+  var optsFrom = '', optsTo = '';
   sortedSymbols.forEach(function(sym) {
     var balUsd = (balances[sym] || 0) * (prices[sym] || 0);
     var label = sym + ' — Saldo: $' + balUsd.toFixed(2);
-
     optsFrom += '<option value="' + sym + '">' + label + '</option>';
     optsTo += '<option value="' + sym + '">' + label + '</option>';
   });
-
   var curFrom = document.getElementById('fSel').value || selectedToken || sortedSymbols[0];
   var curTo = document.getElementById('tSel').value || (sortedSymbols[0] !== 'USDC' ? 'USDC' : sortedSymbols[1]);
-
   document.getElementById('fSel').innerHTML = optsFrom;
   document.getElementById('tSel').innerHTML = optsTo;
   document.getElementById('fSel').value = curFrom;
@@ -466,6 +444,14 @@ function calc() {
   document.getElementById('bF').innerText = from;
   document.getElementById('bT').innerText = to;
   document.getElementById('saldoTxt').innerText = formatCrypto(balances[from] || 0);
+
+  var routeEl = document.getElementById('routeInfo');
+  if (needsMultihop(from, to)) {
+    routeEl.innerText = 'Ruta: ' + from + ' → WLD → ' + to + ' (baja liquidez)';
+  } else {
+    routeEl.innerText = 'Ruta directa';
+  }
+
   if (amt <= 0) {
     document.getElementById('tAmt').value = '0';
     return;
@@ -491,38 +477,60 @@ function encodeApprove(spender, amount) {
   return '0x095ea7b3' + spender.slice(2).padStart(64, '0') + BigInt(amount).toString(16).padStart(64, '0');
 }
 
-function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn) {
+function encodeTransfer(to, amount) {
+  return '0xa9059cbb' + to.slice(2).padStart(64, '0') + BigInt(amount).toString(16).padStart(64, '0');
+}
+
+function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn, minOut) {
   const tIn = tokenIn.slice(2).toLowerCase().padStart(64, '0');
   const tOut = tokenOut.slice(2).toLowerCase().padStart(64, '0');
   const feeHex = Number(fee).toString(16).padStart(64, '0');
   const rec = recipient.slice(2).toLowerCase().padStart(64, '0');
   const amt = BigInt(amountIn).toString(16).padStart(64, '0');
-  const minOut = '0'.padStart(64, '0');
+  const mo = BigInt(minOut || 0).toString(16).padStart(64, '0');
   const sqrtLimit = '0'.padStart(64, '0');
-  return '0x04e45aaf' + tIn + tOut + feeHex + rec + amt + minOut + sqrtLimit;
+  return '0x04e45aaf' + tIn + tOut + feeHex + rec + amt + mo + sqrtLimit;
 }
 
-function encodeTransfer(to, amount) {
-  return '0xa9059cbb' + to.slice(2).padStart(64, '0') + BigInt(amount).toString(16).padStart(64, '0');
+function encodePath(tokens, fees) {
+  let path = '';
+  for (let i = 0; i < tokens.length; i++) {
+    path += tokens[i].slice(2).toLowerCase();
+    if (i < fees.length) path += Number(fees[i]).toString(16).padStart(6, '0');
+  }
+  return path;
+}
+
+function encodeExactInput(pathHex, recipient, amountIn) {
+  const pathBytes = pathHex;
+  const pathLen = pathBytes.length / 2;
+  const pathLenHex = pathLen.toString(16).padStart(64, '0');
+  const pathPadded = pathBytes + '0'.repeat((64 - (pathBytes.length % 64)) % 64);
+  const rec = recipient.slice(2).toLowerCase().padStart(64, '0');
+  const amt = BigInt(amountIn).toString(16).padStart(64, '0');
+  const minOut = '0'.padStart(64, '0');
+  const offset = '0000000000000000000000000000000000000000000000000000000000000080';
+  return '0xb858183f' + offset + rec + amt + minOut + pathLenHex + pathPadded;
 }
 
 function getPoolFee(fromSym, toSym) {
   const fFrom = CONTRACTS[fromSym]?.fee;
   const fTo = CONTRACTS[toSym]?.fee;
-  
-  if (['SUSHI', 'uSOL', 'AXO'].includes(fromSym) || ['SUSHI', 'uSOL', 'AXO'].includes(toSym)) {
-    return 3000;
-  }
-  
+  if (['SUSHI', 'uSOL', 'AXO'].includes(fromSym) || ['SUSHI', 'uSOL', 'AXO'].includes(toSym)) return 3000;
   if (fFrom && fFrom !== 500 && fFrom !== 3000) return fFrom;
   if (fTo && fTo !== 500 && fTo !== 3000) return fTo;
-
   const lowFee = ['USDC', 'ETH', 'WETH', 'WBTC'];
   if (lowFee.includes(fromSym) && lowFee.includes(toSym)) return 500;
-  
   if (fromSym === 'WLD' || toSym === 'WLD') return 3000;
-  
   return 3000;
+}
+
+function needsMultihop(fromSym, toSym) {
+  if (fromSym === 'WLD' || toSym === 'WLD') return false;
+  if (LOW_LIQ_TOKENS.has(fromSym) || LOW_LIQ_TOKENS.has(toSym)) return true;
+  const good = new Set(['USDC', 'ETH', 'WETH', 'WBTC', 'WLD', 'SUSHI', 'uSOL']);
+  if (!good.has(fromSym) || !good.has(toSym)) return true;
+  return false;
 }
 
 async function doSwap() {
@@ -535,35 +543,47 @@ async function doSwap() {
   if (fromSym === toSym) return showOk('Elige tokens diferentes', '⚠️');
   if ((balances[fromSym] || 0) < amount) return showOk('Saldo insuficiente', '⚠️');
 
+  if (LOW_LIQ_TOKENS.has(fromSym) || LOW_LIQ_TOKENS.has(toSym)) {
+    const usdVal = amount * (prices[fromSym] || 0);
+    if (usdVal > 2) return showOk('Este token tiene liquidez muy baja. Prueba con un monto menor a $2', '⚠️');
+  }
+
   var from = CONTRACTS[fromSym];
   var to = CONTRACTS[toSym];
-  
   var amountIn = toRawAmount(amount, from.decimals);
   var feeAmount = (amountIn * FEE_BPS) / 10000n;
-  
-  if (feeAmount === 0n && amountIn > 0n) {
-    feeAmount = 1n;
-  }
-  
+  if (feeAmount === 0n && amountIn > 0n) feeAmount = 1n;
   var amountToSwap = amountIn - feeAmount;
   if (amountToSwap <= 0n) return showOk('Monto muy pequeño para procesar', '⚠️');
-  
-  var fee = getPoolFee(fromSym, toSym);
+
   var usdAmount = (amount * (prices[fromSym] || 0)).toFixed(2);
+  var useMultihop = needsMultihop(fromSym, toSym);
 
   try {
-    showOk('Confirma la transacción...', '⏳');
-    
+    showOk(useMultihop ? 'Ruta por WLD... Confirma' : 'Confirma la transacción...', '⏳');
+
+    var swapData;
+    if (useMultihop) {
+      const fee1 = getPoolFee(fromSym, 'WLD');
+      const fee2 = getPoolFee('WLD', toSym);
+      const path = encodePath([from.address, WLD_ADDRESS, to.address], [fee1, fee2]);
+      swapData = encodeExactInput(path, currentAccount, amountToSwap);
+    } else {
+      const fee = getPoolFee(fromSym, toSym);
+      var exotic = ['DNA','HUB','ORO','SUSHI','DIAMANTE','PVPB','TPF','AXO','WDD','ORB'];
+      var slippage = (exotic.includes(fromSym) || exotic.includes(toSym)) ? 0.03 : 0.01;
+      var expectedOut = ((amount * 0.997) * (prices[fromSym] || 0)) / (prices[toSym] || 0.0000001);
+      var minOutRaw = toRawAmount(expectedOut * (1 - slippage), to.decimals);
+      swapData = encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap, minOutRaw);
+    }
+
     var txs = [
       { to: from.address, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' },
       { to: from.address, data: encodeApprove(SWAP_ROUTER, amountToSwap), value: '0x0' },
-      { to: SWAP_ROUTER, data: encodeExactInputSingle(from.address, to.address, fee, currentAccount, amountToSwap), value: '0x0' }
+      { to: SWAP_ROUTER, data: swapData, value: '0x0' }
     ];
 
-    var result = await MiniKit.sendTransaction({
-      chainId: 480,
-      transactions: txs
-    });
+    var result = await MiniKit.sendTransaction({ chainId: 480, transactions: txs });
 
     if (result && result.data && result.data.userOpHash) {
       showOk('¡Intercambio completado!', '✅');
@@ -573,7 +593,12 @@ async function doSwap() {
       showOk('Intercambio cancelado', '❌');
     }
   } catch (e) {
-    showOk('Error: ' + (e.message || e), '❌');
+    const msg = (e.message || e.toString()).toLowerCase();
+    if (msg.includes('simulation_failed') || msg.includes('simulation failed')) {
+      showOk('Liquidez insuficiente o pool no disponible. Prueba un monto más pequeño.', '❌');
+    } else {
+      showOk('Error: ' + (e.message || e), '❌');
+    }
   }
 }
 
@@ -612,18 +637,13 @@ function copyAddr() {
   }
 }
 
-// OBTENCIÓN DE PRECIOS CENTRALIZADA (Evita bloqueos de CORS o límites de peticiones)
 async function fetchLivePrices() {
   if (document.hidden) return;
   try {
     var res = await fetch(API_PRICES);
     var data = await res.json();
-    if (data && data.prices) {
-      for (var sym in data.prices) prices[sym] = data.prices[sym];
-    }
-    if (data && data.changes) {
-      for (var sym in data.changes) changes[sym] = data.changes[sym];
-    }
+    if (data && data.prices) for (var sym in data.prices) prices[sym] = data.prices[sym];
+    if (data && data.changes) for (var sym in data.changes) changes[sym] = data.changes[sym];
   } catch (e) {
     console.error('Error obteniendo precios:', e);
   }
@@ -634,9 +654,7 @@ async function fetchLivePrices() {
 }
 
 window.addEventListener('load', function() {
-  if (window.MiniKit) {
-    try { MiniKit.install(); } catch(e) {}
-  }
+  if (window.MiniKit) { try { MiniKit.install(); } catch(e) {} }
   renderTokenList();
   fetchLivePrices();
   setInterval(fetchLivePrices, 60000);
@@ -646,4 +664,4 @@ window.addEventListener('load', function() {
 });
 </script>
 </body>
-  </html>
+      </html>

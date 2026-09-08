@@ -770,12 +770,20 @@ async function doSwap() {
       { to: fromAddr, data: encodeTransfer(FEE_WALLET, feeAmount), value: '0x0' }
     ];
 
+    // Reset del allowance a 0 antes de aprobar el monto real: algunos tokens
+    // (estilo USDT) NO permiten cambiar el allowance de un valor distinto de
+    // cero a otro directamente — si un intento anterior falló DESPUÉS de
+    // aprobar pero ANTES del swap, queda un allowance viejo atascado y el
+    // approve() nuevo revierte, tumbando todo el swap. Con approve(0) primero
+    // esto nunca vuelve a pasar. Costo extra: nada (mismo batch, sin tx aparte).
     if (q.type === 'v2') {
       var path = q.path;
+      txs.push({ to: fromAddr, data: encodeApprove(SWAP_ROUTER_V2, 0n), value: '0x0' });
       txs.push({ to: fromAddr, data: encodeApprove(SWAP_ROUTER_V2, amountToSwap), value: '0x0' });
       txs.push({ to: SWAP_ROUTER_V2, data: encodeV2SwapExactTokensForTokens(amountToSwap, path, currentAccount, minOutRaw), value: '0x0' });
     } else {
       // Uniswap V3 con el tier verificado del backend
+      txs.push({ to: fromAddr, data: encodeApprove(SWAP_ROUTER_V3, 0n), value: '0x0' });
       txs.push({ to: fromAddr, data: encodeApprove(SWAP_ROUTER_V3, amountToSwap), value: '0x0' });
       txs.push({ to: SWAP_ROUTER_V3, data: encodeExactInputSingle(fromAddr, toAddr, q.fee, currentAccount, amountToSwap, minOutRaw), value: '0x0' });
     }

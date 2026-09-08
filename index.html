@@ -193,7 +193,7 @@ const CONTRACTS = {
   WETH:     {address:'0x4200000000000000000000000000000000000006', decimals:18, color:'#627eea', letter:'Ξ', fee:500,  logo:ETH_LOGO},
   HUB:      {address:'0xd469fda5d9522a093760902e9be51e0c5d822d26', decimals:18, color:'#ff7a00', letter:'⬡', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/429b21f63_generated_image.png'},
   ORB:      {address:'0xF3F92A60e6004f3982F0FdE0d43602fC0a30a0dB', decimals:18, color:'#9b59b6', letter:'🔮', fee:10000, logo:'https://cdn.dexscreener.com/cms/images/6b364af0717941d3bbab268fd40e6eb424671813008662b76c16921e25bc1d27?width=800&height=800&quality=95&format=auto'},
-  uSOL:     {address:'0x9B8Df6E244526ab5F6e6400d331DB28C8fdDdb55', decimals:9,  color:'#14f195', letter:'⚡', fee:3000, logo:'https://coin-images.coingecko.com/coins/images/4128/large/solana.png?1718769756'},
+  uSOL:     {address:'0x9B8Df6E244526ab5F6e6400d331DB28C8fdDdb55', decimals:18,  color:'#14f195', letter:'⚡', fee:3000, logo:'https://coin-images.coingecko.com/coins/images/4128/large/solana.png?1718769756'},
   WBTC:     {address:'0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3', decimals:8,  color:'#f7931a', letter:'🪙', fee:500,  logo:'https://coin-images.coingecko.com/coins/images/7598/large/WBTCLOGO.png?1764496367'},
   DNA:      {address:'0xed49fe44fd4249a09843c2ba4bba7e50beca7113', decimals:18, color:'#ffcc00', letter:'🧬', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/c487b9b51_generated_image.png'},
   ORO:      {address:'0xcd1e32b86953d79a6ac58e813d2ea7a1790cab63', decimals:18, color:'#ffd700', letter:'🏆', fee:10000, logo:'https://cdn.dexscreener.com/cms/images/90bdc660b15f747a9291399e454528674815dd48a0d21a38ae5489193dfa22df?width=800&height=800&quality=95&format=auto'},
@@ -559,18 +559,9 @@ function calc() {
   document.getElementById('feePctLabel').innerText = feePct.toFixed(1);
 
   var warn = document.getElementById('lowLiqWarn');
-  if (from === 'DNA' || to === 'DNA') {
+  if (PROBLEM_TOKENS.has(from) || PROBLEM_TOKENS.has(to)) {
     warn.style.display = 'block';
-    warn.innerText = 'DNA solo se intercambia con ETH/WETH. Usa montos pequeños.';
-  } else if (from === 'AXO' || to === 'AXO') {
-    warn.style.display = 'block';
-    warn.innerText = 'AXO solo se intercambia con WLD. Usa montos pequeños.';
-  } else if (from === 'CHAD' || to === 'CHAD') {
-    warn.style.display = 'block';
-    warn.innerText = 'CHAD solo se intercambia con ETH. Usa montos pequeños.';
-  } else if (PROBLEM_TOKENS.has(from) || PROBLEM_TOKENS.has(to)) {
-    warn.style.display = 'block';
-    warn.innerText = 'Este token puede tener poca liquidez. Usa montos pequeños.';
+    warn.innerText = 'Este token tiene liquidez limitada. Usa montos pequeños para mejor precio.';
   } else {
     warn.style.display = 'none';
   }
@@ -741,14 +732,6 @@ async function doSwap() {
 
   var usdAmount = (amount * (prices[fromSym] || 0)).toFixed(2);
 
-  // rutas restringidas de DNA y AXO (solo pares con liquidez real)
-  if ((fromSym === 'DNA' || toSym === 'DNA') && !(fromSym === 'ETH' || fromSym === 'WETH' || toSym === 'ETH' || toSym === 'WETH')) {
-    return showOk('DNA solo se intercambia con ETH.\nPrimero cambia a ETH y luego a DNA.', '⚠️');
-  }
-  if ((fromSym === 'AXO' || toSym === 'AXO') && !(fromSym === 'WLD' || toSym === 'WLD')) {
-    return showOk('AXO solo se intercambia con WLD.\nPrimero cambia a WLD y luego a AXO.', '⚠️');
-  }
-
   // COTIZACIÓN REAL: el backend consulta el pool en vivo (Quoter oficial de
   // Uniswap + reservas V2) y devuelve la ruta correcta y el minOut exacto.
   // Esto elimina los falsos errores de "no hay liquidez" que causaba calcular
@@ -776,7 +759,21 @@ async function doSwap() {
     // aprobar pero ANTES del swap, queda un allowance viejo atascado y el
     // approve() nuevo revierte, tumbando todo el swap. Con approve(0) primero
     // esto nunca vuelve a pasar. Costo extra: nada (mismo batch, sin tx aparte).
-    if (q.type === 'v2') {
+    if (q.type === 'multi') {
+      // RUTA MULTI-SALTO (ej. DNA → ETH → uSOL): el backend la calcula sola.
+      // Cada salto va con su approve(0) + approve + swap. El salto 2 gasta
+      // el mínimo garantizado del salto 1, así que nunca revienta.
+      q.legs.forEach(function(leg) {
+        var router = leg.type === 'v2' ? SWAP_ROUTER_V2 : SWAP_ROUTER_V3;
+        txs.push({ to: leg.tokenIn, data: encodeApprove(router, 0n), value: '0x0' });
+        txs.push({ to: leg.tokenIn, data: encodeApprove(router, leg.amountIn), value: '0x0' });
+        if (leg.type === 'v2') {
+          txs.push({ to: router, data: encodeV2SwapExactTokensForTokens(leg.amountIn, leg.path, currentAccount, leg.minOut), value: '0x0' });
+        } else {
+          txs.push({ to: router, data: encodeExactInputSingle(leg.tokenIn, leg.tokenOut, leg.fee, currentAccount, leg.amountIn, leg.minOut), value: '0x0' });
+        }
+      });
+    } else if (q.type === 'v2') {
       var path = q.path;
       txs.push({ to: fromAddr, data: encodeApprove(SWAP_ROUTER_V2, 0n), value: '0x0' });
       txs.push({ to: fromAddr, data: encodeApprove(SWAP_ROUTER_V2, amountToSwap), value: '0x0' });

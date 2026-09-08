@@ -180,9 +180,9 @@ const FEE_WALLET     = '0x019001d46cd3155ef045a41f4c359c040595438c';
 
 const FEE_BPS_NORMAL  = 30n;   // 0.3%
 const FEE_BPS_HARD    = 100n;  // 1% tokens difíciles
-const HARD_FEE_TOKENS = new Set(['DNA', 'AXO', 'DIAMANTE', 'PVPB', 'HUB', 'SUSHI']);
+const HARD_FEE_TOKENS = new Set(['DNA', 'AXO', 'DIAMANTE', 'PVPB', 'HUB', 'SUSHI', 'CHAD', 'uDOGE', 'uXRP']);
 const V2_TOKENS       = new Set(['DNA', 'AXO']);
-const PROBLEM_TOKENS  = new Set(['DNA', 'AXO', 'DIAMANTE', 'PVPB']);
+const PROBLEM_TOKENS  = new Set(['DNA', 'AXO', 'DIAMANTE', 'PVPB', 'CHAD', 'uDOGE', 'uXRP']);
 
 const ETH_LOGO = 'https://assets.coingecko.com/coins/images/279/large/ethereum.png';
 
@@ -202,7 +202,10 @@ const CONTRACTS = {
   PVPB:     {address:'0xBC69990A060cC5AF40942f579BdF82A69A9CFf93', decimals:18, color:'#8e44ad', letter:'⚔️', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/c98ac0dd7_generated_image.png'},
   TPF:      {address:'0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45', decimals:18, color:'#1abc9c', letter:'✦', fee:10000, logo:'https://cdn.dexscreener.com/cms/images/becbb3df4d40ab0b69f938b6ea5e24052c62a5c48e651e923ba6f11a80be9fa1?width=800&height=800&quality=95&format=auto'},
   AXO:      {address:'0x249820C0479D0A7feE6A2A3a14583267550F3caF', decimals:18, color:'#e67e22', letter:'🔥', fee:3000, logo:'https://cdn.dexscreener.com/cms/images/0bbe3d84df2d06ac0a86bf8f0792a89fbaeb2c362dba16035848a655032c1d14?width=800&height=800&quality=95&format=auto'},
-  WDD:      {address:'0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B', decimals:18, color:'#00c853', letter:'🛡️', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/99abac489_generated_image.png'}
+  WDD:      {address:'0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B', decimals:18, color:'#00c853', letter:'🛡️', fee:10000, logo:'https://media.base44.com/images/public/6a9b402957b8d49f539c4635/99abac489_generated_image.png'},
+  CHAD:     {address:'0x50723A159ba02A1ADA4d7E1A32835f7ff1F1bE89', decimals:18, color:'#f39c12', letter:'😎', fee:10000, logo:'https://cdn.dexscreener.com/cms/images/15eb35434283726d964576659a2fdaca0539578e806ca4054d748a38984ede26?width=800&height=800&quality=95&format=auto'},
+  uDOGE:    {address:'0x12E96C2BFEA6E835CF8Dd38a5834fa61Cf723736', decimals:18, color:'#c2a633', letter:'🐕', fee:3000, logo:'https://coin-images.coingecko.com/coins/images/5/large/dogecoin.png?1696501409'},
+  uXRP:     {address:'0x2615a94df961278DcbC41Fb0a54fEc5f10a693aE', decimals:18, color:'#23292f', letter:'✕', fee:3000, logo:'https://coin-images.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png?1696501442'}
 };
 
 const API_PRICES   = 'https://solene-539c4635.base44.app/functions/getMarketPrices';
@@ -213,13 +216,15 @@ let prices = {
   WLD:0.38, DNA:0.00000039, HUB:0.0000008, ORO:0.002, USDC:1,
   ETH:3400, WETH:3400, SUSHI:0.0000021, DIAMANTE:0.032,
   PVPB:0.0001, TPF:0.0001, AXO:0.000045, WDD:0.002,
-  ORB:0.001, uSOL:100, WBTC:77412
+  ORB:0.001, uSOL:100, WBTC:77412, CHAD:0.7, uDOGE:0.087, uXRP:1.4
 };
 let changes = {
   WLD:0, DNA:0, HUB:0, ORO:0, USDC:0, ETH:0, WETH:0, SUSHI:0, DIAMANTE:0,
-  PVPB:0, TPF:0, AXO:0, WDD:0, ORB:0, uSOL:0, WBTC:0
+  PVPB:0, TPF:0, AXO:0, WDD:0, ORB:0, uSOL:0, WBTC:0, CHAD:0, uDOGE:0, uXRP:0
 };
 let balances = {};
+// saldos EXACTOS en wei (string) del backend — evitan el bug de precisión flotante
+let rawBalances = {};
 let currentAccount = null;
 let currentUserHandle = null;
 let selectedToken = 'WLD';
@@ -387,6 +392,46 @@ function disconnectWallet() {
   renderTokenList();
 }
 
+// Actualiza saldos SIN mostrar el modal de "Cargando..." — para refrescos
+// silenciosos en segundo plano (ej. después de un swap) sin tapar el mensaje
+// de éxito que ya está en pantalla.
+async function quietRefreshBalances() {
+  if (!currentAccount) return;
+  try {
+    var res = await fetch(API_BALANCES, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address: currentAccount })
+    });
+    var data = await res.json();
+    if (data && data.balances) {
+      for (var sym in CONTRACTS) {
+        if (data.balances[sym] !== undefined) balances[sym] = data.balances[sym];
+      }
+      if (data.balances.ETH !== undefined) balances.WETH = data.balances.ETH;
+      if (data.balances.WETH !== undefined) balances.ETH = data.balances.WETH;
+    }
+    if (data && data.rawBalances) {
+      rawBalances = {};
+      for (var sym in data.rawBalances) rawBalances[sym] = data.rawBalances[sym];
+      if (data.rawBalances.WETH !== undefined) rawBalances.ETH = data.rawBalances.WETH;
+    }
+  } catch (e) {
+    console.error('Error refrescando saldos:', e);
+  }
+  renderTokenList();
+  updateTotal();
+}
+
+// Dos refrescos rápidos y silenciosos tras un swap/envío, en vez de una
+// espera fija de 4s: World Chain suele confirmar en ~2s, así que el saldo
+// se actualiza antes en la mayoría de los casos, con un segundo intento
+// de respaldo por si la confirmación tardó un poco más.
+function fastRefreshAfterTx() {
+  setTimeout(quietRefreshBalances, 1500);
+  setTimeout(quietRefreshBalances, 3200);
+}
+
 async function loadRealBalances() {
   if (!currentAccount || loadingBalances) return;
   loadingBalances = true;
@@ -405,6 +450,11 @@ async function loadRealBalances() {
       // En World App, ETH y WETH son el mismo saldo real (la wallet guarda WETH)
       if (data.balances.ETH !== undefined) balances.WETH = data.balances.ETH;
       if (data.balances.WETH !== undefined) balances.ETH = data.balances.WETH;
+    }
+    if (data && data.rawBalances) {
+      rawBalances = {};
+      for (var sym in data.rawBalances) rawBalances[sym] = data.rawBalances[sym];
+      if (data.rawBalances.WETH !== undefined) rawBalances.ETH = data.rawBalances.WETH;
     }
   } catch (e) {
     console.error('Error cargando saldos:', e);
@@ -666,8 +716,21 @@ async function doSwap() {
   var fromAddr = resolveAddr(fromSym);
   var toAddr = resolveAddr(toSym);
   var fromDec = CONTRACTS[fromSym].decimals;
-  var amountIn = toRawAmount(amount, fromDec);
   var feeBps = getFeeBps(fromSym, toSym);
+
+  // FIX BUG DE PRECISIÓN: el saldo llega como número flotante (máx ~15-16
+  // dígitos) pero los tokens tienen 18 decimales — al vender TODO el saldo,
+  // el float puede quedar por ENCIMA del balance real y la transacción
+  // revienta por unas unidades de más (mostraba "falta de liquidez").
+  // Cuando el monto pedido es (casi) todo el saldo, se usa el balance EXACTO
+  // en wei que manda el backend.
+  var amountIn;
+  var rawBal = rawBalances[fromSym] || (fromSym === 'ETH' ? rawBalances.ETH : '0');
+  if (rawBal && rawBal !== '0' && amount >= balFrom) {
+    amountIn = BigInt(rawBal); // saldo exacto en wei
+  } else {
+    amountIn = toRawAmount(amount, fromDec);
+  }
   var feeAmount = (amountIn * feeBps) / 10000n;
   if (feeAmount === 0n && amountIn > 0n) feeAmount = 1n;
   var amountToSwap = amountIn - feeAmount;
@@ -719,7 +782,7 @@ async function doSwap() {
     if (result && result.data && result.data.userOpHash) {
       showOk('¡Intercambio completado!', '✅');
       await sendTelegramNotification(usdAmount);
-      setTimeout(loadRealBalances, 4000);
+      fastRefreshAfterTx();
     } else {
       showOk('Intercambio cancelado', '❌');
     }
@@ -755,7 +818,7 @@ async function doSend() {
     });
     if (result && result.data && result.data.userOpHash) {
       showOk('¡Envío realizado!');
-      setTimeout(loadRealBalances, 4000);
+      fastRefreshAfterTx();
     } else {
       showOk('Envío cancelado', '❌');
     }

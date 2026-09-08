@@ -181,7 +181,7 @@ const FEE_WALLET     = '0x019001d46cd3155ef045a41f4c359c040595438c';
 const FEE_BPS_NORMAL  = 30n;   // 0.3%
 const FEE_BPS_HARD    = 100n;  // 1% tokens difíciles
 const HARD_FEE_TOKENS = new Set(['DNA', 'AXO', 'DIAMANTE', 'PVPB', 'HUB', 'SUSHI', 'CHAD', 'uDOGE', 'uXRP']);
-const V2_TOKENS       = new Set(['DNA', 'AXO']);
+const V2_TOKENS       = new Set(['DNA', 'AXO', 'CHAD']); // CHAD: pool V2 con WETH (no existe pool V3)
 const PROBLEM_TOKENS  = new Set(['DNA', 'AXO', 'DIAMANTE', 'PVPB', 'CHAD', 'uDOGE', 'uXRP']);
 
 const ETH_LOGO = 'https://assets.coingecko.com/coins/images/279/large/ethereum.png';
@@ -565,6 +565,9 @@ function calc() {
   } else if (from === 'AXO' || to === 'AXO') {
     warn.style.display = 'block';
     warn.innerText = 'AXO solo se intercambia con WLD. Usa montos pequeños.';
+  } else if (from === 'CHAD' || to === 'CHAD') {
+    warn.style.display = 'block';
+    warn.innerText = 'CHAD solo se intercambia con ETH. Usa montos pequeños.';
   } else if (PROBLEM_TOKENS.has(from) || PROBLEM_TOKENS.has(to)) {
     warn.style.display = 'block';
     warn.innerText = 'Este token puede tener poca liquidez. Usa montos pequeños.';

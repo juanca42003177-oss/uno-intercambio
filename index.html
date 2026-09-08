@@ -648,7 +648,15 @@ function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn, min
 }
 
 function encodeV2SwapExactTokensForTokens(amountIn, path, to, amountOutMin) {
-  const sel = '38ed1739';
+  // 0x5c11d795 = swapExactTokensForTokensSupportingFeeOnTransferTokens.
+  // DNA tiene un impuesto de transferencia del 15% integrado en su contrato
+  // (verificado en su código fuente): el router normal (0x38ed1739) asume
+  // que llega el 100% del monto al pool, y como solo llega el 85%, revienta
+  // por violar la matemática interna (K) — eso causaba "no hay liquidez"
+  // al VENDER DNA (comprar sí funcionaba, solo con pérdida silenciosa).
+  // Esta variante mide el monto REAL recibido, así que nunca revienta por
+  // esto, sea DNA o cualquier otro token con impuesto que no conozcamos aún.
+  const sel = '5c11d795';
   const amountOutMinHex = BigInt(amountOutMin || 0).toString(16).padStart(64, '0');
   const toPad = to.slice(2).toLowerCase().padStart(64, '0');
   const deadline = (Math.floor(Date.now() / 1000) + 1800).toString(16).padStart(64, '0');

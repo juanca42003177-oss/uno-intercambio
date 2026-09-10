@@ -647,6 +647,30 @@ function encodeExactInputSingle(tokenIn, tokenOut, fee, recipient, amountIn, min
   return '0x04e45aaf' + tIn + tOut + feeHex + rec + amt + mo + sqrtLimit;
 }
 
+// exactInput() de Uniswap V3 SwapRouter02 — UN SOLO call que resuelve
+// varios saltos V3 seguidos (ej. USDC -> WLD -> DIAMANTE) sin que el token
+// intermedio (WLD) pase visiblemente por la wallet del usuario. Antes cada
+// salto usaba exactInputSingle por separado y WLD "aterrizaba" en la wallet
+// entre uno y otro, lo que World App mostraba como Send/Receive extra en el
+// historial (mismo swap, pero se veía como 4 movimientos en vez de 1).
+// selector 0xb858183f, struct (bytes path, address recipient, uint256 amountIn, uint256 amountOutMinimum).
+// path = tokenIn(20 bytes) + fee1(3 bytes) + tokenMid(20 bytes) + fee2(3 bytes) + tokenOut(20 bytes)...
+function encodeV3ExactInputMultihop(legs, recipient, amountIn, minOut) {
+  var pathHex = legs[0].tokenIn.slice(2).toLowerCase();
+  legs.forEach(function(leg) {
+    pathHex += Number(leg.fee).toString(16).padStart(6, '0');
+    pathHex += leg.tokenOut.slice(2).toLowerCase();
+  });
+  var pathLenHex = (pathHex.length / 2).toString(16).padStart(64, '0');
+  var pad = (64 - (pathHex.length % 64)) % 64;
+  var pathPadded = pathHex + '0'.repeat(pad);
+  var offsetHex = (4 * 32).toString(16).padStart(64, '0'); // 0x80: 4 slots antes del bytes dinámico
+  var recipientHex = recipient.slice(2).toLowerCase().padStart(64, '0');
+  var amountInHex = BigInt(amountIn).toString(16).padStart(64, '0');
+  var minOutHex = BigInt(minOut || 0).toString(16).padStart(64, '0');
+  return '0xb858183f' + offsetHex + recipientHex + amountInHex + minOutHex + pathLenHex + pathPadded;
+}
+
 function encodeV2SwapExactTokensForTokens(amountIn, path, to, amountOutMin) {
   // 0x5c11d795 = swapExactTokensForTokensSupportingFeeOnTransferTokens.
   // DNA tiene un impuesto de transferencia del 15% integrado en su contrato
@@ -767,10 +791,20 @@ async function doSwap() {
     // aprobar pero ANTES del swap, queda un allowance viejo atascado y el
     // approve() nuevo revierte, tumbando todo el swap. Con approve(0) primero
     // esto nunca vuelve a pasar. Costo extra: nada (mismo batch, sin tx aparte).
-    if (q.type === 'multi') {
-      // RUTA MULTI-SALTO (ej. DNA → ETH → uSOL): el backend la calcula sola.
-      // Cada salto va con su approve(0) + approve + swap. El salto 2 gasta
-      // el mínimo garantizado del salto 1, así que nunca revienta.
+    if (q.type === 'multi' && q.legs.every(function(l) { return l.type === 'v3'; })) {
+      // TODOS los saltos son V3: se fusionan en UN SOLO exactInput multi-hop.
+      // El token intermedio (ej. WLD) nunca toca la wallet del usuario —
+      // queda igual de limpio en el historial que un swap directo (1 solo
+      // Send + 1 solo Receive), en vez de aparecer como 3-4 movimientos.
+      var firstLeg = q.legs[0];
+      txs.push({ to: firstLeg.tokenIn, data: encodeApprove(SWAP_ROUTER_V3, 0n), value: '0x0' });
+      txs.push({ to: firstLeg.tokenIn, data: encodeApprove(SWAP_ROUTER_V3, firstLeg.amountIn), value: '0x0' });
+      txs.push({ to: SWAP_ROUTER_V3, data: encodeV3ExactInputMultihop(q.legs, currentAccount, firstLeg.amountIn, minOutRaw), value: '0x0' });
+    } else if (q.type === 'multi') {
+      // RUTA MIXTA (ej. DNA(V2) → ETH → uSOL(V3)): protocolos distintos no
+      // se pueden fusionar en un solo call, así que cada salto va con su
+      // approve(0) + approve + swap. El salto 2 gasta el mínimo garantizado
+      // del salto 1, así que nunca revienta.
       q.legs.forEach(function(leg) {
         var router = leg.type === 'v2' ? SWAP_ROUTER_V2 : SWAP_ROUTER_V3;
         txs.push({ to: leg.tokenIn, data: encodeApprove(router, 0n), value: '0x0' });

@@ -94,6 +94,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
         <input id="fAmt" type="number" value="0" style="flex:1" oninput="calc()">
         <select id="fSel" onchange="calc()"></select>
       </div>
+      <div class="small" id="fUsd" style="margin-top:4px"></div>
       <div class="perc">
         <button onclick="setPerc(25)">25%</button>
         <button onclick="setPerc(50)">50%</button>
@@ -108,6 +109,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
         <input id="tAmt" readonly style="flex:1">
         <select id="tSel" onchange="calc()"></select>
       </div>
+      <div class="small" id="tUsd" style="margin-top:4px"></div>
     </div>
     <div class="box" style="font-size:13px">
       <div style="display:flex;justify-content:space-between"><span>Comisión (<span id="feePctLabel">0.3</span>%):</span><b id="feeUno">$0.00</b></div>
@@ -570,17 +572,26 @@ function calc() {
     document.getElementById('tAmt').value = '0';
     document.getElementById('feeUno').innerText = '$0.00';
     document.getElementById('totalCommission').innerText = '$0.00';
+    document.getElementById('fUsd').innerText = '';
+    document.getElementById('tUsd').innerText = '';
     return;
   }
   var pf = prices[from] || 0.0000001;
   var pt = prices[to] || 0.0000001;
   var usd = amt * pf;
   var fee = usd * (Number(feeBps) / 10000);
+  var usdOut = usd - fee;
   // Estimado instantáneo con precios de referencia (puede ser impreciso en
   // tokens poco líquidos). Se corrige abajo con la cotización real del pool.
-  document.getElementById('tAmt').value = formatCrypto((usd - fee) / pt);
+  document.getElementById('tAmt').value = formatCrypto(usdOut / pt);
   document.getElementById('feeUno').innerText = '$' + fee.toFixed(4);
   document.getElementById('totalCommission').innerText = '$' + fee.toFixed(4);
+  document.getElementById('fUsd').innerText = '≈ $' + usd.toFixed(4);
+  // El $ de "recibes" se calcula como el valor en dólares que realmente
+  // entra al swap (monto - comisión) — es más confiable que multiplicar por
+  // el precio de referencia del token de salida, que en tokens poco líquidos
+  // puede estar desactualizado o directamente no existir.
+  document.getElementById('tUsd').innerText = '≈ $' + usdOut.toFixed(4);
 
   // Cotización REAL contra el pool (misma que se usa al firmar), para que lo
   // que ves en pantalla coincida con lo que World App te va a pedir firmar.
@@ -613,6 +624,14 @@ function scheduleRealQuote(from, to, amt, feeBps) {
         var toDec = CONTRACTS[to].decimals;
         var realOut = Number(q.expectedOut) / Math.pow(10, toDec);
         document.getElementById('tAmt').value = formatCrypto(realOut);
+        // Una ruta con puente (multi-hop) casi siempre significa que el
+        // par directo tiene liquidez muy fina — se avisa aunque el token
+        // no esté en la lista fija de "problemáticos" conocidos.
+        if (q.type === 'multi') {
+          var warn = document.getElementById('lowLiqWarn');
+          warn.style.display = 'block';
+          warn.innerText = 'Este token tiene liquidez limitada. Usa montos pequeños para mejor precio.';
+        }
       }
     } catch (e) { /* silencioso: se queda con el estimado por precios */ }
   }, 450);

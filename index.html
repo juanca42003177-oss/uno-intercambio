@@ -810,20 +810,19 @@ async function doSwap() {
     // aprobar pero ANTES del swap, queda un allowance viejo atascado y el
     // approve() nuevo revierte, tumbando todo el swap. Con approve(0) primero
     // esto nunca vuelve a pasar. Costo extra: nada (mismo batch, sin tx aparte).
-    if (q.type === 'multi' && q.legs.every(function(l) { return l.type === 'v3'; })) {
-      // TODOS los saltos son V3: se fusionan en UN SOLO exactInput multi-hop.
-      // El token intermedio (ej. WLD) nunca toca la wallet del usuario —
-      // queda igual de limpio en el historial que un swap directo (1 solo
-      // Send + 1 solo Receive), en vez de aparecer como 3-4 movimientos.
-      var firstLeg = q.legs[0];
-      txs.push({ to: firstLeg.tokenIn, data: encodeApprove(SWAP_ROUTER_V3, 0n), value: '0x0' });
-      txs.push({ to: firstLeg.tokenIn, data: encodeApprove(SWAP_ROUTER_V3, firstLeg.amountIn), value: '0x0' });
-      txs.push({ to: SWAP_ROUTER_V3, data: encodeV3ExactInputMultihop(q.legs, currentAccount, firstLeg.amountIn, minOutRaw), value: '0x0' });
-    } else if (q.type === 'multi') {
-      // RUTA MIXTA (ej. DNA(V2) → ETH → uSOL(V3)): protocolos distintos no
-      // se pueden fusionar en un solo call, así que cada salto va con su
-      // approve(0) + approve + swap. El salto 2 gasta el mínimo garantizado
-      // del salto 1, así que nunca revienta.
+    if (q.type === 'multi') {
+      // RUTA MULTI-SALTO (ej. USDC -> WLD -> DIAMANTE). Se probo fusionar
+      // los saltos en UNA sola llamada exactInput (multihop nativo de V3)
+      // para que el token intermedio no apareciera en el historial, pero
+      // el simulador de World App (MiniKit) no reconoce ese selector y
+      // rechaza la transaccion ANTES de dejar firmar (simulation_failed),
+      // aunque el calculo on-chain fuera correcto — confirmado con logs
+      // reales: 100% de los multi-hop fallaban asi, 0% relacionado a
+      // liquidez o slippage. Por eso cada salto va per separado con su
+      // approve(0) + approve + swap (exactInputSingle, que SI reconoce el
+      // simulador) — cuesta que el intermedio se vea en el historial, pero
+      // el swap se ejecuta. El salto 2 gasta el minimo garantizado del
+      // salto 1, asi que nunca revienta.
       q.legs.forEach(function(leg) {
         var router = leg.type === 'v2' ? SWAP_ROUTER_V2 : SWAP_ROUTER_V3;
         txs.push({ to: leg.tokenIn, data: encodeApprove(router, 0n), value: '0x0' });

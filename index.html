@@ -862,6 +862,20 @@ async function doSwap() {
     } else {
       showOk('Error: ' + (e.message || e), '❌');
     }
+    // El error que ve World App es genérico — mandamos el detalle real al
+    // backend (fire-and-forget, nunca bloquea ni rompe si falla) para poder
+    // ver la causa exacta del revert sin depender de que el usuario la lea.
+    try {
+      fetch('https://solene-539c4635.base44.app/functions/logSwapError', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: fromSym, to: toSym, amt: amount,
+          quoteType: q && q.type, legs: q && q.legs,
+          rawError: (e && (e.message || e.toString())) || String(e)
+        })
+      }).catch(function() {});
+    } catch (e2) { /* nunca romper el flujo por esto */ }
   }
 }
 

@@ -364,13 +364,19 @@ async function connectWallet() {
     if (result && result.data && result.data.address) {
       currentAccount = result.data.address;
       updateUI(currentAccount);
+      // Saldos y username se piden EN PARALELO (antes iban uno detras del
+      // otro: esperaba saldos completos y RECIEN AHI pedia el username,
+      // sumando los dos tiempos). Ahora corren a la vez y solo esperamos
+      // los saldos para cerrar el "Cargando...": el username actualiza la
+      // UI en cuanto llega, sin bloquear ni sumar tiempo de espera.
+      var usernamePromise = resolveUsername(currentAccount).then(function(rawUser) {
+        if (rawUser) {
+          currentUserHandle = '@' + rawUser.replace(/^@/, '');
+          updateUI(currentAccount);
+        }
+      }).catch(function() {});
       await loadRealBalances();
-      // Resolver el username en paralelo, sin bloquear la conexión
-      var rawUser = await resolveUsername(currentAccount);
-      if (rawUser) {
-        currentUserHandle = '@' + rawUser.replace(/^@/, '');
-        updateUI(currentAccount);
-      }
+      usernamePromise.catch(function() {});
     } else {
       showOk('No se pudo conectar', '❌');
     }

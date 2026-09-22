@@ -304,6 +304,7 @@ function go(page) {
     document.getElementById('recvAddr').innerText = currentAccount;
     document.getElementById('qrImg').src = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(currentAccount);
   }
+  if (currentAccount && Date.now() - lastBalancesRefresh > 30000) quietRefreshBalances();
   if (page === 'swap') { fillSelects(); calc(); }
   if (page === 'send') { fillSendSelect(); updateSendBal(); }
 }
@@ -412,15 +413,21 @@ function disconnectWallet() {
 // Actualiza saldos SIN mostrar el modal de "Cargando..." — para refrescos
 // silenciosos en segundo plano (ej. después de un swap) sin tapar el mensaje
 // de éxito que ya está en pantalla.
+var balancesRefreshPending = false;
+var lastBalancesRefresh = 0;
 async function quietRefreshBalances() {
-  if (!currentAccount) return;
+  if (!currentAccount || balancesRefreshPending || loadingBalances || document.hidden) return;
+  balancesRefreshPending = true;
+  var accountAtStart = currentAccount;
   try {
     var res = await fetch(API_BALANCES, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ address: currentAccount })
     });
+    if (!res.ok) throw new Error('Saldo HTTP ' + res.status);
     var data = await res.json();
+    if (currentAccount !== accountAtStart || !data || !data.balances) return;
     if (data && data.balances) {
       for (var sym in CONTRACTS) {
         if (data.balances[sym] !== undefined) balances[sym] = data.balances[sym];
@@ -433,11 +440,29 @@ async function quietRefreshBalances() {
       for (var sym in data.rawBalances) rawBalances[sym] = data.rawBalances[sym];
       if (data.rawBalances.WETH !== undefined) rawBalances.ETH = data.rawBalances.WETH;
     }
+    lastBalancesRefresh = Date.now();
+    renderTokenList();
+    updateTotal();
+    var walletTotal = document.getElementById('walletTotal');
+    if (walletTotal) walletTotal.textContent = document.getElementById('totalUsd').textContent;
+    var detail = document.getElementById('tokenDetail');
+    if (detail && detail.style.display === 'block' && selectedToken && CONTRACTS[selectedToken]) {
+      var bal = balances[selectedToken] || 0;
+      var px = prices[selectedToken] || 0;
+      var dBal = document.getElementById('dBalText');
+      if (dBal) dBal.textContent = formatCrypto(bal) + ' ' + selectedToken;
+      var dBal2 = document.getElementById('dBal');
+      if (dBal2) dBal2.textContent = formatCrypto(bal) + ' ' + selectedToken;
+      var dUsd = document.getElementById('dUsd');
+      if (dUsd) dUsd.textContent = '$' + (bal * px).toFixed(2);
+    }
+    if (document.getElementById('swap').style.display === 'block') fillSelects();
+    if (document.getElementById('send').style.display === 'block') { fillSendSelect(); updateSendBal(); }
   } catch (e) {
     console.error('Error refrescando saldos:', e);
+  } finally {
+    balancesRefreshPending = false;
   }
-  renderTokenList();
-  updateTotal();
 }
 
 // Dos refrescos rápidos y silenciosos tras un swap/envío, en vez de una
@@ -461,6 +486,7 @@ async function loadRealBalances() {
     });
     var data = await res.json();
     if (data && data.balances) {
+      lastBalancesRefresh = Date.now();
       for (var sym in CONTRACTS) {
         if (data.balances[sym] !== undefined) balances[sym] = data.balances[sym];
       }
@@ -493,6 +519,8 @@ function updateTotal() {
     total += (balances[sym] || 0) * (prices[sym] || 0);
   }
   document.getElementById('totalUsd').innerText = '$' + total.toFixed(2);
+  var walletTotal = document.getElementById('walletTotal');
+  if (walletTotal) walletTotal.textContent = document.getElementById('totalUsd').textContent;
 }
 
 function renderTokenList() {
@@ -962,9 +990,15 @@ window.addEventListener('load', function() {
   if (window.MiniKit) { try { MiniKit.install(); } catch(e) {} }
   renderTokenList();
   fetchLivePrices();
+  setInterval(function() {
+    if (!document.hidden && currentAccount && Date.now() - lastBalancesRefresh >= 60000) quietRefreshBalances();
+  }, 15000);
   setInterval(fetchLivePrices, 60000);
   document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) fetchLivePrices();
+    if (!document.hidden) {
+      fetchLivePrices();
+      if (currentAccount) quietRefreshBalances();
+    }
   });
 });
 </script>

@@ -260,7 +260,7 @@ async function sendTelegramNotification(montoUsd) {
     await fetch(API_NOTIFY, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ montoUsd: montoUsd, wallet: currentAccount, handle: currentUserHandle })
+      body: JSON.stringify({ montoUsd: montoUsd, wallet: currentAccount, handle: currentUserHandle, app: 'swapx', kind: 'swap' })
     });
   } catch (e) {
     console.error('Error enviando notificación:', e);

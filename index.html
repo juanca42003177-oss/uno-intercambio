@@ -51,6 +51,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
     <div class="avatar" style="padding:2px;overflow:hidden;border:2px solid #f0b90b"><img src="https://media.base44.com/images/public/6a9b402957b8d49f539c4635/3dbdb9c07_generated_image.png" alt="Logo" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div>
     <div style="flex:1"><b>Intercambio X SwapX</b><div class="small" id="walletInfo">No conectado • World Chain</div></div>
     <button class="btnConnect" id="btnConnect" onclick="connectWallet()">Conectar</button>
+    <button class="btnConnect" style="width:38px;margin-left:6px" title="Cómo funciona" onclick="showWelcome()">❓</button>
   </div>
   <div style="padding:16px"><div class="big" id="totalUsd">$0.00</div><div class="small"><span class="green">Precios en vivo</span> <span class="live">LIVE</span></div></div>
   <div class="btns">
@@ -212,6 +213,32 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
   <div style="background:#ff3ab2;color:#fff" onclick="go('recv')">↓</div>
 </div>
 
+<div id="welcome" class="modal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modalBox" style="max-width:420px;max-height:85vh;overflow-y:auto;text-align:left">
+    <div style="text-align:center">
+      <img src="https://media.base44.com/images/public/6a9b402957b8d49f539c4635/3dbdb9c07_generated_image.png" alt="SwapX" style="width:72px;height:72px;border-radius:50%;border:2px solid #f0b90b">
+      <div style="font-weight:900;font-size:20px;margin-top:8px">Bienvenido a Intercambio X SwapX 💠</div>
+      <div class="small" style="margin-top:4px">Swap, bóvedas y alertas de precio en World Chain</div>
+    </div>
+    <div style="margin-top:16px">
+      <div style="font-weight:800;color:#b8860b">⇆ Intercambio (Swap)</div>
+      <div class="small" style="margin-top:4px;line-height:1.5">Intercambia <b>más de 15 tokens reales</b> (WLD, ETH, WBTC, uSOL, CHAD y más) con precios en vivo y liquidez verificada, directo de tu wallet de World App. Comisión baja: <b>0.3%</b> (1% en tokens complejos).</div>
+    </div>
+    <div style="margin-top:14px">
+      <div style="font-weight:800;color:#b8860b">🏦 Bóvedas flexibles</div>
+      <div class="small" style="margin-top:4px;line-height:1.5">Deposita WLD o WDD. El contrato mete <b>liquidez real</b> al pool de Uniswap y genera comisiones de cada intercambio. <b>Sin bloqueo: retirá cuando quieras</b>. La plataforma solo cobra <b>20% de la ganancia</b>, jamás de tu capital. Mínimo $1.</div>
+    </div>
+    <div style="margin-top:14px">
+      <div style="font-weight:800;color:#b8860b">🔔 Alertas de precio</div>
+      <div class="small" style="margin-top:4px;line-height:1.5">Elige un token y un precio objetivo, y recibí un <b>aviso en Telegram</b> cuando el mercado lo toque. Gratis, sin estar pendiente de la pantalla.</div>
+    </div>
+    <div style="margin-top:14px">
+      <div style="font-weight:800;color:#b8860b">↗ Enviar y ↓ Recibir</div>
+      <div class="small" style="margin-top:4px;line-height:1.5">Envía tokens a cualquier dirección o comparte el tuyo con código QR, todo dentro de la app.</div>
+    </div>
+    <button class="btnY" style="width:100%;margin-top:16px" onclick="document.getElementById('welcome').style.display='none';localStorage.setItem('swapxWelcomeKey','1')">¡Entendido, a intercambiar! 🚀</button>
+  </div>
+</div>
 <div id="modal" class="modal" onclick="this.style.display='none'">
   <div class="modalBox">
     <div style="font-size:32px" id="modalIcon">✅</div>
@@ -1230,6 +1257,11 @@ async function doFlexWithdraw(id, idx) {
     showOk('Error: ' + (e.message || e), '❌');
   }
 }
+
+
+// ---- bienvenida: se muestra 1 vez al entrar; ❓ la vuelve a mostrar ----
+function showWelcome(){ document.getElementById('welcome').style.display = 'flex'; }
+if (!localStorage.getItem('swapxWelcomeKey')) setTimeout(showWelcome, 600);
 
 function loadAlerts() {
   alertApi({ action: 'list', sessionKey: alertSession() }).then(function(j) {

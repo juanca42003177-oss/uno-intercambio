@@ -1278,6 +1278,17 @@ async function doFlexWithdraw(id, idx) {
     });
     if (result && result.data && result.data.userOpHash) {
       showOk('¡Retiro realizado!', '✅');
+      // BUG corregido 2026-09-28: el retiro nunca avisaba por Telegram (solo
+      // el deposito lo hacia). Se usa el monto originalmente depositado
+      // (principalA) al precio actual como aproximacion del retiro, ya que
+      // el monto exacto devuelto por el contrato (que puede incluir
+      // ganancia menos 20%) no se conoce en el cliente sin otra llamada.
+      var dep = (v.deposits || []).filter(function(d){ return d.index === idx; })[0];
+      if (dep) {
+        var principalTok = Number(dep.principalA) / Math.pow(10, v.tokenADecimals);
+        var withUsd = principalTok * (prices[v.symA] || 0);
+        sendTelegramNotification(withUsd, 'vault_withdraw', v.name);
+      }
       fastRefreshAfterTx();
       setTimeout(loadFlexVaults, 3000);
     } else {

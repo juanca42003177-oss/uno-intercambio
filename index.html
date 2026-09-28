@@ -377,6 +377,18 @@ function go(page) {
   if (page === 'earn') loadFlexVaults();
 }
 
+// BUG corregido 2026-09-28: la pantalla de detalle del token redondeaba a
+// solo 2 decimales cualquier precio >= $0.01, asi DIAMANTE a $0.01484 se veia
+// como "$0.01" (parecia precio inventado/mal, pero era solo redondeo de
+// pantalla — el dato real siempre fue correcto). Ahora se muestran mas
+// decimales segun el rango del precio, sin cambiar el dato subyacente.
+function fmtPriceDetail(price) {
+  if (!(price > 0)) return '0';
+  if (price >= 1) return price.toFixed(2);
+  if (price >= 0.01) return price.toFixed(4);
+  if (price >= 0.0001) return price.toFixed(6);
+  return price.toPrecision(3);
+}
 function openToken(sym) {
   selectedToken = sym;
   var t = CONTRACTS[sym];
@@ -388,7 +400,7 @@ function openToken(sym) {
   dIcon.innerHTML = tokenIconHTML(t, sym);
   document.getElementById('dName').innerText = sym;
   document.getElementById('dBalText').innerText = formatCrypto(bal) + ' ' + sym;
-  document.getElementById('dPrice').innerText = '$' + price.toFixed(price < 0.01 ? 6 : 2);
+  document.getElementById('dPrice').innerText = '$' + fmtPriceDetail(price);
   document.getElementById('dChange').innerText = (ch >= 0 ? '▲ +' : '▼ ') + Math.abs(ch).toFixed(2) + '%';
   document.getElementById('dBal').innerText = formatCrypto(bal) + ' ' + sym;
   document.getElementById('dUsd').innerText = '$' + (bal * price).toFixed(2);

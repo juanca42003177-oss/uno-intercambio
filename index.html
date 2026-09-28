@@ -167,9 +167,41 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
   </div>
 </div>
 
+<div id="alerts" style="display:none">
+  <div class="main">
+    <h3 style="text-align:center">Alertas de precio 🔔</h3>
+    <p class="small" style="text-align:center;margin:16px 0 20px">Te avisamos por Telegram cuando tu moneda llegue al precio que quieras</p>
+
+    <div style="background:#fff;border:2px solid #f0b90b;border-radius:16px;padding:16px;margin:0 4px">
+      <div style="font-weight:900;font-size:15px">Nueva alerta</div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <select id="alertSym" style="flex:1;padding:12px;border-radius:12px;border:1px solid #ddd;font-size:15px;font-weight:700"></select>
+        <select id="alertDir" style="padding:12px;border-radius:12px;border:1px solid #ddd;font-size:15px;font-weight:700">
+          <option value="arriba">sube a</option>
+          <option value="abajo">baja a</option>
+        </select>
+      </div>
+      <input id="alertPrice" type="number" inputmode="decimal" step="any" placeholder="Precio en USD, ej 0.40" style="width:100%;padding:12px;border-radius:12px;border:1px solid #ddd;font-size:15px;font-weight:700;margin-top:8px;box-sizing:border-box">
+      <button onclick="createAlert()" class="btnY" style="background:#f0b90b;color:#111">🔔 Crear alerta</button>
+    </div>
+
+    <div id="alertLinkBox" style="display:none;background:#111;color:#fff;border-radius:16px;padding:16px;margin:14px 4px">
+      <div style="font-weight:900;font-size:15px;color:#f0b90b">Activa los avisos en Telegram</div>
+      <div class="small" style="color:#bbb;margin-top:6px;line-height:1.5">Envía este código a nuestro bot para recibir la alerta cuando se cumpla:</div>
+      <div id="alertCode" style="font-weight:900;font-size:26px;letter-spacing:4px;color:#f0b90b;text-align:center;margin:12px 0"></div>
+      <button onclick="openAlertBot()" class="btnY" style="background:#2aabee;color:#fff;padding:12px">✈️ Abrir Telegram y vincular</button>
+      <div class="small" style="color:#888;margin-top:8px;text-align:center">Si no se abre, escribe el código en @Unonopremio_bot</div>
+    </div>
+
+    <div id="alertList" style="margin:0 4px"></div>
+    <button onclick="go('home')" class="btnY" style="background:#eee;color:#111;margin-top:12px">← Volver</button>
+  </div>
+</div>
+
 <div class="nav">
   <div id="navHome" class="active" onclick="go('home')">🏠</div>
   <div onclick="go('swap')">⇆</div>
+  <div onclick="go('alerts')">🔔</div>
   <div onclick="go('earn')">💰</div>
   <div style="background:#ff3ab2;color:#fff" onclick="go('recv')">↓</div>
 </div>
@@ -294,7 +326,7 @@ function tokenIconHTML(t, sym) {
 }
 
 function go(page) {
-  ['home','swap','earn','send','recv','tokenDetail'].forEach(function(p) {
+  ['home','swap','earn','send','recv','tokenDetail','alerts'].forEach(function(p) {
     var el = document.getElementById(p);
     if (el) el.style.display = (p === page) ? 'block' : 'none';
   });
@@ -307,6 +339,7 @@ function go(page) {
   if (currentAccount && Date.now() - lastBalancesRefresh > 30000) quietRefreshBalances();
   if (page === 'swap') { fillSelects(); calc(); }
   if (page === 'send') { fillSendSelect(); updateSendBal(); }
+  if (page === 'alerts') { fillAlertTokens(); loadAlerts(); }
 }
 
 function openToken(sym) {
@@ -1001,6 +1034,74 @@ window.addEventListener('load', function() {
     }
   });
 });
+
+// ===== Alertas de precio =====
+var ALERTS_API = 'https://solene-539c4635.base44.app/functions/priceAlerts';
+var ALERT_BOT = 'Unonopremio_bot';
+function alertSession() {
+  var k = localStorage.getItem('xalert_sess');
+  if (!k) { k = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10); localStorage.setItem('xalert_sess', k); }
+  return k;
+}
+function fillAlertTokens() {
+  var sel = document.getElementById('alertSym');
+  if (sel.options.length > 0) return;
+  Object.keys(prices).forEach(function(sym) {
+    if (sym === 'WETH' || sym === 'USDC' || sym === 'USD' || !(prices[sym] > 0)) return;
+    var o = document.createElement('option');
+    o.value = sym; o.textContent = sym + ' — $' + prices[sym];
+    sel.appendChild(o);
+  });
+}
+function alertApi(payload) {
+  return fetch(ALERTS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(function(r){ return r.json(); });
+}
+function createAlert() {
+  var sym = document.getElementById('alertSym').value;
+  var price = parseFloat(document.getElementById('alertPrice').value);
+  var dir = document.getElementById('alertDir').value;
+  if (!sym || !(price > 0)) { showModal('⚠️', 'Escribe un precio válido'); return; }
+  alertApi({ action: 'create', sym: sym, price: price, direction: dir, sessionKey: alertSession() }).then(function(j) {
+    if (!j.ok) { showModal('⚠️', j.error || 'No se pudo crear'); return; }
+    document.getElementById('alertPrice').value = '';
+    if (!j.linked) {
+      document.getElementById('alertCode').textContent = j.code;
+      document.getElementById('alertLinkBox').style.display = 'block';
+    }
+    loadAlerts();
+  }).catch(function() { showModal('⚠️', 'Sin conexión'); });
+}
+function openAlertBot() {
+  var code = document.getElementById('alertCode').textContent;
+  window.open('https://t.me/' + ALERT_BOT + '?start=' + code, '_blank');
+}
+function cancelAlert(id) {
+  alertApi({ action: 'cancel', id: id, sessionKey: alertSession() }).then(loadAlerts);
+}
+function loadAlerts() {
+  alertApi({ action: 'list', sessionKey: alertSession() }).then(function(j) {
+    var box = document.getElementById('alertList');
+    if (!j.ok || !j.alerts || j.alerts.length === 0) {
+      box.innerHTML = '<p class="small" style="text-align:center;margin-top:16px">Aún no tienes alertas. Crea la primera arriba.</p>';
+      return;
+    }
+    var anyLinked = j.alerts.some(function(a){ return a.linked; });
+    document.getElementById('alertLinkBox').style.display = anyLinked ? 'none' : document.getElementById('alertLinkBox').style.display;
+    var html = '<div style="font-weight:900;font-size:15px;margin:16px 0 8px">Mis alertas</div>';
+    j.alerts.forEach(function(a) {
+      var arrow = a.direction === 'arriba' ? '📈' : '📉';
+      var statusChip = a.status === 'avisada'
+        ? '<span style="font-size:11px;background:#f0b90b;color:#111;border-radius:8px;padding:2px 8px;font-weight:800">avisada</span>'
+        : (a.linked ? '<span style="font-size:11px;background:#e5e5e5;color:#666;border-radius:8px;padding:2px 8px;font-weight:800">activa</span>' : '<span style="font-size:11px;background:#e5e5e5;color:#666;border-radius:8px;padding:2px 8px;font-weight:800">activa · vincula Telegram</span>');
+      html += '<div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #eee;border-radius:14px;padding:12px 14px;margin-top:8px">'
+        + '<div style="font-size:20px">' + arrow + '</div>'
+        + '<div style="flex:1"><b>' + a.sym + '</b> <span class="small">' + (a.direction === 'arriba' ? 'sube a' : 'baja a') + ' $' + a.price + '</span><div style="margin-top:4px">' + statusChip + '</div></div>'
+        + (a.status === 'avisada' ? '' : '<button onclick="cancelAlert(\'' + a.id + '\')" style="background:none;border:0;color:#c33;font-weight:900;font-size:18px;cursor:pointer">✕</button>')
+        + '</div>';
+    });
+    box.innerHTML = html;
+  }).catch(function() {});
+}
 </script>
 </body>
 </html>

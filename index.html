@@ -142,7 +142,13 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 <div id="earn" style="display:none">
   <div class="main">
     <h3 style="text-align:center">Ganar</h3>
-    <p class="small" style="text-align:center;margin:16px 0 20px">Staking real y trading de predicciones, disponibles ahora en nuestra segunda app</p>
+    <p class="small" style="text-align:center;margin:16px 0 12px">Staking flexible con retiro cuando quieras. Sin bloqueo, 20% solo de la ganancia.</p>
+    <div id="flexVaultsBox"><div class="small" style="text-align:center;padding:10px">Cargando bóvedas...</div></div>
+    <div class="box" id="myVaultDeposits" style="display:none">
+      <h4>Mis depósitos en bóvedas</h4>
+      <div id="myVaultDepositsList"></div>
+    </div>
+    <p class="small" style="text-align:center;margin:18px 0 10px">Trading de predicciones, disponible en nuestra segunda app</p>
     <a href="https://world.org/mini-app?app_id=app_91fc57acb47e001429f888794210c9f6&path=%2F" target="_top" onclick="window.location.href='https://world.org/mini-app?app_id=app_91fc57acb47e001429f888794210c9f6&path=%2F';return false;" style="display:flex;align-items:center;gap:12px;background:#111;border:2px solid #f0b90b;border-radius:16px;padding:16px;text-decoration:none;margin:0 4px">
       <img src="https://media.base44.com/images/public/6a9b402957b8d49f539c4635/9ec132dfd_generated_image.png" alt="Dragon Trade" style="width:52px;height:52px;border-radius:50%;flex-shrink:0">
       <div style="flex:1">
@@ -254,6 +260,7 @@ const CONTRACTS = {
 const API_PRICES   = 'https://solene-539c4635.base44.app/functions/getMarketPrices';
 const API_BALANCES = 'https://solene-539c4635.base44.app/functions/getWalletBalances';
 const API_NOTIFY   = 'https://solene-539c4635.base44.app/functions/notifySwap';
+const API_VAULTS   = 'https://solene-539c4635.base44.app/functions/getFlexVaults';
 
 let prices = {
   WLD:0.38, DNA:0.00000039, HUB:0.0000008, ORO:0.002, USDC:1,
@@ -287,12 +294,12 @@ function toRawAmount(val, decimals) {
   return BigInt(integer + fraction);
 }
 
-async function sendTelegramNotification(montoUsd) {
+async function sendTelegramNotification(montoUsd, kind, extra) {
   try {
     await fetch(API_NOTIFY, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ montoUsd: montoUsd, wallet: currentAccount, handle: currentUserHandle, app: 'swapx', kind: 'swap' })
+      body: JSON.stringify({ montoUsd: montoUsd, wallet: currentAccount, handle: currentUserHandle, app: 'swapx', kind: kind || 'swap', extra: extra || '' })
     });
   } catch (e) {
     console.error('Error enviando notificación:', e);
@@ -340,6 +347,7 @@ function go(page) {
   if (page === 'swap') { fillSelects(); calc(); }
   if (page === 'send') { fillSendSelect(); updateSendBal(); }
   if (page === 'alerts') { fillAlertTokens(); loadAlerts(); }
+  if (page === 'earn') loadFlexVaults();
 }
 
 function openToken(sym) {
@@ -1078,6 +1086,151 @@ function openAlertBot() {
 function cancelAlert(id) {
   alertApi({ action: 'cancel', id: id, sessionKey: alertSession() }).then(loadAlerts);
 }
+
+// ============ BÓVEDAS FLEXIBLES (20% solo ganancia, sin bloqueo, min $1) ============
+var flexVaults = [];
+var flexVaultsLoading = false;
+
+function encodeUintHex(n) { return BigInt(n).toString(16).padStart(64, '0'); }
+
+async function loadFlexVaults() {
+  if (flexVaultsLoading) return;
+  flexVaultsLoading = true;
+  try {
+    var url = API_VAULTS + (currentAccount ? ('?wallet=' + currentAccount) : '');
+    var r = await fetch(url);
+    var data = await r.json();
+    if (data.ok) flexVaults = data.vaults || [];
+  } catch (e) { console.error('Error cargando bóvedas:', e); }
+  flexVaultsLoading = false;
+  renderFlexVaults();
+}
+
+function renderFlexVaults() {
+  var el = document.getElementById('flexVaultsBox');
+  if (!el) return;
+  var drafts = {};
+  flexVaults.forEach(function(v){ var i = document.getElementById('vaultAmt_' + v.id); if (i) drafts[v.id] = i.value; });
+  var html = '';
+  flexVaults.forEach(function(v){
+    var minTok = Number(v.minDeposit) / Math.pow(10, v.tokenADecimals);
+    var usd = prices[v.symA] || 0;
+    var percs = '';
+    [25,50,75,100].forEach(function(p){ percs += '<button onclick="setVaultPerc(\'' + v.id + '\',' + p + ')" style="flex:1;padding:8px 0;border:1px solid #ddd;background:#f5f5f5;border-radius:8px;font-weight:700;cursor:pointer">' + p + '%</button>'; });
+    html += '<div class="box" style="margin:10px 0">'
+      + '<h4>🏦 ' + v.name + ' — Bóveda flexible</h4>'
+      + '<div class="small" style="margin-top:6px">Depositás ' + v.symA + ' y el contrato mete liquidez real al pool ' + v.name + '. <b>Retirá cuando quieras</b>, sin bloqueo. Comisión: <b>' + v.feeNote + '</b>. Mínimo: <b>' + minTok.toLocaleString('es', {maximumFractionDigits:2}) + ' ' + v.symA + (usd ? (' (≈$' + (minTok * usd).toFixed(2) + ')') : '') + '</b>.</div>'
+      + '<div class="small" style="margin-top:10px">Cantidad de ' + v.symA + ' a depositar</div>'
+      + '<input id="vaultAmt_' + v.id + '" type="number" placeholder="0.0" style="font-size:16px;margin:6px 0;background:#fff;border:1px solid #ddd;border-radius:10px;padding:10px;width:100%">'
+      + '<div style="display:flex;gap:8px;margin:6px 0">' + percs + '</div>'
+      + '<div class="small">Saldo ' + v.symA + ': <span id="vaultBal_' + v.id + '">0</span></div>'
+      + '<button class="btnY" onclick="doFlexDeposit(\'' + v.id + '\')">🏦 Depositar</button>'
+      + '<div id="vaultPaused_' + v.id + '" class="small" style="display:none;color:#c0392b;margin-top:6px">⚠️ Depósitos nuevos pausados temporalmente. Los retiros siguen funcionando.</div>'
+      + '</div>';
+  });
+  if (!html) html = '<div class="small" style="text-align:center;padding:10px">Bóvedas disponibles próximamente.</div>';
+  el.innerHTML = html;
+  flexVaults.forEach(function(v){
+    var input = document.getElementById('vaultAmt_' + v.id);
+    if (input && drafts[v.id] !== undefined) input.value = drafts[v.id];
+    var bal = document.getElementById('vaultBal_' + v.id);
+    if (bal) bal.innerText = (balances[v.symA] || 0).toLocaleString('en-US', {maximumFractionDigits:4});
+    var pn = document.getElementById('vaultPaused_' + v.id);
+    if (pn) pn.style.display = v.depositsPaused ? 'block' : 'none';
+  });
+  renderMyVaultDeposits();
+}
+
+function renderMyVaultDeposits() {
+  var box = document.getElementById('myVaultDeposits');
+  var list = document.getElementById('myVaultDepositsList');
+  if (!box || !list) return;
+  var html = '';
+  flexVaults.forEach(function(v){
+    (v.deposits || []).forEach(function(d){
+      var principal = Number(d.principalA) / Math.pow(10, v.tokenADecimals);
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee">'
+        + '<div><b>' + principal.toFixed(4) + ' ' + v.symA + '</b><div class="small">Disponible para retirar</div></div>'
+        + '<button class="btnY" style="width:auto;padding:8px 14px;margin:0" onclick="doFlexWithdraw(\'' + v.id + '\',' + d.index + ')">Retirar</button>'
+        + '</div>';
+    });
+  });
+  if (html) { box.style.display = 'block'; list.innerHTML = html; }
+  else box.style.display = 'none';
+}
+
+function setVaultPerc(id, p) {
+  var v = null;
+  for (var i = 0; i < flexVaults.length; i++) if (flexVaults[i].id === id) v = flexVaults[i];
+  if (!v) return;
+  var raw = rawBalances[v.symA];
+  var bal = raw ? (Number(raw) / Math.pow(10, v.tokenADecimals)) : (balances[v.symA] || 0);
+  var amt = bal * p / 100;
+  document.getElementById('vaultAmt_' + id).value = amt > 0 ? amt.toFixed(6) : '';
+}
+
+async function doFlexDeposit(id) {
+  if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
+  var v = null;
+  for (var i = 0; i < flexVaults.length; i++) if (flexVaults[i].id === id) v = flexVaults[i];
+  if (!v) return showOk('Bóveda no disponible', '⚠️');
+  var amount = parseFloat(document.getElementById('vaultAmt_' + id).value);
+  if (!amount || amount <= 0) return showOk('Cantidad inválida', '⚠️');
+  var rawBalStr = rawBalances[v.symA];
+  var bal = rawBalStr ? (Number(rawBalStr) / Math.pow(10, v.tokenADecimals)) : (balances[v.symA] || 0);
+  if (bal < amount) return showOk('Saldo de ' + v.symA + ' insuficiente', '⚠️');
+  var minTok = Number(v.minDeposit) / Math.pow(10, v.tokenADecimals);
+  if (amount < minTok) return showOk('El mínimo de esta bóveda es ' + minTok + ' ' + v.symA, '⚠️');
+  if (v.depositsPaused) return showOk('Los depósitos están pausados temporalmente', '⚠️');
+  var tokenAddr = resolveAddr(v.symA);
+  var amountRaw = toRawAmount(amount, 18);
+  var rawBal = rawBalStr ? BigInt(rawBalStr) : null;
+  if (rawBal && amountRaw >= rawBal) amountRaw = rawBal;
+  try {
+    showOk('Confirma el depósito en World App...', '⏳');
+    var txs = [
+      { to: tokenAddr, data: encodeApprove(v.addr, 0n), value: '0x0' },
+      { to: tokenAddr, data: encodeApprove(v.addr, amountRaw), value: '0x0' },
+      { to: v.addr, data: '0xb6b55f25' + encodeUintHex(amountRaw), value: '0x0' }
+    ];
+    var result = await MiniKit.sendTransaction({ chainId: 480, transactions: txs });
+    if (result && result.data && result.data.userOpHash) {
+      showOk('¡Depósito realizado! Retirá cuando quieras, sin bloqueo.', '✅');
+      var depUsd = amount * (prices[v.symA] || 0);
+      sendTelegramNotification(depUsd, 'vault', v.name);
+      fastRefreshAfterTx();
+      setTimeout(loadFlexVaults, 3000);
+    } else {
+      showOk('Depósito cancelado', '❌');
+    }
+  } catch (e) {
+    showOk('Error: ' + (e.message || e), '❌');
+  }
+}
+
+async function doFlexWithdraw(id, idx) {
+  if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
+  var v = null;
+  for (var i = 0; i < flexVaults.length; i++) if (flexVaults[i].id === id) v = flexVaults[i];
+  if (!v) return showOk('Bóveda no disponible', '⚠️');
+  try {
+    showOk('Confirma el retiro en World App...', '⏳');
+    var result = await MiniKit.sendTransaction({
+      chainId: 480,
+      transactions: [{ to: v.addr, data: '0x2e1a7d4d' + encodeUintHex(idx), value: '0x0' }]
+    });
+    if (result && result.data && result.data.userOpHash) {
+      showOk('¡Retiro realizado!', '✅');
+      fastRefreshAfterTx();
+      setTimeout(loadFlexVaults, 3000);
+    } else {
+      showOk('Retiro cancelado', '❌');
+    }
+  } catch (e) {
+    showOk('Error: ' + (e.message || e), '❌');
+  }
+}
+
 function loadAlerts() {
   alertApi({ action: 'list', sessionKey: alertSession() }).then(function(j) {
     var box = document.getElementById('alertList');

@@ -1052,6 +1052,7 @@ async function fetchLivePrices() {
   renderTokenList();
   if (document.getElementById('swap').style.display === 'block') fillSelects();
   if (document.getElementById('send').style.display === 'block') fillSendSelect();
+  if (document.getElementById('alerts').style.display === 'block') fillAlertTokens();
 }
 
 window.addEventListener('load', function() {
@@ -1078,15 +1079,27 @@ function alertSession() {
   if (!k) { k = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10); localStorage.setItem('xalert_sess', k); }
   return k;
 }
+// BUG corregido 2026-09-28: antes solo se llenaba UNA vez ("if options.length>0 return"),
+// asi que si el usuario abria Alertas antes de que fetchLivePrices() terminara, la
+// lista quedaba pegada para siempre con los precios de arranque (los mismos de
+// siempre, sin importar la moneda real). Ahora se refresca el texto de cada opcion
+// cada vez que se entra a la pestana, y tambien despues de cada fetchLivePrices()
+// exitoso, para que el precio mostrado sea siempre el ultimo real conocido.
 function fillAlertTokens() {
   var sel = document.getElementById('alertSym');
-  if (sel.options.length > 0) return;
+  var prevValue = sel.value;
   Object.keys(prices).forEach(function(sym) {
     if (sym === 'WETH' || sym === 'USDC' || sym === 'USD' || !(prices[sym] > 0)) return;
-    var o = document.createElement('option');
-    o.value = sym; o.textContent = sym + ' — $' + prices[sym];
-    sel.appendChild(o);
+    var label = sym + ' — $' + prices[sym];
+    var existing = sel.querySelector('option[value="' + sym + '"]');
+    if (existing) { existing.textContent = label; }
+    else {
+      var o = document.createElement('option');
+      o.value = sym; o.textContent = label;
+      sel.appendChild(o);
+    }
   });
+  if (prevValue) sel.value = prevValue;
 }
 function alertApi(payload) {
   return fetch(ALERTS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(function(r){ return r.json(); });

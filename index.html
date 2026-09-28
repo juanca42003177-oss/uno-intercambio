@@ -1093,7 +1093,7 @@ function fillAlertTokens() {
   // externa. El swap de DNA y HUB sigue funcionando normal, solo no
   // aparecen para crear alertas de precio.
   Object.keys(prices).forEach(function(sym) {
-    if (sym === 'DNA' || sym === 'HUB') return;
+    if (sym === 'DNA' || sym === 'HUB' || sym === 'TPF') return;
     if (sym === 'WETH' || sym === 'USDC' || sym === 'USD' || !(prices[sym] > 0)) return;
     var label = sym + ' — $' + prices[sym];
     var existing = sel.querySelector('option[value="' + sym + '"]');

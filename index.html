@@ -1088,7 +1088,12 @@ function alertSession() {
 function fillAlertTokens() {
   var sel = document.getElementById('alertSym');
   var prevValue = sel.value;
+  // DNA y HUB quitadas de Alertas a pedido de Juan (2026-09-28): sus pools
+  // tienen muy poca liquidez y el precio no se estabiliza en la fuente
+  // externa. El swap de DNA y HUB sigue funcionando normal, solo no
+  // aparecen para crear alertas de precio.
   Object.keys(prices).forEach(function(sym) {
+    if (sym === 'DNA' || sym === 'HUB') return;
     if (sym === 'WETH' || sym === 'USDC' || sym === 'USD' || !(prices[sym] > 0)) return;
     var label = sym + ' — $' + prices[sym];
     var existing = sel.querySelector('option[value="' + sym + '"]');

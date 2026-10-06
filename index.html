@@ -247,6 +247,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
   </div>
 </div>
 
+<script src="no44.js"></script>
 <script>
 const SWAP_ROUTER_V3 = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';
 const SWAP_ROUTER_V2 = '0x541aB7c31A119441eF3575F6973277DE0eF460bd';
@@ -505,8 +506,11 @@ async function quietRefreshBalances() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ address: currentAccount })
     });
-    if (!res.ok) throw new Error('Saldo HTTP ' + res.status);
-    var data = await res.json();
+    var data = null;
+    if (res.ok) data = await res.json();
+    if ((!data || !data.balances) && window.NO44) {
+      data = await no44Balances(currentAccount); // respaldo directo sin Base44
+    }
     if (currentAccount !== accountAtStart || !data || !data.balances) return;
     if (data && data.balances) {
       for (var sym in CONTRACTS) {
@@ -564,7 +568,10 @@ async function loadRealBalances() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ address: currentAccount })
     });
-    var data = await res.json();
+    var data = res.ok ? await res.json() : null;
+    if ((!data || !data.balances) && window.NO44) {
+      data = await no44Balances(currentAccount); // respaldo directo sin Base44
+    }
     if (data && data.balances) {
       lastBalancesRefresh = Date.now();
       for (var sym in CONTRACTS) {
@@ -859,8 +866,17 @@ async function quoteBestPrice(tokenIn, tokenOut, amountIn) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tokenIn: tokenIn, tokenOut: tokenOut, amountIn: amountIn.toString() })
     });
-    return await r.json();
+    var data = null;
+    if (r.ok) data = await r.json();
+    if (!data || !data.ok) {
+      // respaldo directo: cotiza contra los pools reales desde el navegador
+      data = await no44QuoteSwap(tokenIn, tokenOut, amountIn.toString());
+    }
+    return data;
   } catch (e) {
+    try {
+      if (window.NO44) return await no44QuoteSwap(tokenIn, tokenOut, amountIn.toString());
+    } catch (e2) { /* sin respaldo */ }
     return { ok: false, note: 'No se pudo conectar con el servidor de precios' };
   }
 }
@@ -1044,6 +1060,9 @@ async function fetchLivePrices() {
   try {
     var res = await fetch(API_PRICES);
     var data = await res.json();
+    if ((!res.ok || !data || !data.prices) && window.NO44) {
+      data = await no44Prices(); // respaldo directo: RPC/CoinGecko/Dexscreener sin Base44
+    }
     if (data && data.prices) {
       for (var sym in data.prices) {
         if (sym === 'DIAMANTE' && data.prices[sym] < 0.001) continue;
@@ -1156,8 +1175,12 @@ async function loadFlexVaults() {
   try {
     var url = API_VAULTS + (currentAccount ? ('?wallet=' + currentAccount) : '');
     var r = await fetch(url);
-    var data = await r.json();
-    if (data.ok) flexVaults = data.vaults || [];
+    var data = null;
+    try { data = await r.json(); } catch (err) { data = null; }
+    if ((!data || !data.ok) && window.NO44) {
+      data = await no44FlexVaults(currentAccount); // respaldo directo sin Base44
+    }
+    if (data && data.ok) flexVaults = data.vaults || [];
   } catch (e) { console.error('Error cargando bóvedas:', e); }
   flexVaultsLoading = false;
   renderFlexVaults();

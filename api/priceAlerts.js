@@ -35,8 +35,10 @@ function fmtPrice(v) {
 
 // ---- persistencia en GitHub (alerts-data/alerts.json) ----
 async function loadAlertsFile() {
-  const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${ALERTS_BRANCH}/${ALERTS_PATH}?t=${Date.now()}`, {
-    headers: { Authorization: `token ${gh()}` },
+  // via API (no raw.githubusercontent): el raw tiene cache CDN que sirve 404
+  // viejos justo despues de crear el archivo y las alertas parecen perderse.
+  const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${ALERTS_PATH}?ref=${ALERTS_BRANCH}`, {
+    headers: { Authorization: `token ${gh()}`, Accept: 'application/vnd.github.raw+json' },
   });
   if (r.status === 404) return { alerts: [] };
   if (!r.ok) throw new Error(`leer alerts.json HTTP ${r.status}`);

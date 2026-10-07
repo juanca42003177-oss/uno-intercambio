@@ -120,8 +120,8 @@ async function no44Balances(address) {
 
 // ---------------- PRECIOS: CoinGecko (grandes) + Dexscreener (exóticos) ----------------
 var NO44_CG_IDS = {
-  WLD: 'worldcoin', ETH: 'ethereum', WETH: 'ethereum', WBTC: 'wrapped-bitcoin',
-  SUSHI: 'sushi', uSOL: 'solana', uXRP: 'ripple', uDOGE: 'dogecoin', USDC: 'usd-coin'
+  WLD: 'worldcoin-wld', ETH: 'weth', WETH: 'weth', WBTC: 'wrapped-bitcoin',
+  uSOL: 'solana', uXRP: 'ripple', uDOGE: 'dogecoin', USDC: 'usd-coin'
 };
 
 async function no44FetchJson(url, timeoutMs) {
@@ -138,37 +138,10 @@ async function no44FetchJson(url, timeoutMs) {
   }
 }
 
-function no44DexPrices(addrs) {
-  // bloques de 5 direcciones en paralelo (el batch de Dexscreener corta en 30 pares)
-  var blocks = [];
-  for (var i = 0; i < addrs.length; i += 5) blocks.push(addrs.slice(i, i + 5));
-  return Promise.all(blocks.map(function (blk) {
-    var q = blk.map(function (a) { return encodeURIComponent(a); }).join(',');
-    return no44FetchJson('https://api.dexscreener.com/latest/dex/search?q=' + q, 7000);
-  })).then(function (results) {
-    var out = {};
-    results.forEach(function (data) {
-      if (!data || !data.pairs) return;
-      data.pairs.forEach(function (p) {
-        if (p.chainId !== 'worldchain') return;
-        var base = (p.baseToken && p.baseToken.address || '').toLowerCase();
-        if (!base || out[base] !== undefined) return;
-        // solo el par con más liquidez por token
-        var liq = (p.liquidity && p.liquidity.usd) || 0;
-        if (out[base] === undefined || liq > out[base].liq) {
-          var chg = (p.priceChange && p.priceChange && p.priceChange.h24) || 0;
-          out[base] = { price: Number(p.priceUsd) || 0, liq: liq, chg: chg };
-        }
-      });
-    });
-    return out;
-  });
-}
-
 async function no44Prices() {
   var prices = {};
   var changes = {};
-  // 1) CoinGecko para los tokens grandes
+  // CoinGecko para los tokens grandes (mismos ids que el backend original)
   var cgSyms = Object.keys(NO44_CG_IDS);
   var idsParam = cgSyms.map(function (s) { return NO44_CG_IDS[s]; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).join(',');
   var cg = await no44FetchJson('https://api.coingecko.com/api/v3/simple/price?ids=' + idsParam + '&vs_currencies=usd&include_24hr_change=true', 6000);
@@ -181,25 +154,47 @@ async function no44Prices() {
       }
     });
   }
-  // 2) Dexscreener SOLO para los exóticos de World Chain (los grandes ya vienen
-  // de CoinGecko; tomarlos de Dexscreener traía pares falsos de baja liquidez
-  // que pisaban el precio real, ej. WLD a $0.0026)
-  var NO44_DEX_ONLY = ['DNA', 'HUB', 'ORO', 'DIAMANTE', 'PVPB', 'TPF', 'AXO', 'WDD', 'ORB', 'CHAD', 'SUSHI'];
+  // Dexscreener para los exóticos de World Chain (endpoint tokens/, mismo criterio
+  // del backend: el par más líquido por token, solo cadena worldchain)
+  var NO44_DEX_ONLY = ['WLD', 'USDC', 'DNA', 'HUB', 'ORO', 'SUSHI', 'DIAMANTE', 'PVPB', 'TPF', 'AXO', 'WDD', 'ORB', 'CHAD'];
   var addrs = NO44_DEX_ONLY.map(function (s) { return no44AddrOf(s); }).filter(Boolean);
   try {
-    var dex = await no44DexPrices(addrs);
+    var blocks = [];
+    for (var i = 0; i < addrs.length; i += 5) blocks.push(addrs.slice(i, i + 5));
+    var results = await Promise.all(blocks.map(function (blk) {
+      return no44FetchJson('https://api.dexscreener.com/latest/dex/tokens/' + blk.join(','), 7000);
+    }));
+    var bestByToken = {};
+    var addrToSyms = {};
     NO44_DEX_ONLY.forEach(function (sym) {
       var a = no44AddrOf(sym);
-      var d = a ? dex[a] : null;
-      if (d && d.price > 0) {
-        prices[sym] = d.price;
-        if (d.chg) changes[sym] = d.chg;
+      if (a) { (addrToSyms[a] = addrToSyms[a] || []).push(sym); }
+    });
+    results.forEach(function (data) {
+      if (!data || !Array.isArray(data.pairs)) return;
+      data.pairs.forEach(function (p) {
+        if (p.chainId !== 'worldchain') return;
+        var base = String((p.baseToken && p.baseToken.address) || '').toLowerCase();
+        var syms = addrToSyms[base];
+        if (!syms) return;
+        var liq = (p.liquidity && p.liquidity.usd) || 0;
+        syms.forEach(function (sym) {
+          if (!bestByToken[sym] || liq > ((bestByToken[sym].liquidity && bestByToken[sym].liquidity.usd) || 0)) bestByToken[sym] = p;
+        });
+      });
+    });
+    NO44_DEX_ONLY.forEach(function (sym) {
+      var p = bestByToken[sym];
+      if (p && p.priceUsd) {
+        var px = parseFloat(p.priceUsd);
+        if (px > 0) prices[sym] = px;
+        var ch = parseFloat((p.priceChange && p.priceChange.h24) || '0');
+        if (!isNaN(ch)) changes[sym] = ch;
       }
     });
   } catch (e) { /* CoinGecko solo */ }
   if (prices.WETH !== undefined && prices.ETH === undefined) prices.ETH = prices.WETH;
   if (prices.ETH !== undefined) prices.WETH = prices.ETH;
-  if (prices.USDC === undefined) prices.USDC = 1;
   return { prices: prices, changes: changes, ts: Date.now() };
 }
 

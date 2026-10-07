@@ -204,9 +204,9 @@ async function no44Prices() {
 
 // ---------------- BÓVEDAS FLEXIBLES: lectura directa de los contratos ----------------
 var NO44_FLEX_VAULTS = [
-  { id: 'wld',  name: 'WLD / ETH',  symA: 'WLD',  symB: 'ETH', addr: '0xef4D662397a88c6ba59485aEC013540944b788E3', tokenA: '0x2cFc85d8E48F8EAB294be644d9E25C3030863003', tokenADecimals: 18, minUsd: 0 },
-  { id: 'wdd',  name: 'WDD / ETH',  symA: 'WDD',  symB: 'ETH', addr: '0x9Ecc9d734673583c044EbD58d5D5b4e801E7d5Cb', tokenA: '0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B', tokenADecimals: 18, minUsd: 0 },
-  { id: 'chad', name: 'CHAD / ETH', symA: 'CHAD', symB: 'ETH', addr: '0x09f18e9392bB6793B5E47c60b5398328e5e28aC5', tokenA: '0x50723A159ba02A1ADA4d7E1A32835f7ff1F1bE89', tokenADecimals: 18, minUsd: 0 }
+  { id: 'wld',  name: 'WLD / ETH',  symA: 'WLD',  symB: 'ETH', addr: '0xef4D662397a88c6ba59485aEC013540944b788E3', tokenA: '0x2cFc85d8E48F8EAB294be644d9E25C3030863003', tokenADecimals: 18, minUsd: 1, feeNote: '1% flat al retirar' },
+  { id: 'wdd',  name: 'WDD / ETH',  symA: 'WDD',  symB: 'ETH', addr: '0x9Ecc9d734673583c044EbD58d5D5b4e801E7d5Cb', tokenA: '0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B', tokenADecimals: 18, minUsd: 1, feeNote: '1% flat al retirar' },
+  { id: 'chad', name: 'CHAD / ETH', symA: 'CHAD', symB: 'ETH', addr: '0x09f18e9392bB6793B5E47c60b5398328e5e28aC5', tokenA: '0x50723A159ba02A1ADA4d7E1A32835f7ff1F1bE89', tokenADecimals: 18, minUsd: 1, feeNote: '1% flat al retirar' }
 ];
 var NO44_SEL = { minDeposit: '0x41b3d185', depositsPaused: '0x60da3e83', depositsLength: '0xcb85b972', depositInfo: '0xb9d774df' };
 

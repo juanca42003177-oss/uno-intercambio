@@ -6,6 +6,7 @@
 // Acciones: move (agregar jugada o firma de resultado) | state (leer log).
 
 const BRANCH = 'damas-data';
+const EMOTES = ['👏', '😂', '😮', '😭', '😡', '🔥', '🐉', '👍'];
 const REPO = process.env.GITHUB_ALERTS_REPO || 'juanca42003177-oss/Uno-Intercambio-Prueba';
 
 function gh() { return process.env.GITHUB_TOKEN || process.env.GITHUB_TOKEN_2 || ''; }
@@ -56,7 +57,25 @@ module.exports = wrap(async (req, res) => {
 
   // ---- leer el log completo (polling del rival) ----
   if (action === 'state') {
-    return res.json({ ok: true, log: data.log });
+    return res.json({ ok: true, log: data.log, emotes: Array.isArray(data.emotes) ? data.emotes : [] });
+  }
+
+  // ---- emojis estilo Clash entre jugadores (no tocan el log de jugadas) ----
+  if (action === 'emote') {
+    const emote = String(body.emote || body.e || '');
+    const by = String(body.by || '').slice(0, 44);
+    if (!EMOTES.includes(emote)) return res.status(400).json({ ok: false, error: 'emote no valido' });
+    if (!Array.isArray(data.emotes)) data.emotes = [];
+    const last = data.emotes[data.emotes.length - 1];
+    if (last && Date.now() - last.ts < 1500) {
+      return res.json({ ok: true, throttled: true, emotes: data.emotes });
+    }
+    data.emotes.push({ by, emote, ts: Date.now() });
+    if (data.emotes.length > 40) data.emotes = data.emotes.slice(-40);
+    try { await saveGame(gameId, data); } catch (e) {
+      return res.status(500).json({ ok: false, error: 'guardar: ' + String(e) });
+    }
+    return res.json({ ok: true, emotes: data.emotes });
   }
 
   // ---- agregar una entrada: jugada o firma de resultado ----

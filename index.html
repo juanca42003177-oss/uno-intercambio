@@ -1118,7 +1118,6 @@ window.addEventListener('load', function() {
 });
 
 // ===== Alertas de precio =====
-var ALERTS_API = 'https://solene-539c4635.base44.app/functions/priceAlerts';
 var ALERT_BOT = 'Unonopremio_bot';
 function alertSession() {
   var k = localStorage.getItem('xalert_sess');
@@ -1153,7 +1152,9 @@ function fillAlertTokens() {
   if (prevValue) sel.value = prevValue;
 }
 function alertApi(payload) {
-  return fetch(ALERTS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(function(r){ return r.json(); });
+  return apiEndpoint('priceAlerts').then(function(url) {
+    return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(function(r){ return r.json(); });
+  });
 }
 function createAlert() {
   var sym = document.getElementById('alertSym').value;

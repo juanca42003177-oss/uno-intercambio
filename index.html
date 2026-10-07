@@ -1019,7 +1019,7 @@ async function doSwap() {
     // backend (fire-and-forget, nunca bloquea ni rompe si falla) para poder
     // ver la causa exacta del revert sin depender de que el usuario la lea.
     try {
-      fetch('https://solene-539c4635.base44.app/functions/logSwapError', {
+      fetch(await apiEndpoint('logSwapError'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

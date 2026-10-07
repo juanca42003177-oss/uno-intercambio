@@ -128,7 +128,8 @@ function applySlip(amount, slipBps) { return (amount * BigInt(10000 - slipBps)) 
 const quoteCache = new Map();
 const QUOTE_TTL = 3000;
 
-module.exports = async (req, res) => {
+const wrap = require('./_cors');
+module.exports = wrap(async (req, res) => {
   const body = req.body || {};
   const tokenIn = String(body.tokenIn || '').toLowerCase();
   const tokenOut = String(body.tokenOut || '').toLowerCase();
@@ -214,4 +215,4 @@ module.exports = async (req, res) => {
   } catch (e) {
     return res.status(200).json({ ok: false, note: 'Error consultando el pool: ' + String(e).slice(0, 120) });
   }
-};
+});

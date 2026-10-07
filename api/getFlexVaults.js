@@ -16,7 +16,8 @@ const ZERO_ADDR = '0x0000000000000000000000000000000000000000';
 
 let staticCache = null; // { ts, data } — 30 s, datos no dependen del usuario
 
-module.exports = async (req, res) => {
+const wrap = require('./_cors');
+module.exports = wrap(async (req, res) => {
   try {
     let wallet = ZERO_ADDR;
     try {
@@ -86,4 +87,4 @@ module.exports = async (req, res) => {
   } catch (e) {
     return res.status(500).json({ ok: false, error: String((e && e.message) || e) });
   }
-};
+});

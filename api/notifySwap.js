@@ -27,7 +27,8 @@ function buildText(app, kind, prefix, amt, wallet, extra) {
   return body;
 }
 
-module.exports = async (req, res) => {
+const wrap = require('./_cors');
+module.exports = wrap(async (req, res) => {
   const body = req.body || {};
   const montoUsd = Number(body.montoUsd);
   const wallet = String(body.wallet || '').toLowerCase();
@@ -57,4 +58,4 @@ module.exports = async (req, res) => {
   } catch (e) {
     return res.status(200).json({ ok: false, error: String(e) });
   }
-};
+});

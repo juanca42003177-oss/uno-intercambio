@@ -107,7 +107,8 @@ async function fetchPrices() {
   return (j && j.prices) || {};
 }
 
-module.exports = async (req, res) => {
+const wrap = require('./_cors');
+module.exports = wrap(async (req, res) => {
   const body = req.body || {};
   const action = String(body.action || 'tick').toLowerCase();
   const now = Date.now();
@@ -227,4 +228,4 @@ module.exports = async (req, res) => {
   }
 
   return res.status(400).json({ ok: false, error: 'acción desconocida' });
-};
+});

@@ -285,14 +285,11 @@ const CONTRACTS = {
   uXRP:     {address:'0x2615a94df961278DcbC41Fb0a54fEc5f10a693aE', decimals:18, color:'#23292f', letter:'✕', fee:3000, logo:'https://coin-images.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png?1696501442'}
 };
 
-const API_PRICES   = 'https://solene-539c4635.base44.app/functions/getMarketPrices';
-const API_BALANCES = 'https://solene-539c4635.base44.app/functions/getWalletBalances';
-const API_NOTIFY   = 'https://solene-539c4635.base44.app/functions/notifySwap';
-const API_VAULTS   = 'https://solene-539c4635.base44.app/functions/getFlexVaults';
-
 // ---- Endpoints: usa las funciones Vercel (/api) cuando la app corre en Vercel,
-// si no el backend Base44, si no el respaldo directo del navegador (no44). ----
-const API44 = 'https://solene-539c4635.base44.app/functions/';
+// si no la MISMA API de Vercel por URL absoluta (CORS abierto, funciona desde
+// cualquier origen), si no el respaldo directo del navegador (no44).
+// CERO llamadas a Base44: la app es 100% independiente. ----
+const VERCEL_API_URL = 'https://intercambiox.vercel.app/api/';
 var VERCEL_API = null; // null = sin detectar aún
 async function apiEndpoint(fn) {
   if (VERCEL_API === null) {
@@ -302,7 +299,7 @@ async function apiEndpoint(fn) {
       VERCEL_API = !!(j && j.ok);
     } catch (e) { VERCEL_API = false; }
   }
-  return VERCEL_API ? ('/api/' + fn) : (API44 + fn);
+  return VERCEL_API ? ('/api/' + fn) : (VERCEL_API_URL + fn);
 }
 
 let prices = {

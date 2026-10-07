@@ -54,7 +54,8 @@ function krakenNormalize(pair) {
   return pair.replace(/^X(?=[A-Z0-9]{3,5}Z[A-Z]{3,4}$)/, '').replace(/Z(?=[A-Z]{3,4}$)/, '');
 }
 
-module.exports = async (req, res) => {
+const wrap = require('./_cors');
+module.exports = wrap(async (req, res) => {
   try {
     if (cache && Date.now() - cache.ts < 330000) {
       res.setHeader('Cache-Control', 'public, max-age=60');
@@ -167,4 +168,4 @@ module.exports = async (req, res) => {
   } catch (e) {
     return res.status(200).json({ prices: lastGoodPrices, changes: {}, ts: Date.now() });
   }
-};
+});

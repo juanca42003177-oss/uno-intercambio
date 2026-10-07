@@ -22,7 +22,8 @@ const TOKENS = {
   uXRP:     { addr: '0x2615a94df961278DcbC41Fb0a54fEc5f10a693aE', decimals: 18 },
 };
 
-module.exports = async (req, res) => {
+const wrap = require('./_cors');
+module.exports = wrap(async (req, res) => {
   try {
     const address = String((req.body && req.body.address) || '').toLowerCase();
     if (!/^0x[0-9a-f]{40}$/.test(address)) {
@@ -59,4 +60,4 @@ module.exports = async (req, res) => {
   } catch (e) {
     return res.status(502).json({ error: 'Error consultando el RPC', detail: String(e) });
   }
-};
+});

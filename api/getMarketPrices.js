@@ -57,7 +57,7 @@ function krakenNormalize(pair) {
 module.exports = async (req, res) => {
   try {
     if (cache && Date.now() - cache.ts < 330000) {
-      res.set('Cache-Control', 'public, max-age=60');
+      res.setHeader('Cache-Control', 'public, max-age=60');
       return res.status(200).json(cache.data);
     }
     const prices = { ...lastGoodPrices };
@@ -162,7 +162,7 @@ module.exports = async (req, res) => {
     const live = (cg !== null) || allPairs.length > 0 || (kraken !== null && !!kraken.result);
     const data = { prices, changes, ts: Date.now(), live, source: 'vercel-swapx-market' };
     cache = { data, ts: Date.now() };
-    res.set('Cache-Control', 'public, max-age=60');
+    res.setHeader('Cache-Control', 'public, max-age=60');
     return res.status(200).json(data);
   } catch (e) {
     return res.status(200).json({ prices: lastGoodPrices, changes: {}, ts: Date.now() });

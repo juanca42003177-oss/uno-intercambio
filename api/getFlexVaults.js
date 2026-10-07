@@ -81,7 +81,7 @@ module.exports = async (req, res) => {
       depositsPaused: stat[i].depositsPaused, feeNote: v.feeNote, noLock: true,
       deposits: deps[v.id] || [],
     }));
-    res.set('Cache-Control', 'no-store');
+    res.setHeader('Cache-Control', 'no-store');
     return res.status(200).json({ ok: true, vaults });
   } catch (e) {
     return res.status(500).json({ ok: false, error: String((e && e.message) || e) });

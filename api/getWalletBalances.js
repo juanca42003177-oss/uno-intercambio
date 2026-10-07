@@ -54,7 +54,7 @@ module.exports = async (req, res) => {
       balances.ETH = balances.WETH;
       rawBalances.ETH = rawBalances.WETH;
     }
-    res.set('Cache-Control', 'no-store');
+    res.setHeader('Cache-Control', 'no-store');
     return res.status(200).json({ address, balances, rawBalances, ts: Date.now() });
   } catch (e) {
     return res.status(502).json({ error: 'Error consultando el RPC', detail: String(e) });

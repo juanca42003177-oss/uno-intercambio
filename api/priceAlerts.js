@@ -107,6 +107,7 @@ async function fetchPrices() {
   return (j && j.prices) || {};
 }
 
+let LAST_TICK_AT = 0; // candado por instancia (evita doble envio si cron y app coinciden)
 const wrap = require('./_cors');
 module.exports = wrap(async (req, res) => {
   const body = req.body || {};
@@ -182,8 +183,12 @@ module.exports = wrap(async (req, res) => {
     return res.json({ ok: true });
   }
 
-  // ---- tick (cron cada 5 min) ----
+  // ---- tick (cron cada 5 min + la propia app cada ~45s) ----
   if (action === 'tick') {
+    // candado por instancia: si otro tick corrio hace menos de 40s, no repetir
+    // (evita enviar dos veces la misma alerta cuando cron y app coinciden)
+    if (now - LAST_TICK_AT < 40000) return res.json({ ok: true, skipped: true });
+    LAST_TICK_AT = now;
     const log = { linked: 0, triggered: 0, expired: 0, errors: [] };
     let dirty = false;
     try {

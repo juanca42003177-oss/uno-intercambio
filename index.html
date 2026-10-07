@@ -384,9 +384,10 @@ function go(page) {
     document.getElementById('qrImg').src = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(currentAccount);
   }
   if (currentAccount && Date.now() - lastBalancesRefresh > 30000) quietRefreshBalances();
+  if (Date.now() - lastPricesFetch > 20000) fetchLivePrices(); // precios nunca mas de 20s viejos al entrar
   if (page === 'swap') { fillSelects(); calc(); }
   if (page === 'send') { fillSendSelect(); updateSendBal(); }
-  if (page === 'alerts') { fillAlertTokens(); loadAlerts(); }
+  if (page === 'alerts') { fillAlertTokens(); loadAlerts(); lastAlertTick = 0; tickAlerts(); }
   if (page === 'earn') loadFlexVaults();
 }
 
@@ -1067,8 +1068,10 @@ function copyAddr() {
   }
 }
 
+var lastPricesFetch = 0;
 async function fetchLivePrices() {
   if (document.hidden) return;
+  lastPricesFetch = Date.now();
   try {
     var res = await fetch(await apiEndpoint('getMarketPrices'));
     var data = await res.json();
@@ -1103,13 +1106,17 @@ window.addEventListener('load', function() {
   renderTokenList();
   fetchLivePrices();
   setInterval(function() {
-    if (!document.hidden && currentAccount && Date.now() - lastBalancesRefresh >= 60000) quietRefreshBalances();
+    if (!document.hidden && currentAccount && Date.now() - lastBalancesRefresh >= 30000) quietRefreshBalances();
+    tickAlerts(); // alertas de Telegram: el bot revisa mientras usas la app
   }, 15000);
-  setInterval(fetchLivePrices, 60000);
+  setInterval(fetchLivePrices, 30000);
   document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
+      lastPricesFetch = 0;
       fetchLivePrices();
       if (currentAccount) quietRefreshBalances();
+      lastAlertTick = 0;
+      tickAlerts();
     }
   });
 });
@@ -1153,6 +1160,14 @@ function alertApi(payload) {
     return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(function(r){ return r.json(); });
   });
 }
+// El bot de Telegram ya no espera al cron de 5 min: mientras la app esta abierta
+// se dispara la revision cada ~45s (y al crear una alerta / volver del bot).
+var lastAlertTick = 0;
+function tickAlerts() {
+  if (document.hidden || Date.now() - lastAlertTick < 45000) return;
+  lastAlertTick = Date.now();
+  alertApi({ action: 'tick' }).catch(function() {});
+}
 function createAlert() {
   var sym = document.getElementById('alertSym').value;
   var price = parseFloat(document.getElementById('alertPrice').value);
@@ -1166,6 +1181,8 @@ function createAlert() {
       document.getElementById('alertLinkBox').style.display = 'block';
     }
     loadAlerts();
+    lastAlertTick = 0;
+    tickAlerts();
   }).catch(function() { showModal('⚠️', 'Sin conexión'); });
 }
 function openAlertBot() {

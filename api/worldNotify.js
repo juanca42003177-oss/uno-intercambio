@@ -13,7 +13,7 @@
 // retos esta limitado a 1 por minuto por instancia.
 
 const BRANCH = 'alerts-data';
-const REPO = process.env.GITHUB_ALERTS_REPO || 'juanca42003177-oss/Uno-Intercambio-Prueba';
+const REPO = process.env.GITHUB_ALERTS_REPO || 'juanca42003177-oss/uno-intercambio';
 const SUBS_PATH = 'notify/subs-swapx.json';
 const APP_LABEL = 'Intercambio X SwapX';
 

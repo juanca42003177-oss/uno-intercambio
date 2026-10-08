@@ -178,13 +178,13 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 <div id="alerts" style="display:none">
   <div class="main">
     <h3 style="text-align:center">Alertas de precio 🔔</h3>
-    <p class="small" style="text-align:center;margin:16px 0 20px">Te avisamos por Telegram cuando tu moneda llegue al precio que quieras</p>
+    <p class="small" style="text-align:center;margin:16px 0 20px">Te avisamos por World App o Telegram cuando tu moneda llegue al precio que quieras</p>
 
     <div style="background:#fff;border:2px solid #f0b90b;border-radius:16px;padding:16px;margin:0 4px">
       <div style="font-weight:900;font-size:15px">Nueva alerta</div>
       <div style="display:flex;gap:8px;margin-top:12px">
-        <select id="alertSym" style="flex:1;padding:12px;border-radius:12px;border:1px solid #ddd;font-size:15px;font-weight:700"></select>
-        <select id="alertDir" style="padding:12px;border-radius:12px;border:1px solid #ddd;font-size:15px;font-weight:700">
+        <select id="alertSym" style="flex:1 1 55%;min-width:0;width:55%;padding:12px 8px;border-radius:12px;border:1px solid #ddd;font-size:14px;font-weight:700;text-overflow:ellipsis"></select>
+        <select id="alertDir" style="flex:0 0 38%;width:38%;min-width:0;padding:12px 8px;border-radius:12px;border:1px solid #ddd;font-size:15px;font-weight:700">
           <option value="arriba">sube a</option>
           <option value="abajo">baja a</option>
         </select>
@@ -1237,7 +1237,7 @@ function fillAlertTokens() {
   Object.keys(prices).forEach(function(sym) {
     if (sym === 'DNA' || sym === 'HUB' || sym === 'TPF') return;
     if (sym === 'WETH' || sym === 'USDC' || sym === 'USD' || !(prices[sym] > 0)) return;
-    var label = sym + ' — $' + prices[sym];
+    var label = sym + ' $' + prices[sym];
     var existing = sel.querySelector('option[value="' + sym + '"]');
     if (existing) { existing.textContent = label; }
     else {

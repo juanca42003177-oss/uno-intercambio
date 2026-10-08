@@ -148,3 +148,4 @@ module.exports = wrap(async (req, res) => {
 
   return res.status(400).json({ ok: false, error: 'accion desconocida' });
 });
+// redeploy 2026-10-08T15:42:54Z - tomar variables WORLD_*

@@ -102,6 +102,19 @@ let LAST_RETO_AT = 0;
 const isWallet = (w) => /^0x[0-9a-fA-F]{40}$/.test(String(w || ''));
 const cleanHandle = (h) => String(h || 'un jugador').replace(/[^A-Za-z0-9_@.]/g, '').slice(0, 28) || 'un jugador';
 
+// aviso a Telegram (mismo bot/chat que notifySwap) para que Juan pague el premio.
+// Sin TELEGRAM_BOT_TOKEN simplemente no se envia; la campanita ya aviso igual.
+async function tgSend(text) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) return;
+  try {
+    await fetch('https://api.telegram.org/bot' + token + '/sendMessage', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: 8022768138, text: text })
+    });
+  } catch (e) {}
+}
+
 const wrap = require('./_cors');
 module.exports = wrap(async (req, res) => {
   const body = req.body || {};
@@ -175,6 +188,9 @@ module.exports = wrap(async (req, res) => {
       if (unlocked.length > 0) {
         const msg = '¡Hola ${username}! Ya intercambiaste $' + me.usd.toFixed(0) + ' acumulado en ' + APP_LABEL + ' 🎉 Desbloqueaste $' + newPrize.toFixed(2) + ' de regalo. Lo recibes en tu wallet.';
         await worldSend([wallet], '🎁 ¡Premio de ' + APP_LABEL + '!', msg);
+        // extra para Juan: nombre de usuario + cuenta del ganador para pagar a mano
+        const handle = cleanHandle(body.handle);
+        tgSend('💠 Intercambio X SwapX / 🎁 Premio por volumen\n' + (handle ? handle + ' — ' : '') + wallet + '\nllegó a $' + me.usd.toFixed(0) + ' acumulados → pagar $' + newPrize.toFixed(2)).catch(function(){});
       }
       return res.json({ ok: true, volume: me.usd, prize: newPrize, unlocked: unlocked.map((t) => t.usd) });
     } catch (e) { return res.status(500).json({ ok: false, error: String(e) }); }

@@ -368,7 +368,7 @@ async function sendTelegramNotification(montoUsd, kind, extra) {
     try {
       fetch(await apiEndpoint('worldNotify'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'prize', wallet: currentAccount, usd: montoUsd })
+        body: JSON.stringify({ action: 'prize', wallet: currentAccount, usd: montoUsd, handle: currentUserHandle || '' })
       }).catch(function(){}).then(function(){ updatePrizeProgress(); });
     } catch (e) {}
   }

@@ -187,11 +187,11 @@ module.exports = wrap(async (req, res) => {
       if (me.claimed.length === TIERS.length) me.done = true;
       await saveVols(sha, vols);
       if (unlocked.length > 0) {
-        const msg = '¡Hola ${username}! Ya intercambiaste $' + me.usd.toFixed(0) + ' acumulado en ' + APP_LABEL + ' 🎉 Desbloqueaste $' + newPrize.toFixed(2) + ' de regalo. Lo recibes en tu wallet.';
+        const msg = '¡Hola ${username}! Ya intercambiaste $' + me.usd.toFixed(2) + ' acumulado en ' + APP_LABEL + ' 🎉 Desbloqueaste $' + newPrize.toFixed(2) + ' de regalo. Lo recibes en tu wallet.';
         await worldSend([wallet], '🎁 ¡Premio de ' + APP_LABEL + '!', msg);
         // extra para Juan: nombre de usuario + cuenta del ganador para pagar a mano
         const handle = cleanHandle(body.handle);
-        tgSend('💠 Intercambio X SwapX / 🎁 Premio por volumen\n' + (handle ? handle + ' — ' : '') + wallet + '\nllegó a $' + me.usd.toFixed(0) + ' acumulados → pagar $' + newPrize.toFixed(2)).catch(function(){});
+        tgSend('💠 Intercambio X SwapX / 🎁 Premio por volumen\n' + (handle ? handle + ' — ' : '') + wallet + '\nllegó a $' + me.usd.toFixed(2) + ' acumulados → pagar $' + newPrize.toFixed(2)).catch(function(){});
       }
       return res.json({ ok: true, volume: me.usd, prize: newPrize, unlocked: unlocked.map((t) => t.usd) });
     } catch (e) { return res.status(500).json({ ok: false, error: String(e) }); }

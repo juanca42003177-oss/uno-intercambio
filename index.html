@@ -392,8 +392,10 @@ async function updatePrizeProgress() {
     el.style.display = 'block';
     var t = document.getElementById('prizeProgText'), b = document.getElementById('prizeProgBar');
     if (!j.next) { t.innerHTML = '🏆 ¡Nivel máximo! Ya ganaste todos los premios por volumen.'; b.style.width = '100%'; return; }
-    var pct = Math.min(100, Math.round(j.volume / j.next.usd * 100));
-    t.innerHTML = 'Llevas <b>$' + j.volume.toFixed(0) + '</b> de <b>$' + j.next.usd + '</b> intercambiados → te faltan <b>$' + Math.max(0, j.next.usd - j.volume).toFixed(0) + '</b> para ganar <b>$' + j.next.prize.toFixed(2) + '</b> 🎁';
+    var falta = Math.max(0, j.next.usd - j.volume);
+    var pct = Math.min(100, Math.max(j.volume > 0 ? 2 : 0, Math.round(j.volume / j.next.usd * 1000) / 10));
+    var ordinal = (j.claimed && j.claimed.length > 0) ? 'tu siguiente premio' : 'tu primer premio de muchos más';
+    t.innerHTML = 'Te faltan <b>$' + falta.toFixed(2) + '</b> para tu premio. Cuando llegues a <b>$' + j.next.usd + '</b> ganas <b>$' + j.next.prize.toFixed(2) + '</b>, ' + ordinal + ' 🎁<br><b>¡INTERCAMBIA MÁS para ganar! 🤑</b>';
     b.style.width = pct + '%';
   } catch (e) { el.style.display = 'none'; }
 }

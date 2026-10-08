@@ -402,6 +402,8 @@ async function updatePrizeProgress() {
 
 // suscribirse a notificaciones push de World App (permiso + registro)
 
+// aviso en pantalla (usa el modal que ya existe en la pagina)
+function showModal(icon, msg) { showOk(msg, icon); }
 // pide permiso de notificaciones (MiniKit 1.x y 2.x) y devuelve 'ok' | 'denied' | 'error:<detalle>'
 async function askNotifPermission() {
   try {

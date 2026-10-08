@@ -100,6 +100,7 @@ async function linkPendingSessions(data) {
 }
 
 // campanita de World App: aviso de alerta cumplida (si el usuario se suscribio)
+let lastAlertReason = '';
 async function worldAlert(wallet, message) {
   const key = process.env.WORLD_API_KEY;
   const appId = process.env.WORLD_APP_ID;
@@ -115,8 +116,10 @@ async function worldAlert(wallet, message) {
       })
     });
     const j = await r.json().catch(() => ({}));
-    return !!(j && j.success);
-  } catch (e) { return false; }
+    const one = Array.isArray(j && j.result) ? j.result[0] : null;
+    lastAlertReason = one ? (one.sent ? 'enviada' : (one.reason || 'rechazada')) : (j && j.success ? 'ok' : 'sin respuesta');
+    return !!(j && j.success && (!one || one.sent));
+  } catch (e) { lastAlertReason = 'error: ' + String(e).slice(0, 60); return false; }
 }
 
 async function fetchPrices() {
@@ -244,6 +247,7 @@ module.exports = wrap(async (req, res) => {
         // campanita de World App (canal adicional, independiente del Telegram)
         const worldTxt = `${a.sym} ${verb} $${fmtPrice(cur)} 🎯 Tu alerta se cumplió. Vuelve a la app.`;
         const worldOk = await worldAlert(a.wallet, worldTxt);
+        log.errors.push('campanita ' + a.sym + ': ' + lastAlertReason);
         if (avisada || worldOk) { a.status = 'avisada'; a.triggeredAt = now; log.triggered++; dirty = true; }
       }
     }

@@ -96,8 +96,14 @@ async function worldSend(wallets, title, message) {
     });
     const j = await r.json().catch(() => ({}));
     if (!j.success) throw new Error('World API: ' + JSON.stringify(j).slice(0, 180));
+    // World responde por wallet: sent true/false + reason. Se guarda para diagnostico.
+    if (Array.isArray(j.result)) {
+      lastWorldResult = j.result.map((x) => ({ w: String(x.walletAddress || '').slice(0, 10), sent: !!x.sent, reason: x.reason || '' }));
+    }
   }
+  return lastWorldResult;
 }
+let lastWorldResult = [];
 
 let LAST_RETO_AT = 0;
 const isWallet = (w) => /^0x[0-9a-fA-F]{40}$/.test(String(w || ''));
@@ -209,8 +215,8 @@ module.exports = wrap(async (req, res) => {
       const { subs } = await loadSubs();
       const targets = subs.filter((s) => s.wallet !== from).map((s) => s.wallet);
       if (targets.length === 0) return res.json({ ok: true, sent: 0 });
-      await worldSend(targets, '🔔 ¡Aviso de SwapX!', handle + ' abrió un reto de ' + stake + ' WLD 🐉 Entra y acepta el desafío.');
-      return res.json({ ok: true, sent: targets.length });
+      const wr = await worldSend(targets, '🔔 ¡Aviso de SwapX!', handle + ' abrió un reto de ' + stake + ' WLD 🐉 Entra y acepta el desafío.');
+      return res.json({ ok: true, sent: targets.length, world: wr });
     } catch (e) { return res.status(500).json({ ok: false, error: String(e) }); }
   }
 

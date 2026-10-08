@@ -123,11 +123,21 @@ async function worldAlert(wallet, message) {
 }
 
 async function fetchPrices() {
-  const r = await fetch(`http://${process.env.VERCEL_URL || 'intercambiox.vercel.app'}/api/getMarketPrices`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}',
-  });
-  const j = await r.json();
-  return (j && j.prices) || {};
+  // URL publica estable (VERCEL_URL es un dominio interno protegido que puede devolver HTML)
+  const hosts = ['https://intercambiox.vercel.app'];
+  if (process.env.VERCEL_URL) hosts.push('https://' + process.env.VERCEL_URL);
+  let lastErr = '';
+  for (const h of hosts) {
+    try {
+      const r = await fetch(h + '/api/getMarketPrices', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}',
+      });
+      const j = await r.json();
+      if (j && j.prices && Object.keys(j.prices).length > 0) return j.prices;
+      lastErr = h + ' sin precios';
+    } catch (e) { lastErr = h + ': ' + String(e).slice(0, 80); }
+  }
+  throw new Error(lastErr);
 }
 
 let LAST_TICK_AT = 0; // candado por instancia (evita doble envio si cron y app coinciden)

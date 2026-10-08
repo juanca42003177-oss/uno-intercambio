@@ -60,6 +60,17 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
     <div class="btn" onclick="go('send')">↗ Enviar</div>
     <div class="btn" onclick="go('recv')">↓ Recibir</div>
   </div>
+  <div class="box" id="prizeCard" style="margin:12px 16px;border:2px solid #f0b90b;background:#fff">
+    <div style="font-weight:900;color:#111">🎁 Premios por intercambiar</div>
+    <div class="small" style="margin:6px 0 8px;line-height:1.5">Cuanto más intercambias en un swap, mayor es tu regalo:</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px;font-weight:800">
+      <div style="background:#fff8e1;padding:8px;border-radius:10px;text-align:center">$100 → <span style="color:#b8860b">$0.05</span></div>
+      <div style="background:#fff8e1;padding:8px;border-radius:10px;text-align:center">$200 → <span style="color:#b8860b">$0.10</span></div>
+      <div style="background:#fff8e1;padding:8px;border-radius:10px;text-align:center">$300 → <span style="color:#b8860b">$0.15</span></div>
+      <div style="background:#fff8e1;padding:8px;border-radius:10px;text-align:center">$500 → <span style="color:#b8860b">$0.30</span></div>
+    </div>
+    <button onclick="subscribeWorldNotifs()" class="btnY" style="background:#111;color:#f0b90b;margin-top:10px">🔔 Avisarme cuando gane un premio</button>
+  </div>
   <div class="tokens" id="tokenList"></div>
 </div>
 

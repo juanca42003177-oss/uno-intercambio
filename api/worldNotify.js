@@ -25,6 +25,7 @@ const APP_LABEL = 'Intercambio X SwapX';
 
 // niveles de premio por volumen acumulado (usd alcanzado -> regalo)
 const TIERS = [
+  { usd: 50, prize: 0.03 },
   { usd: 100, prize: 0.05 },
   { usd: 200, prize: 0.10 },
   { usd: 300, prize: 0.15 },

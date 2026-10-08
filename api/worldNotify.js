@@ -172,7 +172,7 @@ module.exports = wrap(async (req, res) => {
     const wallet = String(body.wallet || '').toLowerCase();
     const usd = Number(body.usd) || 0;
     if (!isWallet(wallet)) return res.status(400).json({ ok: false, error: 'wallet invalida' });
-    if (usd < 1 || usd > 100000) return res.json({ ok: true, volume: 0, prize: 0 });
+    if (usd < 0.01 || usd > 100000) return res.json({ ok: true, volume: 0, prize: 0 });
     try {
       const { sha, vols } = await loadVols();
       let me = vols.find((v) => v.wallet === wallet);

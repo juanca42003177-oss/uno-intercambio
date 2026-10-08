@@ -5,41 +5,74 @@
 //   WORLD_API_KEY  — API key creada en el Developer Portal (config de la app)
 //   WORLD_APP_ID   — app_id de la mini app (app_xxxx)
 //   GITHUB_TOKEN   — mismo token que usan priceAlerts/damasMoves
-// Suscriptores: notify/subs-swapx.json en la rama 'alerts-data' del repo
-// de GitHub (mismo patron que alerts.json). Cero Base44.
+// Suscriptores: notify/subs-APP.json en la rama de datos del repo de GitHub.
+// Volumen acumulado: notify/volumes-APP.json (mismo repo/rama). Cero Base44.
+//
+// PREMIOS POR VOLUMEN ACUMULADO (los paga Juan manualmente):
+//   $100 -> $0.05 | $200 -> $0.10 | $300 -> $0.15 | $500 -> $0.30
+//   Cada nivel se desbloquea UNA vez por wallet. El cliente suma cada swap
+//   (>= $1) al volumen; el servidor avisa cuando se cruza un nivel nuevo.
 //
 // Anti-abuso: el servidor SOLO envia mensajes con plantillas fijas (prize / reto);
 // nadie desde fuera puede mandar texto arbitrario a los usuarios, y el aviso de
 // retos esta limitado a 1 por minuto por instancia.
 
-const BRANCH = 'alerts-data';
+const BRANCH = 'alerts-data'; // rama de datos del repo
 const REPO = process.env.GITHUB_ALERTS_REPO || 'juanca42003177-oss/uno-intercambio';
 const SUBS_PATH = 'notify/subs-swapx.json';
+const VOL_PATH = 'notify/volumes-swapx.json';
 const APP_LABEL = 'Intercambio X SwapX';
+
+// niveles de premio por volumen acumulado (usd alcanzado -> regalo)
+const TIERS = [
+  { usd: 100, prize: 0.05 },
+  { usd: 200, prize: 0.10 },
+  { usd: 300, prize: 0.15 },
+  { usd: 500, prize: 0.30 }
+];
 
 function gh() { return process.env.GITHUB_TOKEN || process.env.GITHUB_TOKEN_2 || ''; }
 function ghHeaders() {
   return { Authorization: 'Bearer ' + gh(), Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' };
 }
 
-async function loadSubs() {
-  const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${SUBS_PATH}?ref=${BRANCH}`, { headers: ghHeaders() });
-  if (r.status === 404) return { sha: null, subs: [] };
-  if (!r.ok) throw new Error(`leer subs HTTP ${r.status}`);
+async function loadFile(path) {
+  const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}?ref=${BRANCH}`, { headers: ghHeaders() });
+  if (r.status === 404) return { sha: null, data: null };
+  if (!r.ok) throw new Error(`leer ${path} HTTP ${r.status}`);
   const j = await r.json();
   const body = Buffer.from(j.content, 'base64').toString('utf8');
-  const data = JSON.parse(body || '{}');
-  return { sha: j.sha, subs: Array.isArray(data.subs) ? data.subs : [] };
+  return { sha: j.sha, data: JSON.parse(body || 'null') };
+}
+
+async function saveFile(path, sha, data, msg) {
+  const body = JSON.stringify(data, null, 2);
+  const put = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+    method: 'PUT',
+    headers: ghHeaders(),
+    body: JSON.stringify({ message: msg, branch: BRANCH, content: Buffer.from(body).toString('base64'), sha: sha || undefined })
+  });
+  if (!put.ok) throw new Error(`guardar ${path} HTTP ${put.status}: ${(await put.text()).slice(0, 200)}`);
+}
+
+async function loadSubs() {
+  const { sha, data } = await loadFile(SUBS_PATH);
+  return { sha, subs: Array.isArray(data && data.subs) ? data.subs : [] };
 }
 
 async function saveSubs(sha, subs) {
-  const body = JSON.stringify({ subs }, null, 2);
-  const put = await fetch(`https://api.github.com/repos/${REPO}/contents/${SUBS_PATH}`, {
-    method: 'PUT',
-    headers: ghHeaders(),
-    body: JSON.stringify({ message: 'subs update (worldNotify)', branch: BRANCH, content: Buffer.from(body).toString('base64'), sha: sha || undefined })
-  });
-  if (!put.ok) throw new Error(`guardar subs HTTP ${put.status}: ${(await put.text()).slice(0, 200)}`);
+  await saveFile(SUBS_PATH, sha, { subs }, 'subs update (worldNotify)');
+}
+
+async function loadVols() {
+  const { sha, data } = await loadFile(VOL_PATH);
+  const vols = (data && Array.isArray(data.vols)) ? data.vols : [];
+  return { sha, vols };
+}
+
+async function saveVols(sha, vols) {
+  if (vols.length > 20000) vols.splice(0, vols.length - 20000);
+  await saveFile(VOL_PATH, sha, { vols }, 'volumes update (worldNotify)');
 }
 
 // envio a la campanita de World App (API oficial del Developer Portal)
@@ -63,15 +96,6 @@ async function worldSend(wallets, title, message) {
     const j = await r.json().catch(() => ({}));
     if (!j.success) throw new Error('World API: ' + JSON.stringify(j).slice(0, 180));
   }
-}
-
-// premios por volumen de intercambio (los paga Juan manualmente con sus comisiones)
-function prizeTier(usd) {
-  if (usd >= 500) return 0.30;
-  if (usd >= 300) return 0.15;
-  if (usd >= 200) return 0.10;
-  if (usd >= 100) return 0.05;
-  return 0;
 }
 
 let LAST_RETO_AT = 0;
@@ -115,17 +139,44 @@ module.exports = wrap(async (req, res) => {
     } catch (e) { return res.status(500).json({ ok: false, error: String(e) }); }
   }
 
-  // premio por intercambio: aviso directo al que cambio (con su nombre via ${username})
+  // consultar mi volumen acumulado y el proximo premio (para la barra de progreso)
+  if (action === 'volume') {
+    const wallet = String(body.wallet || '').toLowerCase();
+    if (!isWallet(wallet)) return res.status(400).json({ ok: false, error: 'wallet invalida' });
+    try {
+      const { vols } = await loadVols();
+      const me = vols.find((v) => v.wallet === wallet);
+      const volume = (me && Number(me.usd)) || 0;
+      const claimed = (me && Array.isArray(me.claimed) && me.claimed) || [];
+      const next = TIERS.find((t) => !claimed.includes(t.usd));
+      return res.json({ ok: true, volume: volume, claimed: claimed, next: next ? { usd: next.usd, prize: next.prize } : null, tiers: TIERS });
+    } catch (e) { return res.status(500).json({ ok: false, error: String(e) }); }
+  }
+
+  // sumar un swap al volumen acumulado; avisar si se desbloquea un nivel nuevo
   if (action === 'prize') {
     const wallet = String(body.wallet || '').toLowerCase();
     const usd = Number(body.usd) || 0;
     if (!isWallet(wallet)) return res.status(400).json({ ok: false, error: 'wallet invalida' });
-    const prize = prizeTier(usd);
-    if (!prize) return res.json({ ok: true, prize: 0 });
-    const msg = '¡Hola ${username}! Intercambiaste $' + usd.toFixed(0) + ' y ganaste $' + prize.toFixed(2) + ' de regalo 🎉 Lo recibes en tu wallet.'
+    if (usd < 1 || usd > 100000) return res.json({ ok: true, volume: 0, prize: 0 });
     try {
-      await worldSend([wallet], '🎁 ¡Premio de ' + APP_LABEL + '!', msg);
-      return res.json({ ok: true, prize: prize });
+      const { sha, vols } = await loadVols();
+      let me = vols.find((v) => v.wallet === wallet);
+      if (!me) { me = { wallet, usd: 0, claimed: [], at: Date.now() }; vols.push(me); }
+      const before = me.usd || 0;
+      me.usd = before + usd;
+      me.at = Date.now();
+      if (!Array.isArray(me.claimed)) me.claimed = [];
+      const unlocked = TIERS.filter((t) => before < t.usd && me.usd >= t.usd && !me.claimed.includes(t.usd));
+      const newPrize = unlocked.reduce((s, t) => s + t.prize, 0);
+      unlocked.forEach((t) => me.claimed.push(t.usd));
+      if (me.claimed.length === TIERS.length) me.done = true;
+      await saveVols(sha, vols);
+      if (unlocked.length > 0) {
+        const msg = '¡Hola ${username}! Ya intercambiaste $' + me.usd.toFixed(0) + ' acumulado en ' + APP_LABEL + ' 🎉 Desbloqueaste $' + newPrize.toFixed(2) + ' de regalo. Lo recibes en tu wallet.';
+        await worldSend([wallet], '🎁 ¡Premio de ' + APP_LABEL + '!', msg);
+      }
+      return res.json({ ok: true, volume: me.usd, prize: newPrize, unlocked: unlocked.map((t) => t.usd) });
     } catch (e) { return res.status(500).json({ ok: false, error: String(e) }); }
   }
 
@@ -141,12 +192,10 @@ module.exports = wrap(async (req, res) => {
       const { subs } = await loadSubs();
       const targets = subs.filter((s) => s.wallet !== from).map((s) => s.wallet);
       if (targets.length === 0) return res.json({ ok: true, sent: 0 });
-      await worldSend(targets, '🐉 ¡Nuevo reto de Damas!', handle + ' abrió un reto de ' + stake + ' WLD 🐉 Entra y acepta el desafío.');
+      await worldSend(targets, '🔔 ¡Aviso de SwapX!', handle + ' abrió un reto de ' + stake + ' WLD 🐉 Entra y acepta el desafío.');
       return res.json({ ok: true, sent: targets.length });
     } catch (e) { return res.status(500).json({ ok: false, error: String(e) }); }
   }
 
   return res.status(400).json({ ok: false, error: 'accion desconocida' });
 });
-// redeploy 2026-10-08T15:42:54Z - tomar variables WORLD_*
-// redeploy 2026-10-08T15:53:46Z

@@ -69,6 +69,12 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
       <div style="background:#fff8e1;padding:8px;border-radius:10px;text-align:center">$300 → <span style="color:#b8860b">$0.15</span></div>
       <div style="background:#fff8e1;padding:8px;border-radius:10px;text-align:center">$500 → <span style="color:#b8860b">$0.30</span></div>
     </div>
+    <div id="prizeProgWrap" style="display:none;margin-top:10px">
+      <div class="small" id="prizeProgText" style="line-height:1.5"></div>
+      <div style="height:8px;background:#f0f0f0;border-radius:4px;margin-top:6px;overflow:hidden">
+        <div id="prizeProgBar" style="height:100%;background:#f0b90b;width:0%;border-radius:4px"></div>
+      </div>
+    </div>
     <button onclick="subscribeWorldNotifs()" class="btnY" style="background:#111;color:#f0b90b;margin-top:10px">🔔 Avisarme cuando gane un premio</button>
   </div>
   <div class="tokens" id="tokenList"></div>
@@ -358,14 +364,31 @@ async function sendTelegramNotification(montoUsd, kind, extra) {
   }
   // campanita de World App: si acepto notificaciones y el swap llega a nivel
   // de premio ($100/$200/$300/$500), se le avisa al instante
-  if ((!kind || kind === 'swap') && montoUsd >= 100 && currentAccount) {
+  if ((!kind || kind === 'swap') && montoUsd >= 1 && currentAccount) {
     try {
       fetch(await apiEndpoint('worldNotify'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'prize', wallet: currentAccount, usd: montoUsd })
-      }).catch(function(){});
+      }).catch(function(){}).then(function(){ updatePrizeProgress(); });
     } catch (e) {}
   }
+}
+
+// barra de progreso de premios por volumen acumulado (servidor worldNotify)
+async function updatePrizeProgress() {
+  var el = document.getElementById('prizeProgWrap'); if (!el) return;
+  if (!currentAccount) { el.style.display = 'none'; return; }
+  try {
+    var r = await fetch(await apiEndpoint('worldNotify'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'volume', wallet: currentAccount }) });
+    var j = await r.json();
+    if (!j.ok) { el.style.display = 'none'; return; }
+    el.style.display = 'block';
+    var t = document.getElementById('prizeProgText'), b = document.getElementById('prizeProgBar');
+    if (!j.next) { t.innerHTML = '🏆 ¡Nivel máximo! Ya ganaste todos los premios por volumen.'; b.style.width = '100%'; return; }
+    var pct = Math.min(100, Math.round(j.volume / j.next.usd * 100));
+    t.innerHTML = 'Llevas <b>$' + j.volume.toFixed(0) + '</b> de <b>$' + j.next.usd + '</b> intercambiados → te faltan <b>$' + Math.max(0, j.next.usd - j.volume).toFixed(0) + '</b> para ganar <b>$' + j.next.prize.toFixed(2) + '</b> 🎁';
+    b.style.width = pct + '%';
+  } catch (e) { el.style.display = 'none'; }
 }
 
 // suscribirse a notificaciones push de World App (permiso + registro)
@@ -522,6 +545,7 @@ async function connectWallet() {
 function updateUI(addr) {
   const displayLabel = currentUserHandle || (addr.slice(0,6) + '...' + addr.slice(-4));
   document.getElementById('walletInfo').innerHTML = displayLabel + ' • World Chain';
+  updatePrizeProgress();
   var btn = document.getElementById('btnConnect');
   btn.innerText = 'Desconectar';
   btn.onclick = disconnectWallet;

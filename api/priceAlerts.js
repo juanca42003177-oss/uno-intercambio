@@ -227,17 +227,20 @@ module.exports = wrap(async (req, res) => {
         if (!cur || !isFinite(cur) || cur <= 0) continue;
         const hit = (a.direction === 'arriba' && cur >= a.price) || (a.direction === 'abajo' && cur <= a.price);
         if (!hit) continue;
-        if (!a.chatId) {
+        // sin Telegram NI wallet suscrita a la campanita: no hay a quien avisar
+        if (!a.chatId && !a.wallet) {
           if (now - a.created > 7 * 86400000) { a.status = 'expirada'; log.expired++; dirty = true; }
           continue;
         }
         const verb = a.direction === 'arriba' ? 'subió hasta' : 'bajó hasta';
         const txt = `${ALERT_PREFIX} — Alerta\n${a.sym} ${verb} $${fmtPrice(cur)} 🎯\nTu alerta era $${fmtPrice(a.price)}.\nVuelve a la app para intercambiar.`;
         let avisada = false;
-        try {
-          const r = await tg('sendMessage', { chat_id: a.chatId, text: txt });
-          if (r && r.ok) avisada = true;
-        } catch (e) { log.errors.push(`alerta ${a.id}: ` + String(e)); }
+        if (a.chatId) {
+          try {
+            const r = await tg('sendMessage', { chat_id: a.chatId, text: txt });
+            if (r && r.ok) avisada = true;
+          } catch (e) { log.errors.push(`alerta ${a.id}: ` + String(e)); }
+        }
         // campanita de World App (canal adicional, independiente del Telegram)
         const worldTxt = `${a.sym} ${verb} $${fmtPrice(cur)} 🎯 Tu alerta se cumplió. Vuelve a la app.`;
         const worldOk = await worldAlert(a.wallet, worldTxt);

@@ -204,21 +204,5 @@ module.exports = wrap(async (req, res) => {
   }
 
   // reto de damas nuevo: aviso a todos los suscritos (menos al creador del reto)
-  if (action === 'reto') {
-    const now = Date.now();
-    if (now - LAST_RETO_AT < 60000) return res.json({ ok: true, skipped: true });
-    LAST_RETO_AT = now;
-    const handle = cleanHandle(body.handle);
-    const stake = Number(body.stake) || 0;
-    const from = String(body.fromWallet || '').toLowerCase();
-    try {
-      const { subs } = await loadSubs();
-      const targets = subs.filter((s) => s.wallet !== from).map((s) => s.wallet);
-      if (targets.length === 0) return res.json({ ok: true, sent: 0 });
-      const wr = await worldSend(targets, '🔔 ¡Aviso de SwapX!', handle + ' abrió un reto de ' + stake + ' WLD 🐉 Entra y acepta el desafío.');
-      return res.json({ ok: true, sent: targets.length, world: wr });
-    } catch (e) { return res.status(500).json({ ok: false, error: String(e) }); }
-  }
-
   return res.status(400).json({ ok: false, error: 'accion desconocida' });
 });

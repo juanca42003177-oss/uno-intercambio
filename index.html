@@ -190,6 +190,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
       </div>
       <input id="alertPrice" type="number" inputmode="decimal" step="any" placeholder="Precio en USD, ej 0.40" style="width:100%;padding:12px;border-radius:12px;border:1px solid #ddd;font-size:15px;font-weight:700;margin-top:8px;box-sizing:border-box">
       <button onclick="createAlert()" class="btnY" style="background:#f0b90b;color:#111">🔔 Crear alerta</button>
+      <button onclick="subscribeWorldNotifs()" class="btnY" style="background:#111;color:#f0b90b;margin-top:8px">🔔 Recibir avisos en World App (premios y alertas)</button>
     </div>
 
     <div id="alertLinkBox" style="display:none;background:#111;color:#fff;border-radius:16px;padding:16px;margin:14px 4px">
@@ -344,6 +345,33 @@ async function sendTelegramNotification(montoUsd, kind, extra) {
   } catch (e) {
     console.error('Error enviando notificación:', e);
   }
+  // campanita de World App: si acepto notificaciones y el swap llega a nivel
+  // de premio ($100/$200/$300/$500), se le avisa al instante
+  if ((!kind || kind === 'swap') && montoUsd >= 100 && currentAccount) {
+    try {
+      fetch(await apiEndpoint('worldNotify'), {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'prize', wallet: currentAccount, usd: montoUsd })
+      }).catch(function(){});
+    } catch (e) {}
+  }
+}
+
+// suscribirse a notificaciones push de World App (permiso + registro)
+async function subscribeWorldNotifs() {
+  if (!currentAccount) { showModal('⚠️', 'Conecta tu wallet'); return; }
+  try {
+    if (window.MiniKit && MiniKit.requestPermission) {
+      var p = await MiniKit.requestPermission({ permission: 'notifications' });
+      if (p && p.payload && p.payload.status === 'denied') { showModal('🔔', 'No activaste las notificaciones'); return; }
+    }
+    var r = await fetch(await apiEndpoint('worldNotify'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'subscribe', wallet: currentAccount, handle: currentUserHandle || '' })
+    });
+    var j = await r.json();
+    showModal(j.ok ? '✅' : '⚠️', j.ok ? '¡Listo! Te avisaremos por la campanita de World App cuando ganes premios o se cumplan tus alertas.' : (j.error || 'No se pudo activar'));
+  } catch (e) { showModal('⚠️', 'Sin conexión'); }
 }
 
 function formatCrypto(val) {
@@ -1173,7 +1201,7 @@ function createAlert() {
   var price = parseFloat(document.getElementById('alertPrice').value);
   var dir = document.getElementById('alertDir').value;
   if (!sym || !(price > 0)) { showModal('⚠️', 'Escribe un precio válido'); return; }
-  alertApi({ action: 'create', sym: sym, price: price, direction: dir, sessionKey: alertSession() }).then(function(j) {
+  alertApi({ action: 'create', sym: sym, price: price, direction: dir, sessionKey: alertSession(), wallet: currentAccount || '' }).then(function(j) {
     if (!j.ok) { showModal('⚠️', j.error || 'No se pudo crear'); return; }
     document.getElementById('alertPrice').value = '';
     if (!j.linked) {

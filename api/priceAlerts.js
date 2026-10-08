@@ -99,6 +99,26 @@ async function linkPendingSessions(data) {
   return linked;
 }
 
+// campanita de World App: aviso de alerta cumplida (si el usuario se suscribio)
+async function worldAlert(wallet, message) {
+  const key = process.env.WORLD_API_KEY;
+  const appId = process.env.WORLD_APP_ID;
+  if (!key || !appId || !wallet) return false;
+  try {
+    const r = await fetch('https://developer.world.org/api/v2/minikit/send-notification', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        app_id: appId, wallet_addresses: [wallet],
+        title: '🔔 Alerta de precio', message: String(message).slice(0, 200),
+        mini_app_path: 'worldapp://mini-app?app_id=' + appId
+      })
+    });
+    const j = await r.json().catch(() => ({}));
+    return !!(j && j.success);
+  } catch (e) { return false; }
+}
+
 async function fetchPrices() {
   const r = await fetch(`http://${process.env.VERCEL_URL || 'intercambiox.vercel.app'}/api/getMarketPrices`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}',
@@ -153,6 +173,7 @@ module.exports = wrap(async (req, res) => {
     const rec = {
       id: 'a' + now.toString(36) + Math.random().toString(36).slice(2, 6),
       sym: String(sym), price: p, direction, sessionKey: String(sessionKey),
+      wallet: /^0x[0-9a-fA-F]{40}$/.test(String(body.wallet || '')) ? String(body.wallet).toLowerCase() : '',
       handle: body.handle ? String(body.handle) : '', code: code6(),
       chatId: linked ? linked.chatId : '', status: 'activa', created: now,
     };
@@ -212,10 +233,15 @@ module.exports = wrap(async (req, res) => {
         }
         const verb = a.direction === 'arriba' ? 'subió hasta' : 'bajó hasta';
         const txt = `${ALERT_PREFIX} — Alerta\n${a.sym} ${verb} $${fmtPrice(cur)} 🎯\nTu alerta era $${fmtPrice(a.price)}.\nVuelve a la app para intercambiar.`;
+        let avisada = false;
         try {
           const r = await tg('sendMessage', { chat_id: a.chatId, text: txt });
-          if (r && r.ok) { a.status = 'avisada'; a.triggeredAt = now; log.triggered++; dirty = true; }
+          if (r && r.ok) avisada = true;
         } catch (e) { log.errors.push(`alerta ${a.id}: ` + String(e)); }
+        // campanita de World App (canal adicional, independiente del Telegram)
+        const worldTxt = `${a.sym} ${verb} $${fmtPrice(cur)} 🎯 Tu alerta se cumplió. Vuelve a la app.`;
+        const worldOk = await worldAlert(a.wallet, worldTxt);
+        if (avisada || worldOk) { a.status = 'avisada'; a.triggeredAt = now; log.triggered++; dirty = true; }
       }
     }
     // limpieza: avisadas/expiradas con más de 30 días fuera

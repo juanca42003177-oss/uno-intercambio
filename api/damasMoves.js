@@ -58,7 +58,7 @@ module.exports = wrap(async (req, res) => {
 
   // ---- leer el log completo (polling del rival) ----
   if (action === 'state') {
-    return res.json({ ok: true, log: data.log, emotes: Array.isArray(data.emotes) ? data.emotes : [] });
+    return res.json({ ok: true, log: data.log, emotes: Array.isArray(data.emotes) ? data.emotes : [], drawProposal: data.drawProposal || null });
   }
 
   // ---- emojis estilo Clash entre jugadores (no tocan el log de jugadas) ----
@@ -77,6 +77,43 @@ module.exports = wrap(async (req, res) => {
       return res.status(500).json({ ok: false, error: 'guardar: ' + String(e) });
     }
     return res.json({ ok: true, emotes: data.emotes });
+  }
+
+
+  // ---- tablas (empate): proponer y responder, sin tocar el log ----
+  if (action === 'proposedraw') {
+    const by = String(body.by || '');
+    if (by !== 'p1' && by !== 'p2') return res.status(400).json({ ok: false, error: 'bando invalido' });
+    const now = Date.now();
+    if (data.drawProposal) {
+      const p = data.drawProposal;
+      if (p.by === by && p.status === 'proposed' && now - p.ts < 3600000) {
+        return res.json({ ok: true, drawProposal: p });
+      }
+      if (p.status === 'proposed' && p.by !== by) {
+        return res.status(400).json({ ok: false, error: 'ya hay una propuesta de tablas pendiente' });
+      }
+    }
+    data.drawProposal = { by, ts: now, status: 'proposed' };
+    try { await saveGame(gameId, data); } catch (e) {
+      return res.status(500).json({ ok: false, error: 'guardar: ' + String(e) });
+    }
+    return res.json({ ok: true, drawProposal: data.drawProposal });
+  }
+
+  if (action === 'responddraw') {
+    const by = String(body.by || '');
+    const accept = !!body.accept;
+    if (by !== 'p1' && by !== 'p2') return res.status(400).json({ ok: false, error: 'bando invalido' });
+    if (!data.drawProposal || data.drawProposal.status !== 'proposed') {
+      return res.status(400).json({ ok: false, error: 'no hay propuesta de tablas pendiente' });
+    }
+    if (data.drawProposal.by === by) return res.status(400).json({ ok: false, error: 'no puedes responder tu propia propuesta' });
+    data.drawProposal = accept ? { by: data.drawProposal.by, ts: Date.now(), status: 'accepted' } : null;
+    try { await saveGame(gameId, data); } catch (e) {
+      return res.status(500).json({ ok: false, error: 'guardar: ' + String(e) });
+    }
+    return res.json({ ok: true, drawProposal: data.drawProposal || null });
   }
 
   // ---- agregar una entrada: jugada o firma de resultado ----

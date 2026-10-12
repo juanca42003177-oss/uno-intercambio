@@ -5,6 +5,7 @@
 // No es un bot ni corre solo: solo responde cuando un jugador llama.
 // Acciones: move (agregar jugada o firma de resultado) | state (leer log).
 
+const rules = require('./_damasRules');
 const BRANCH = 'damas-data';
 const EMOTES = ['👏', '😂', '😮', '😭', '😡', '🔥', '🐉', '👍'];
 const REPO = process.env.GITHUB_ALERTS_REPO || 'juanca42003177-oss/Uno-Intercambio-Prueba';
@@ -88,7 +89,22 @@ module.exports = wrap(async (req, res) => {
       // para que el cliente se resincronice en vez de duplicar.
       return res.json({ ok: true, conflict: true, log: data.log });
     }
-    data.log.push({ ...entry, ts: Date.now() });
+    // ---- VALIDACION ANTI-TRAMPA: solo se aceptan jugadas legales y en turno ----
+    if (entry.type === 'move') {
+      const by = entry.by;
+      if (by !== 'p1' && by !== 'p2') return res.status(400).json({ ok: false, error: 'bando invalido' });
+      const rb = rules.damasRebuild(data.log);
+      if (rb.turn !== by) return res.status(400).json({ ok: false, error: 'no es tu turno' });
+      const mv = entry.move;
+      const legales = rules.damasLegalMoves(rb.board, by);
+      const ok = mv && legales.some((l) => l.from === mv.from && l.to === mv.to &&
+        JSON.stringify(l.captures || []) === JSON.stringify(mv.captures || []));
+      if (!ok) return res.status(400).json({ ok: false, error: 'jugada ilegal' });
+      // guardar solo los campos conocidos (nada de datos extra del cliente)
+      data.log.push({ type: 'move', move: { from: mv.from, to: mv.to, captures: mv.captures || [] }, by, ts: Date.now() });
+    } else {
+      return res.status(400).json({ ok: false, error: 'tipo de entrada no permitido' });
+    }
     try { await saveGame(gameId, data); } catch (e) {
       return res.status(500).json({ ok: false, error: 'guardar: ' + String(e) });
     }

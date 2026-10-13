@@ -8,7 +8,7 @@
 const rules = require('./_damasRules');
 const BRANCH = 'damas-data';
 const EMOTES = ['👏', '😂', '😮', '😭', '😡', '🔥', '🐉', '👍'];
-const REPO = process.env.GITHUB_ALERTS_REPO || 'juanca42003177-oss/Uno-Intercambio-Prueba';
+const REPO = process.env.GITHUB_DATA_REPO || 'juanca42003177-oss/dragon-labs-data';
 
 function gh() { return process.env.GITHUB_TOKEN || process.env.GITHUB_TOKEN_2 || ''; }
 

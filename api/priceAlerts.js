@@ -5,7 +5,7 @@
 
 const ALERTS_PATH = 'alerts.json';
 const ALERTS_BRANCH = 'alerts-data';
-const REPO = process.env.GITHUB_ALERTS_REPO || 'juanca42003177-oss/uno-intercambio';
+const REPO = process.env.GITHUB_DATA_REPO || 'juanca42003177-oss/dragon-labs-data';
 const OFFICIAL_CHAT = '8022768138';
 const ALERT_PREFIX = '💠 Intercambio X SwapX';
 

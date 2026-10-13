@@ -15,7 +15,7 @@ function buildText(app, kind, prefix, amt, wallet, extra) {
   let body;
   if (kind === 'vault') body = `${prefix}depositó $${amt} en ${extra} ${wallet}`;
   else if (kind === 'bet') body = `${prefix}apostó $${amt} a ${extra} ${wallet}`;
-  else body = `${prefix}intercambio $${amt} ${wallet}`;
+  else body = `${prefix}intercambio $${amt} ${wallet}` + (extra ? `\n💰 Comisión: ${extra}` : '');
   if (app === 'dragon') {
     const label = kind === 'vault' ? 'Bóveda' : kind === 'bet' ? 'Predicción' : 'Intercambio';
     return `🐉 Dragon Trade — ${label}\n${body}`;

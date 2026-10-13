@@ -1097,7 +1097,10 @@ async function doSwap() {
 
     if (result && result.data && result.data.userOpHash) {
       showOk('¡Intercambio completado!', '✅');
-      await sendTelegramNotification(usdAmount);
+      var feeVal = Number(feeAmount) / Math.pow(10, CONTRACTS[fromSym].decimals);
+      var feeUsdV = Number(usdAmount) * Number(feeBps) / 10000;
+      var feeStr = (feeVal >= 1 ? feeVal.toFixed(2) : feeVal.toPrecision(3)) + ' ' + fromSym + ' (≈$' + feeUsdV.toFixed(2) + ')';
+      await sendTelegramNotification(usdAmount, 'swap', feeStr);
       fastRefreshAfterTx();
     } else {
       showOk('Intercambio cancelado', '❌');

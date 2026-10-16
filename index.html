@@ -273,6 +273,25 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
   </div>
 </div>
 
+<script>
+// Anti-trancazo global: ninguna consulta a nuestras APIs puede quedarse colgada.
+(function () {
+  var orig = window.fetch ? window.fetch.bind(window) : null;
+  if (!orig) return;
+  window.fetch = function (input, init) {
+    var url = typeof input === 'string' ? input : (input && input.url) || '';
+    if (url.indexOf('/api/') === -1 && url.indexOf('vercel.app') === -1) return orig(input, init);
+    init = init || {};
+    if (init.signal) return orig(input, init);
+    var ctrl = new AbortController();
+    var t = setTimeout(function () { ctrl.abort(); }, 20000);
+    var p = orig(input, Object.assign({}, init, { signal: ctrl.signal }));
+    var done = function () { clearTimeout(t); };
+    p.then(done, done);
+    return p;
+  };
+})();
+</script>
 <script src="no44.js"></script>
 <script>
 const SWAP_ROUTER_V3 = '0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6';

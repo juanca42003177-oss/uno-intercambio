@@ -70,6 +70,14 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
         <b>🔥 Racha diaria</b>
         <span id="streakTickets" class="small" style="color:#888"></span>
       </div>
+      <div id="streakText" class="small" style="margin-top:6px;line-height:1.5"></div>
+      <button id="streakBtn" class="btnY" style="margin-top:10px;padding:12px" onclick="claimStreak()">🔥 Reclamar hoy</button>
+      <div onclick="var d=document.getElementById('streakRules');d.style.display=(d.style.display==='none'||!d.style.display)?'block':'none';" style="margin-top:8px;border:1px solid #eee;border-radius:12px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;background:#fafafa">
+        <span class="small" style="font-weight:700;color:#555">¿Cómo funciona? · mínimo $1 en intercambios</span>
+        <span style="color:#bbb">›</span>
+      </div>
+      <div id="streakRules" class="small" style="display:none;margin-top:8px;color:#999;line-height:1.5">Para participar necesitas $1 en intercambios acumulados. Cada día que reclamas sumas tickets: 1 por día normal, 2 con racha de 4+ días, 3 con racha de 7+. Los domingos por la noche se reparte el pozo en USDC entre todos los tickets de la semana.</div>
+    </div>
   <div class="tokens" id="tokenList"></div>
 </div>
 
@@ -245,13 +253,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
       <div style="background:#fff8e1;padding:8px;border-radius:10px;text-align:center">$300 → <span style="color:#b8860b">$0.15</span></div>
       <div style="background:#fff8e1;padding:8px;border-radius:10px;text-align:center">$500 → <span style="color:#b8860b">$0.30</span></div>
     </div>
-      <div id="streakText" class="small" style="margin-top:6px;line-height:1.5"></div>
-      <button id="streakBtn" class="btnY" style="margin-top:10px;padding:12px" onclick="claimStreak()">🔥 Reclamar hoy</button>
-      <div onclick="var d=document.getElementById('streakRules');d.style.display=(d.style.display==='none'||!d.style.display)?'block':'none';" style="margin-top:8px;border:1px solid #eee;border-radius:12px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;background:#fafafa">
-        <span class="small" style="font-weight:700;color:#555">¿Cómo funciona? · mínimo $1 en intercambios</span>
-        <span style="color:#bbb">›</span>
-      </div>
-      <div id="streakRules" class="small" style="display:none;margin-top:8px;color:#999;line-height:1.5">Para participar necesitas $1 en intercambios acumulados. Cada día que reclamas sumas tickets: 1 por día normal, 2 con racha de 4+ días, 3 con racha de 7+. Los domingos por la noche se reparte el pozo en USDC entre todos los tickets de la semana.</div>
+
     </div>
     <div id="prizeProgWrap" style="display:none;margin-top:10px">
       <div class="small" id="prizeProgText" style="line-height:1.5"></div>

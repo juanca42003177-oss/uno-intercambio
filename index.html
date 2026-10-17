@@ -240,6 +240,14 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
       <div style="background:#fff8e1;padding:8px;border-radius:10px;text-align:center">$300 → <span style="color:#b8860b">$0.15</span></div>
       <div style="background:#fff8e1;padding:8px;border-radius:10px;text-align:center">$500 → <span style="color:#b8860b">$0.30</span></div>
     </div>
+    <div id="streakCard" style="display:none;margin-top:12px;background:#fff;border:1px solid #eee;border-radius:14px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.04)">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <b>🔥 Racha diaria</b>
+        <span id="streakTickets" class="small" style="color:#888"></span>
+      </div>
+      <div id="streakText" class="small" style="margin-top:6px;line-height:1.5"></div>
+      <button id="streakBtn" class="btnY" style="margin-top:10px;padding:12px" onclick="claimStreak()">🔥 Reclamar hoy</button>
+    </div>
     <div id="prizeProgWrap" style="display:none;margin-top:10px">
       <div class="small" id="prizeProgText" style="line-height:1.5"></div>
       <div style="height:8px;background:#f0f0f0;border-radius:4px;margin-top:6px;overflow:hidden">
@@ -416,6 +424,52 @@ async function sendTelegramNotification(montoUsd, kind, extra) {
   }
 }
 
+// ---------- racha diaria ----------
+async function loadStreakCard() {
+  var card = document.getElementById('streakCard');
+  if (!card) return;
+  if (!currentAccount) { card.style.display = 'none'; return; }
+  try {
+    var r = await fetch(await apiEndpoint('worldNotify'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'streak', wallet: currentAccount })
+    });
+    var j = await r.json();
+    if (!j || !j.ok) { card.style.display = 'none'; return; }
+    card.style.display = 'block';
+    var txt = document.getElementById('streakText');
+    var btn = document.getElementById('streakBtn');
+    document.getElementById('streakTickets').innerText = j.ticketsThisWeek > 0 ? ('🎟 ' + j.ticketsThisWeek + ' ticket' + (j.ticketsThisWeek > 1 ? 's' : '') + ' esta semana') : '';
+    if (j.canClaim) {
+      txt.innerText = 'Tu racha: ' + j.streak + ' día' + (j.streak === 1 ? '' : 's') + '. Entra cada día y reclama: rachas largas dan más tickets para el pozo semanal en USDC.';
+      btn.disabled = false;
+      btn.style.opacity = 1;
+      btn.innerText = '🔥 Reclamar hoy' + (j.streak > 0 ? ' (día ' + (j.streak + 1) + ')' : '');
+    } else {
+      txt.innerText = 'Racha actual: ' + j.streak + ' día' + (j.streak === 1 ? '' : 's') + ' (récord: ' + j.best + '). ¡Ya reclamaste hoy! Vuelve mañana para que no se rompa.';
+      btn.disabled = true;
+      btn.style.opacity = .55;
+      btn.innerText = '✅ Reclamado hoy';
+    }
+  } catch (e) { card.style.display = 'none'; }
+}
+async function claimStreak() {
+  if (!currentAccount) return showOk('Conecta tu wallet', '⚠️');
+  try {
+    var r = await fetch(await apiEndpoint('worldNotify'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'streakClaim', wallet: currentAccount })
+    });
+    var j = await r.json();
+    if (j && j.ok) {
+      histAdd('🔥 Racha', 'Día ' + j.streak + ' de racha reclamado (+' + j.tickets + ' ticket' + (j.tickets > 1 ? 's' : '') + ' para el pozo semanal)');
+      showOk('🔥 ¡Racha de ' + j.streak + ' día' + (j.streak === 1 ? '' : 's') + '! +' + j.tickets + ' ticket' + (j.tickets > 1 ? 's' : '') + ' para el pozo semanal', '✅');
+    } else {
+      showOk((j && j.error) || 'No se pudo reclamar', '⚠️');
+    }
+    await loadStreakCard();
+  } catch (e) { showOk('Error de conexión, intenta de nuevo', '⚠️'); }
+}
 // barra de progreso de premios por volumen acumulado (servidor worldNotify)
 async function updatePrizeProgress() {
   var el = document.getElementById('prizeProgWrap'); if (!el) return;
@@ -641,6 +695,7 @@ async function connectWallet() {
 }
 
 function updateUI(addr) {
+  try { loadStreakCard(); } catch (e) {}
   const displayLabel = currentUserHandle || (addr.slice(0,6) + '...' + addr.slice(-4));
   document.getElementById('walletInfo').innerHTML = displayLabel + ' • World Chain';
   updatePrizeProgress();

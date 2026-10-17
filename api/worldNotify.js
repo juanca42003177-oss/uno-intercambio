@@ -179,6 +179,30 @@ module.exports = wrap(async (req, res) => {
     await tgSend('🔔 Prueba de Telegram desde ' + APP_LABEL + ' — si ves esto, el aviso de premios funciona.');
     return res.json({ ok: true, token_presente: !!process.env.TELEGRAM_BOT_TOKEN });
   }
+
+// ---------- racha diaria de SwapX ----------
+const STREAK_PATH = 'notify/streak-swapx.json';
+
+async function loadStreak() {
+  const { sha, data } = await loadFile(STREAK_PATH);
+  const s = (data && typeof data === 'object') ? data : {};
+  if (!s.wallets) s.wallets = {};
+  if (!s.weeks) s.weeks = {};
+  return { sha, s };
+}
+async function saveStreak(sha, s) { await saveFile(STREAK_PATH, sha, s, 'streak update (worldNotify)'); }
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+function yesterdayStr() { return new Date(Date.now() - 86400000).toISOString().slice(0, 10); }
+function weekKeyOf(ms) {
+  const t = new Date(ms || Date.now());
+  const day = (t.getUTCDay() + 6) % 7;
+  t.setUTCDate(t.getUTCDate() - day);
+  const y = t.getUTCFullYear();
+  const first = new Date(Date.UTC(y, 0, 1));
+  const week = Math.ceil((((t - first) / 86400000) + first.getUTCDay() + 1) / 7);
+  return y + '-W' + week;
+}
+
   if (action === 'prize') {
     const wallet = String(body.wallet || '').toLowerCase();
     const usd = Number(body.usd) || 0;
@@ -215,6 +239,51 @@ module.exports = wrap(async (req, res) => {
     } catch (e) { return res.status(500).json({ ok: false, error: String(e) }); }
   }
 
-  // reto de damas nuevo: aviso a todos los suscritos (menos al creador del reto)
+  // ---- racha: consultar estado ----
+  if (action === 'streak') {
+    const wallet = String(body.wallet || '').toLowerCase();
+    if (!isWallet(wallet)) return res.status(400).json({ ok: false, error: 'wallet invalida' });
+    try {
+      const { s } = await loadStreak();
+      const me = s.wallets[wallet] || {};
+      const wk = weekKeyOf();
+      const wkData = s.weeks[wk] || {};
+      return res.json({
+        ok: true,
+        streak: me.streak || 0,
+        best: me.best || 0,
+        lastClaim: me.lastClaim || null,
+        canClaim: (me.lastClaim || '') !== todayStr(),
+        ticketsThisWeek: (wkData.tickets && wkData.tickets[wallet]) || 0
+      });
+    } catch (e) { return res.status(500).json({ ok: false, error: String(e) }); }
+  }
+
+  // ---- racha: reclamar el dia ----
+  if (action === 'streakClaim') {
+    const wallet = String(body.wallet || '').toLowerCase();
+    if (!isWallet(wallet)) return res.status(400).json({ ok: false, error: 'wallet invalida' });
+    try {
+      const [{ sha, s }, { vols }] = await Promise.all([loadStreak(), loadVols()]);
+      const vol = vols.find((v) => v.wallet === wallet);
+      if (!vol || (vol.usd || 0) < 1) return res.json({ ok: false, error: 'Necesitas al menos $1 en intercambios acumulados para participar en la racha.' });
+      const me = s.wallets[wallet] || {};
+      const today = todayStr();
+      if (me.lastClaim === today) return res.json({ ok: false, error: 'Ya reclamaste hoy. Vuelve mañana para no perder tu racha.' });
+      me.streak = (me.lastClaim === yesterdayStr()) ? (me.streak || 0) + 1 : 1;
+      me.best = Math.max(me.best || 0, me.streak);
+      me.lastClaim = today;
+      s.wallets[wallet] = me;
+      const tickets = me.streak >= 7 ? 3 : (me.streak >= 4 ? 2 : 1);
+      const wk = weekKeyOf();
+      if (!s.weeks[wk]) s.weeks[wk] = { tickets: {} };
+      if (!s.weeks[wk].tickets) s.weeks[wk].tickets = {};
+      s.weeks[wk].tickets[wallet] = (s.weeks[wk].tickets[wallet] || 0) + tickets;
+      await saveStreak(sha, s);
+      return res.json({ ok: true, streak: me.streak, tickets: tickets });
+    } catch (e) { return res.status(500).json({ ok: false, error: String(e) }); }
+  }
+
+  //reto de damas nuevo: aviso a todos los suscritos (menos al creador del reto)
   return res.status(400).json({ ok: false, error: 'accion desconocida' });
 });

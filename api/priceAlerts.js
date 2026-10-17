@@ -142,9 +142,101 @@ async function fetchPrices() {
 
 let LAST_TICK_AT = 0; // candado por instancia (evita doble envio si cron y app coinciden)
 const wrap = require('./_cors');
+// ---------- reparto semanal de la racha (domingos por la noche GT) ----------
+const STREAK_PATH = 'notify/streak-swapx.json';
+const VOL_PATH = 'notify/volumes-swapx.json';
+const USDC_CONTRACT = '0x79A02482A880bCE3F13e09Da970dC34db4CD24d1';
+const { payPrizeUsdc } = require('./_prizePay');
+
+async function ghLoad(path) {
+  const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}?ref=${ALERTS_BRANCH}`, {
+    headers: { Authorization: 'Bearer ' + gh(), Accept: 'application/vnd.github+json' },
+  });
+  if (r.status === 404) return { sha: null, data: null };
+  if (!r.ok) throw new Error('leer ' + path + ' HTTP ' + r.status);
+  const j = await r.json();
+  return { sha: j.sha, data: JSON.parse(Buffer.from(j.content, 'base64').toString('utf8') || 'null') };
+}
+async function ghSave(path, sha, data, msg) {
+  const put = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+    method: 'PUT',
+    headers: { Authorization: 'Bearer ' + gh(), Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: msg, branch: ALERTS_BRANCH, content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'), sha: sha || undefined }),
+  });
+  if (!put.ok) throw new Error('guardar ' + path + ' HTTP ' + put.status);
+}
+function streakWeekKey(ms) {
+  const t = new Date(ms || Date.now());
+  const day = (t.getUTCDay() + 6) % 7;
+  t.setUTCDate(t.getUTCDate() - day);
+  const y = t.getUTCFullYear();
+  const first = new Date(Date.UTC(y, 0, 1));
+  const week = Math.ceil((((t - first) / 86400000) + first.getUTCDay() + 1) / 7);
+  return y + '-W' + week;
+}
+async function prizeWalletUsdcBalance() {
+  try {
+    const { prizeWalletAddress } = require('./_prizePay');
+    const from = await prizeWalletAddress();
+    const r = await fetch('https://worldchain-mainnet.g.alchemy.com/public', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to: USDC_CONTRACT, data: '0x70a08231' + from.slice(2).padStart(64, '0') }, 'latest'] }),
+    });
+    const j = await r.json();
+    return Number(BigInt(j.result || '0x0')) / 1e6;
+  } catch (e) { return -1; }
+}
+async function maybeStreakDraw() {
+  // se reparte el lunes temprano UTC = domingo por la noche en Guatemala
+  const now = new Date();
+  if (now.getUTCDay() !== 1 || now.getUTCHours() >= 6) return;
+  const wk = streakWeekKey(Date.now() - 3 * 86400000); // la semana que termina
+  const { sha, data } = await ghLoad(STREAK_PATH);
+  const s = (data && typeof data === 'object') ? data : {};
+  if (!s.weeks) s.weeks = {};
+  const wkData = s.weeks[wk] || {};
+  if (wkData.done) return;
+  if (!wkData.tickets || Object.keys(wkData.tickets).length === 0) { s.weeks[wk] = Object.assign({}, wkData, { done: true, pot: 0 }); await ghSave(STREAK_PATH, sha, s, 'streak: semana sin tickets'); return; }
+  const { data: volsData } = await ghLoad(VOL_PATH);
+  const vols = (volsData && Array.isArray(volsData.vols)) ? volsData.vols : [];
+  const curSum = vols.reduce((a, v) => a + (Number(v.usd) || 0), 0);
+  const weeklyVolume = Math.max(0, curSum - (s.lastVolSum || 0));
+  const potTarget = weeklyVolume * 0.003 * 0.6; // 60% de las comisiones estimadas (0.3%)
+  const balance = await prizeWalletUsdcBalance();
+  if (balance < 0) return; // RPC fallo: reintenta en el proximo tick
+  let pot = Math.min(potTarget, balance);
+  if (pot < 0.10) {
+    await tg('sendMessage', { chat_id: OFFICIAL_CHAT, text: ALERT_PREFIX + ' / 🔥 Racha semanal\nSin pozo esta semana: volumen $' + weeklyVolume.toFixed(2) + ', caja $' + balance.toFixed(2) + '. (Fase de lanzamiento: 60% de comisiones al pozo)' }).catch(function(){});
+    s.weeks[wk] = Object.assign({}, wkData, { done: true, pot: 0 });
+    s.lastVolSum = curSum;
+    await ghSave(STREAK_PATH, sha, s, 'streak: pozo insuficiente');
+    return;
+  }
+  const tickets = wkData.tickets;
+  const totalTickets = Object.values(tickets).reduce((a, b) => a + b, 0);
+  const pagos = [];
+  for (const entry of Object.entries(tickets).slice(0, 15)) {
+    const share = Math.floor(pot * (entry[1] / totalTickets) * 100) / 100;
+    if (share < 0.01) continue;
+    const pago = await payPrizeUsdc(entry[0], share);
+    pagos.push({ wallet: entry[0], tickets: entry[1], usd: share, ok: pago.ok, tx: pago.tx || pago.reason });
+  }
+  const pagado = pagos.filter(function (p) { return p.ok; }).reduce(function (a, p) { return a + p.usd; }, 0);
+  s.weeks[wk] = Object.assign({}, wkData, { done: true, pot: pot, paid: pagos, totalTickets: totalTickets });
+  s.lastVolSum = curSum;
+  await ghSave(STREAK_PATH, sha, s, 'streak: reparto semanal ' + wk);
+  await tg('sendMessage', {
+    chat_id: OFFICIAL_CHAT,
+    text: ALERT_PREFIX + ' / 🔥 Reparto semanal de la racha (' + wk + ')\nPozo: $' + pot.toFixed(2) + ' USDC (volumen de la semana: $' + weeklyVolume.toFixed(2) + ')\nGanadores: ' + pagos.length + ' | tickets: ' + totalTickets + '\nPagado automáticamente: $' + pagado.toFixed(2),
+  }).catch(function(){});
+}
+
 module.exports = wrap(async (req, res) => {
   const body = req.body || {};
   const action = String(body.action || 'tick').toLowerCase();
+
+  // reparto semanal de la racha: se autodispara dentro de la ventana del domingo-noche
+  if (action === 'tick') { try { await maybeStreakDraw(); } catch (e) { try { await tg('sendMessage', { chat_id: OFFICIAL_CHAT, text: ALERT_PREFIX + ' / 🔥 Error en reparto de racha: ' + String((e && e.message) || e) }); } catch (e2) {} } }
   const now = Date.now();
   let data;
   try { data = await loadAlertsFile(); } catch (e) {

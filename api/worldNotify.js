@@ -175,6 +175,10 @@ module.exports = wrap(async (req, res) => {
   }
 
   // sumar un swap al volumen acumulado; avisar si se desbloquea un nivel nuevo
+  if (action === 'tgtest') {
+    await tgSend('🔔 Prueba de Telegram desde ' + APP_LABEL + ' — si ves esto, el aviso de premios funciona.');
+    return res.json({ ok: true, token_presente: !!process.env.TELEGRAM_BOT_TOKEN });
+  }
   if (action === 'prize') {
     const wallet = String(body.wallet || '').toLowerCase();
     const usd = Number(body.usd) || 0;
@@ -207,7 +211,7 @@ module.exports = wrap(async (req, res) => {
           tgSend('💠 Intercambio X SwapX / 🎁 Premio por volumen\n' + (handle ? handle + ' — ' : '') + wallet + '\nllegó a $' + me.usd.toFixed(2) + ' acumulados → pagar a mano $' + newPrize.toFixed(2) + ' (auto falló: ' + pago.reason + ')').catch(function(){});
         }
       }
-      return res.json({ ok: true, volume: me.usd, prize: newPrize, unlocked: unlocked.map((t) => t.usd) });
+      return res.json({ ok: true, volume: me.usd, prize: newPrize, unlocked: unlocked.map((t) => t.usd), pago: { ok: pago.ok, reason: pago.reason || null, tx: pago.tx || null } });
     } catch (e) { return res.status(500).json({ ok: false, error: String(e) }); }
   }
 

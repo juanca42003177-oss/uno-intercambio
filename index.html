@@ -65,6 +65,11 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
     <span style="font-weight:700;color:#111">📜 Historial de movimientos</span>
     <span style="color:#bbb;font-size:18px">›</span>
   </div>
+    <div id="streakCard" style="display:none;margin-top:12px;background:#fff;border:1px solid #eee;border-radius:14px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.04)">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <b>🔥 Racha diaria</b>
+        <span id="streakTickets" class="small" style="color:#888"></span>
+      </div>
   <div class="tokens" id="tokenList"></div>
 </div>
 
@@ -240,11 +245,6 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
       <div style="background:#fff8e1;padding:8px;border-radius:10px;text-align:center">$300 → <span style="color:#b8860b">$0.15</span></div>
       <div style="background:#fff8e1;padding:8px;border-radius:10px;text-align:center">$500 → <span style="color:#b8860b">$0.30</span></div>
     </div>
-    <div id="streakCard" style="display:none;margin-top:12px;background:#fff;border:1px solid #eee;border-radius:14px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.04)">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <b>🔥 Racha diaria</b>
-        <span id="streakTickets" class="small" style="color:#888"></span>
-      </div>
       <div id="streakText" class="small" style="margin-top:6px;line-height:1.5"></div>
       <button id="streakBtn" class="btnY" style="margin-top:10px;padding:12px" onclick="claimStreak()">🔥 Reclamar hoy</button>
     </div>

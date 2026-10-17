@@ -197,9 +197,9 @@ module.exports = wrap(async (req, res) => {
       unlocked.forEach((t) => me.claimed.push(t.usd));
       if (me.claimed.length === TIERS.length) me.done = true;
       await saveVols(sha, vols);
+      var pago = { ok: false, reason: 'sin_llave' };
       if (unlocked.length > 0) {
         const handle = cleanHandle(body.handle);
-        let pago = { ok: false, reason: 'sin_llave' };
         try { pago = await payPrizeUsdc(wallet, newPrize); } catch (e) { pago = { ok: false, reason: String(e) }; }
         const msg = pago.ok
           ? '¡Hola ${username}! Ya intercambiaste $' + me.usd.toFixed(2) + ' acumulado en ' + APP_LABEL + ' 🎉 Desbloqueaste $' + newPrize.toFixed(2) + ' de regalo. Ya están en tu wallet en USDC.'

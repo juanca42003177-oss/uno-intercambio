@@ -123,6 +123,7 @@ async function tgSend(text) {
 }
 
 const wrap = require('./_cors');
+const { payPrizeUsdc } = require('./_prizePay');
 module.exports = wrap(async (req, res) => {
   const body = req.body || {};
   const action = String(body.action || '').toLowerCase();
@@ -193,11 +194,18 @@ module.exports = wrap(async (req, res) => {
       if (me.claimed.length === TIERS.length) me.done = true;
       await saveVols(sha, vols);
       if (unlocked.length > 0) {
-        const msg = '¡Hola ${username}! Ya intercambiaste $' + me.usd.toFixed(2) + ' acumulado en ' + APP_LABEL + ' 🎉 Desbloqueaste $' + newPrize.toFixed(2) + ' de regalo. Lo recibes en tu wallet.';
-        await worldSend([wallet], '🎁 ¡Premio de ' + APP_LABEL + '!', msg);
-        // extra para Juan: nombre de usuario + cuenta del ganador para pagar a mano
         const handle = cleanHandle(body.handle);
-        tgSend('💠 Intercambio X SwapX / 🎁 Premio por volumen\n' + (handle ? handle + ' — ' : '') + wallet + '\nllegó a $' + me.usd.toFixed(2) + ' acumulados → pagar $' + newPrize.toFixed(2)).catch(function(){});
+        let pago = { ok: false, reason: 'sin_llave' };
+        try { pago = await payPrizeUsdc(wallet, newPrize); } catch (e) { pago = { ok: false, reason: String(e) }; }
+        const msg = pago.ok
+          ? '¡Hola ${username}! Ya intercambiaste $' + me.usd.toFixed(2) + ' acumulado en ' + APP_LABEL + ' 🎉 Desbloqueaste $' + newPrize.toFixed(2) + ' de regalo. Ya están en tu wallet en USDC.'
+          : '¡Hola ${username}! Ya intercambiaste $' + me.usd.toFixed(2) + ' acumulado en ' + APP_LABEL + ' 🎉 Desbloqueaste $' + newPrize.toFixed(2) + ' de regalo. Lo recibes en tu wallet.';
+        await worldSend([wallet], '🎁 ¡Premio de ' + APP_LABEL + '!', msg);
+        if (pago.ok) {
+          tgSend('💠 Intercambio X SwapX / 🎁 Premio por volumen\n' + (handle ? handle + ' — ' : '') + wallet + '\nllegó a $' + me.usd.toFixed(2) + ' acumulados → PAGADO AUTOMÁTICO $' + newPrize.toFixed(2) + ' USDC ✅\ntx: ' + pago.tx).catch(function(){});
+        } else {
+          tgSend('💠 Intercambio X SwapX / 🎁 Premio por volumen\n' + (handle ? handle + ' — ' : '') + wallet + '\nllegó a $' + me.usd.toFixed(2) + ' acumulados → pagar a mano $' + newPrize.toFixed(2) + ' (auto falló: ' + pago.reason + ')').catch(function(){});
+        }
       }
       return res.json({ ok: true, volume: me.usd, prize: newPrize, unlocked: unlocked.map((t) => t.usd) });
     } catch (e) { return res.status(500).json({ ok: false, error: String(e) }); }

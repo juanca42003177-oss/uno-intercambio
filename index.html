@@ -209,12 +209,20 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
   </div>
 </div>
 
+<div id="hist" style="display:none">
+  <button onclick="go('home')" class="btnY" style="background:#eee;color:#222;margin-bottom:12px">← Volver</button>
+  <h3>📜 Historial de movimientos</h3>
+  <div class="small" style="margin-bottom:10px">Tus acciones en esta app quedan aquí: intercambios, envíos, bóvedas y premios. Se guardan solo en tu teléfono, por wallet.</div>
+  <div id="histList"></div>
+</div>
+
 <div class="nav">
   <div id="navHome" class="active" onclick="go('home')">🏠</div>
   <div onclick="go('swap')">⇆</div>
   <div onclick="go('alerts')">🔔</div>
   <div onclick="go('earn')">💰</div>
   <div style="background:#ff3ab2;color:#fff" onclick="go('recv')">↓</div>
+  <div onclick="go('hist')">📜</div>
 </div>
 
 <div id="prizeModal" class="modal" onclick="if(event.target===this)this.style.display='none'">
@@ -397,7 +405,10 @@ async function sendTelegramNotification(montoUsd, kind, extra) {
       fetch(await apiEndpoint('worldNotify'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'prize', wallet: currentAccount, usd: montoUsd, handle: currentUserHandle || '' })
-      }).catch(function(){}).then(function(){ updatePrizeProgress(); });
+      }).then(function(r){ return r && r.json ? r.json() : null; }).catch(function(){ return null; }).then(function(j){
+        try { if (j && j.prize > 0) histAdd('🎁 Premio', 'Recibiste $' + Number(j.prize).toFixed(2) + ' USDC por volumen acumulado (total: $' + Number(j.volume).toFixed(2) + ')'); } catch (e) {}
+        updatePrizeProgress();
+      });
     } catch (e) {}
   }
 }
@@ -487,13 +498,44 @@ function tokenIconHTML(t, sym) {
     : '');
 }
 
+
+// ---- Historial local de movimientos (por wallet, en este dispositivo) ----
+function histKey() { return 'dtHist_' + (currentAccount || 'anon'); }
+function histAdd(type, text, txHash) {
+  try {
+    var list = JSON.parse(localStorage.getItem(histKey()) || '[]');
+    list.unshift({ t: Date.now(), type: type, text: text, tx: txHash || null });
+    if (list.length > 100) list = list.slice(0, 100);
+    localStorage.setItem(histKey(), JSON.stringify(list));
+  } catch (e) {}
+}
+function renderHist() {
+  var el = document.getElementById('histList');
+  if (!el) return;
+  if (!currentAccount) { el.innerHTML = '<div class="small">Conecta tu wallet para ver tu historial.</div>'; return; }
+  var list = [];
+  try { list = JSON.parse(localStorage.getItem(histKey()) || '[]'); } catch (e) {}
+  if (!list.length) { el.innerHTML = '<div class="small">Aún no hay movimientos. Cada swap, envío, depósito, apuesta, partida o premio quedará registrado aquí.</div>'; return; }
+  var html = '';
+  list.forEach(function (h) {
+    var d = new Date(h.t);
+    var fecha = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    html += '<div style="border:1px solid #ddd;border-radius:10px;padding:10px;margin:8px 0">'
+      + '<div style="display:flex;justify-content:space-between;gap:8px"><b>' + h.type + '</b><span class="small">' + fecha + '</span></div>'
+      + '<div class="small">' + h.text + '</div>'
+      + (h.tx ? '<a href="https://worldscan.org/tx/' + h.tx + '" target="_blank" rel="noopener" class="small" style="color:#7ab8ff">Ver en blockchain ↗</a>' : '')
+      + '</div>';
+  });
+  el.innerHTML = html;
+}
 function go(page) {
-  ['home','swap','earn','send','recv','tokenDetail','alerts'].forEach(function(p) {
+  ['home','swap','earn','send','recv','tokenDetail','alerts','hist'].forEach(function(p) {
     var el = document.getElementById(p);
     if (el) el.style.display = (p === page) ? 'block' : 'none';
   });
   document.querySelectorAll('.nav div').forEach(function(d) { d.classList.remove('active'); });
   if (page === 'home') document.getElementById('navHome').classList.add('active');
+  if (page === 'hist') renderHist();
   if (page === 'recv' && currentAccount) {
     document.getElementById('recvAddr').innerText = currentAccount;
     document.getElementById('qrImg').src = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(currentAccount);
@@ -1125,6 +1167,7 @@ async function doSwap() {
 
     if (result && result.data && result.data.userOpHash) {
       showOk('¡Intercambio completado!', '✅');
+      histAdd('⇆ Intercambio', 'Cambió ' + amount + ' ' + fromSym + ' → ' + toSym + ' (≈ $' + usdAmount + ')');
       var feeVal = Number(feeAmount) / Math.pow(10, CONTRACTS[fromSym].decimals);
       var feeUsdV = Number(usdAmount) * Number(feeBps) / 10000;
       var feeStr = (feeVal >= 1 ? feeVal.toFixed(2) : feeVal.toPrecision(3)) + ' ' + fromSym + ' (≈$' + feeUsdV.toFixed(2) + ')';
@@ -1179,6 +1222,7 @@ async function doSend() {
     });
     if (result && result.data && result.data.userOpHash) {
       showOk('¡Envío realizado!');
+      histAdd('↗ Envío', 'Envió ' + amount + ' ' + sym + ' a ' + String(toAddr).slice(0, 8) + '...');
       fastRefreshAfterTx();
     } else {
       showOk('Envío cancelado', '❌');
@@ -1433,6 +1477,7 @@ async function doFlexDeposit(id) {
     var result = await MiniKit.sendTransaction({ chainId: 480, transactions: txs });
     if (result && result.data && result.data.userOpHash) {
       showOk('¡Depósito realizado! Retirá cuando quieras, sin bloqueo.', '✅');
+      histAdd('🏦 Bóveda', 'Depósito realizado en la bóveda.');
       var depUsd = amount * (prices[v.symA] || 0);
       sendTelegramNotification(depUsd, 'vault', v.name);
       fastRefreshAfterTx();
@@ -1458,6 +1503,7 @@ async function doFlexWithdraw(id, idx) {
     });
     if (result && result.data && result.data.userOpHash) {
       showOk('¡Retiro realizado!', '✅');
+      histAdd('🏦 Bóveda', 'Retiro realizado de la bóveda.');
       // BUG corregido 2026-09-28: el retiro nunca avisaba por Telegram (solo
       // el deposito lo hacia). Se usa el monto originalmente depositado
       // (principalA) al precio actual como aproximacion del retiro, ya que

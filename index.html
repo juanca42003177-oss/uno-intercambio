@@ -134,6 +134,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
       <input id="sendTo" type="text" placeholder="0x..." style="font-size:14px;margin:8px 0;background:#fff;border:1px solid #ddd;border-radius:10px;padding:10px">
       <div class="small">Cantidad</div>
       <input id="sendAmount" type="number" placeholder="0.0" style="font-size:16px;margin:8px 0;background:#fff;border:1px solid #ddd;border-radius:10px;padding:10px">
+      <div style="display:flex;gap:6px;margin:8px 0"><button type="button" id="sendPct25" onclick="sendPct(25)" style="flex:1;background:#fff;border:1px solid #ddd;border-radius:10px;padding:7px 0;font-size:13px;cursor:pointer">25%</button><button type="button" id="sendPct50" onclick="sendPct(50)" style="flex:1;background:#fff;border:1px solid #ddd;border-radius:10px;padding:7px 0;font-size:13px;cursor:pointer">50%</button><button type="button" id="sendPct75" onclick="sendPct(75)" style="flex:1;background:#fff;border:1px solid #ddd;border-radius:10px;padding:7px 0;font-size:13px;cursor:pointer">75%</button><button type="button" id="sendPct100" onclick="sendPct(100)" style="flex:1;background:#fff;border:1px solid #ddd;border-radius:10px;padding:7px 0;font-size:13px;cursor:pointer">100%</button></div>
       <div class="small">Saldo: <span id="sendBal">0</span></div>
     </div>
     <button class="btnY" onclick="doSend()">Enviar ahora</button>
@@ -796,6 +797,14 @@ function fillSendSelect() {
   document.getElementById('sendToken').value = cur;
 }
 
+function sendPct(p) {
+  var sym = document.getElementById('sendToken').value;
+  var bal = balances[sym] || 0;
+  if (sym === 'ETH') bal = balances.ETH || balances.WETH || 0;
+  var amt = Math.floor(bal * p) / 100;
+  amt = Number(amt.toFixed(6));
+  document.getElementById('sendAmount').value = amt > 0 ? amt : '';
+}
 function updateSendBal() {
   var sym = document.getElementById('sendToken').value;
   var bal = balances[sym] || 0;

@@ -260,7 +260,14 @@ function weekKeyOf(ms) {
   }
 
   // ---- racha: reclamar el dia ----
-  if (action === 'streakClaim') {
+  if (action === 'prizetest') {
+    try {
+      const { prizeWalletAddress } = require('./_prizePay');
+      const addr = await prizeWalletAddress();
+      return res.json({ ok: true, wallet_premios: addr });
+    } catch (e) { return res.json({ ok: false, error: String(e && e.message ? e.message : e) }); }
+  }
+  if (action === 'streakclaim') {
     const wallet = String(body.wallet || '').toLowerCase();
     if (!isWallet(wallet)) return res.status(400).json({ ok: false, error: 'wallet invalida' });
     try {

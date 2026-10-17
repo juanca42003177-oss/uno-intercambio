@@ -430,6 +430,44 @@ async function sendTelegramNotification(montoUsd, kind, extra) {
 }
 
 // ---------- racha diaria ----------
+function fmtCd(ms) {
+  var m = Math.max(0, Math.floor(ms / 60000));
+  var d = Math.floor(m / 1440); m = m % 1440;
+  var hh = Math.floor(m / 60); var mm = m % 60;
+  if (d > 0) return d + 'd ' + hh + 'h';
+  if (hh > 0) return hh + 'h ' + mm + 'm';
+  return mm + 'm';
+}
+function nextClaimAt() { // medianoche UTC = cuando el servidor abre el reclamo del nuevo dia
+  var n = new Date();
+  return Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate() + 1);
+}
+function nextDrawAt() { // lunes 00:00 UTC = domingo 18:00 GT, cuando arranca el reparto semanal
+  var n = new Date();
+  var days = ((1 - n.getUTCDay()) + 7) % 7;
+  if (days === 0 && n.getUTCHours() >= 6) days = 7;
+  return Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate() + days);
+}
+function renderStreakText() {
+  var st = window.__streakState;
+  var txt = document.getElementById('streakText');
+  var btn = document.getElementById('streakBtn');
+  if (!st || !txt || !btn) return;
+  var claimCd = fmtCd(nextClaimAt() - Date.now());
+  var drawCd = fmtCd(nextDrawAt() - Date.now());
+  if (st.canClaim) {
+    txt.innerHTML = 'Tu racha: <b>' + st.streak + ' día' + (st.streak === 1 ? '' : 's') + '</b>. Rachas largas dan más tickets. 🎟 Pozo semanal se reparte en <b>' + drawCd + '</b>.';
+    btn.disabled = false;
+    btn.style.opacity = 1;
+    btn.innerText = '🔥 Reclamar hoy' + (st.streak > 0 ? ' (día ' + (st.streak + 1) + ')' : '');
+  } else {
+    txt.innerHTML = 'Racha: <b>' + st.streak + ' día' + (st.streak === 1 ? '' : 's') + '</b> (récord: ' + st.best + '). ✅ Reclamado hoy — próximo reclamo en <b>' + claimCd + '</b>. 🎟 Pozo se reparte en <b>' + drawCd + '</b>.';
+    btn.disabled = true;
+    btn.style.opacity = .55;
+    btn.innerText = '✅ Reclamado hoy';
+  }
+}
+setInterval(renderStreakText, 60000);
 async function loadStreakCard() {
   var card = document.getElementById('streakCard');
   if (!card) return;
@@ -445,17 +483,8 @@ async function loadStreakCard() {
     var txt = document.getElementById('streakText');
     var btn = document.getElementById('streakBtn');
     document.getElementById('streakTickets').innerText = j.ticketsThisWeek > 0 ? ('🎟 ' + j.ticketsThisWeek + ' ticket' + (j.ticketsThisWeek > 1 ? 's' : '') + ' esta semana') : '';
-    if (j.canClaim) {
-      txt.innerText = 'Tu racha: ' + j.streak + ' día' + (j.streak === 1 ? '' : 's') + '. Entra cada día y reclama: rachas largas dan más tickets para el pozo semanal en USDC.';
-      btn.disabled = false;
-      btn.style.opacity = 1;
-      btn.innerText = '🔥 Reclamar hoy' + (j.streak > 0 ? ' (día ' + (j.streak + 1) + ')' : '');
-    } else {
-      txt.innerText = 'Racha actual: ' + j.streak + ' día' + (j.streak === 1 ? '' : 's') + ' (récord: ' + j.best + '). ¡Ya reclamaste hoy! Vuelve mañana para que no se rompa.';
-      btn.disabled = true;
-      btn.style.opacity = .55;
-      btn.innerText = '✅ Reclamado hoy';
-    }
+    window.__streakState = { canClaim: j.canClaim, streak: j.streak, best: j.best };
+    renderStreakText();
   } catch (e) { card.style.display = 'none'; }
 }
 async function claimStreak() {

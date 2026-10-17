@@ -206,10 +206,12 @@ async function maybeStreakDraw() {
   if (balance < 0) return; // RPC fallo: reintenta en el proximo tick
   let pot = Math.min(potTarget, balance);
   if (pot < 0.10) {
-    await tg('sendMessage', { chat_id: OFFICIAL_CHAT, text: ALERT_PREFIX + ' / 🔥 Racha semanal\nSin pozo esta semana: volumen $' + weeklyVolume.toFixed(2) + ', caja $' + balance.toFixed(2) + '. (Fase de lanzamiento: 60% de comisiones al pozo)' }).catch(function(){});
-    s.weeks[wk] = Object.assign({}, wkData, { done: true, pot: 0 });
-    s.lastVolSum = curSum;
-    await ghSave(STREAK_PATH, sha, s, 'streak: pozo insuficiente');
+    // no marcar done: si la caja se rellena durante la noche, el proximo tick paga esta misma semana
+    if (!wkData.warned) {
+      await tg('sendMessage', { chat_id: OFFICIAL_CHAT, text: ALERT_PREFIX + ' / 🔥 Racha semanal\nPozo de esta semana: $' + potTarget.toFixed(2) + ' USDC, pero la caja de premios tiene $' + balance.toFixed(2) + '.\nManda el faltante a la wallet de premios y el sistema reparte solo esta misma noche.' }).catch(function(){});
+    }
+    s.weeks[wk] = Object.assign({}, wkData, { warned: true, potTarget: potTarget });
+    await ghSave(STREAK_PATH, sha, s, 'streak: caja insuficiente, esperando fondos');
     return;
   }
   const tickets = wkData.tickets;

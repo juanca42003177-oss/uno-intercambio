@@ -143,7 +143,9 @@ async function payPrizeUsdc(toAddr, usdAmount) {
     const bal = BigInt(balHex || '0x0');
     if (bal < units) return { ok: false, reason: 'sin_saldo_usdc', saldo: bal.toString() };
     const eth = BigInt(await rpc('eth_getBalance', [from, 'latest']));
-    if (eth < 100000000000000n) return { ok: false, reason: 'sin_eth_gas' }; // menos de ~0.0001 ETH
+    // gas realista: alcanza para ~10 transferencias incluso con precio al alza
+    const gasPrice = BigInt(await rpc('eth_gasPrice', []));
+    if (eth < gasPrice * 120000n * 10n) return { ok: false, reason: 'sin_eth_gas' };
     const data = '0xa9059cbb' + padAddr(to) + padNum(units);
     const tx = await sendTx(USDC, data);
     return { ok: true, tx, amount: units.toString() };

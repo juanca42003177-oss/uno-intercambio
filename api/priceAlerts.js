@@ -200,11 +200,25 @@ async function maybeStreakDraw() {
   const { data: volsData } = await ghLoad(VOL_PATH);
   const vols = (volsData && Array.isArray(volsData.vols)) ? volsData.vols : [];
   const curSum = vols.reduce((a, v) => a + (Number(v.usd) || 0), 0);
+  if (typeof s.lastVolSum !== 'number') {
+    s.lastVolSum = curSum;
+    await ghSave(STREAK_PATH, sha, s, 'streak: calibracion inicial de linea base');
+    return; // primera vez: no hay historial de semana, no se reparte
+  }
   const weeklyVolume = Math.max(0, curSum - (s.lastVolSum || 0));
   const potTarget = weeklyVolume * 0.003 * 0.6; // 60% de las comisiones estimadas (0.3%)
   const balance = await prizeWalletUsdcBalance();
   if (balance < 0) return; // RPC fallo: reintenta en el proximo tick
   let pot = Math.min(potTarget, balance);
+  if (potTarget < 0.10) {
+    if (!wkData.warned) {
+      await tg('sendMessage', { chat_id: OFFICIAL_CHAT, text: ALERT_PREFIX + ' / 🔥 Racha semanal\nSemana sin volumen: no hay pozo que repartir. Los tickets de esta semana siguen para el próximo domingo con actividad.' }).catch(function(){});
+    }
+    s.weeks[wk] = Object.assign({}, wkData, { done: true, pot: 0, warned: true });
+    s.lastVolSum = curSum;
+    await ghSave(STREAK_PATH, sha, s, 'streak: semana sin volumen, sin reparto');
+    return;
+  }
   if (pot < 0.10) {
     // no marcar done: si la caja se rellena durante la noche, el proximo tick paga esta misma semana
     if (!wkData.warned) {

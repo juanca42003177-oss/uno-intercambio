@@ -214,7 +214,7 @@ function weekKeyOf(ms) {
       if (!me) { me = { wallet, usd: 0, claimed: [], at: Date.now() }; vols.push(me); }
       const before = me.usd || 0;
       me.usd = before + usd;
-      me.ts = Date.now();
+      if (usd >= 1) me.ts = Date.now();
       me.at = Date.now();
       if (!Array.isArray(me.claimed)) me.claimed = [];
       const unlocked = TIERS.filter((t) => before < t.usd && me.usd >= t.usd && !me.claimed.includes(t.usd));
@@ -274,7 +274,8 @@ function weekKeyOf(ms) {
     try {
       const [{ sha, s }, { vols }] = await Promise.all([loadStreak(), loadVols()]);
       const vol = vols.find((v) => v.wallet === wallet);
-      if (!vol || (vol.usd || 0) < 1 || !vol.ts || (Date.now() - vol.ts) > 604800000) return res.json({ ok: false, error: 'Para reclamar la racha necesitas un intercambio (mín $1) en los últimos 7 días.' });
+      const hoyTs = new Date(vol && vol.ts ? vol.ts : 0).toISOString().slice(0, 10);
+      if (!vol || (vol.usd || 0) < 1 || !vol.ts || hoyTs !== todayStr()) return res.json({ ok: false, error: 'Para reclamar el ticket de HOY necesitás intercambiar mínimo $1 HOY. Hacé tu intercambio y volvé a reclamar.' });
       const me = s.wallets[wallet] || {};
       const today = todayStr();
       if (me.lastClaim === today) return res.json({ ok: false, error: 'Ya reclamaste hoy. Vuelve mañana para no perder tu racha.' });

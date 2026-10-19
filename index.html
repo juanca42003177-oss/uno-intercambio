@@ -710,13 +710,31 @@ function dchPoints(sym, r, cb) {
         cb(fb);
       });
   } else {
-    var lh = sparkHist[sym] || [];
-    var fb2 = lh.map(function(x) { return [x.t, x.p]; });
-    if (sparks[sym] && sparks[sym].length > 2 && r !== '24H') {
-      fb2 = sparks[sym].map(function(p, i) { return [Date.now() - (sparks[sym].length - i) * 3600000, p]; });
-    }
-    DCH_DATA[k] = { pts: fb2, ts: Date.now() };
-    cb(fb2);
+    // moneda exotica: historial real grabado por el servidor cada 5 min
+    // (repo de datos) + historial local del celular, unidos y sin duplicados
+    var lh = (sparkHist[sym] || []).map(function(x) { return [x.t, x.p]; });
+    var srvCache = DCH_DATA['srv|' + sym];
+    var fetchSrv = srvCache && Date.now() - srvCache.ts < 240000
+      ? Promise.resolve({ hist: srvCache.pts })
+      : apiEndpoint('getSparkHistory').then(function(u) {
+          return fetch(u + '?sym=' + encodeURIComponent(sym) + '&x=' + Date.now()).then(function(res) { return res.json(); });
+        });
+    fetchSrv.then(function(j) {
+      var srv = (j && j.hist ? j.hist : []).map(function(x) { return [x[0], x[1]]; });
+      if (srv.length > 1) DCH_DATA['srv|' + sym] = { pts: srv, ts: Date.now() };
+      var cut = r === '24H' ? Date.now() - 86400000 : (r === '7D' ? Date.now() - 604800000 : 0);
+      var seen = {}, out = [];
+      srv.concat(lh).sort(function(a, b) { return a[0] - b[0]; }).forEach(function(p) {
+        if (p[0] < cut) return;
+        var key = Math.round(p[0] / 10000);
+        if (seen[key]) return;
+        seen[key] = 1;
+        out.push(p);
+      });
+      if (out.length > 1) { DCH_DATA[k] = { pts: out, ts: Date.now() }; cb(out); }
+      else if (lh.length > 1) { cb(lh); }
+      else { DCH_DATA[k] = { pts: [], ts: Date.now() }; cb([]); }
+    }).catch(function() { cb(lh); });
   }
 }
 function dchPaint(cv, pts, cur) {

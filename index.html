@@ -886,7 +886,8 @@ function renderTokenList() {
     html += '<div class="tok" onclick="openToken(\'' + sym + '\')">' +
       '<div style="display:flex;gap:12px;align-items:center">' +
         '<div class="tIcon" style="background:' + t.color + '">' + tokenIconHTML(t, sym) + '</div>' +
-        '<div><b>' + sym + '</b><div class="small">' + formatCrypto(bal) + ' ' + sym + '</div></div>' +
+        '<div style="flex:1"><b>' + sym + '</b><div class="small">' + formatCrypto(bal) + ' ' + sym + '</div></div>' +
+        '<canvas class="sparkc" data-sym="' + sym + '" width="132" height="44" style="width:66px;height:22px;opacity:.9"></canvas>' +
       '</div>' +
       '<div style="text-align:right">' +
         '<b>$' + usd.toFixed(2) + '</b>' +
@@ -895,6 +896,32 @@ function renderTokenList() {
     '</div>';
   });
   document.getElementById('tokenList').innerHTML = html;
+  drawSparks();
+}
+
+function drawSparks() {
+  var cs = document.querySelectorAll('.sparkc');
+  for (var i = 0; i < cs.length; i++) {
+    var c = cs[i]; if (!c) continue;
+    var sym = c.getAttribute('data-sym');
+    var raw = sparks[sym] || sparkHist[sym] || [];
+    var data = [];
+    for (var k = 0; k < raw.length; k++) data.push(typeof raw[k] === 'object' ? raw[k].p : raw[k]);
+    if (data.length < 2) continue;
+    var ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, c.width, c.height);
+    var min = Math.min.apply(null, data), max = Math.max.apply(null, data);
+    if (max === min) max = min + 1e-9;
+    var up = data[data.length - 1] >= data[0];
+    ctx.strokeStyle = up ? '#16a34a' : '#dc2626';
+    ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.beginPath();
+    for (var j2 = 0; j2 < data.length; j2++) {
+      var x = (j2 / (data.length - 1)) * (c.width - 6) + 3;
+      var y = c.height - 5 - ((data[j2] - min) / (max - min)) * (c.height - 10);
+      if (j2 === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
 }
 
 function fillSelects() {
@@ -1333,6 +1360,9 @@ function copyAddr() {
 }
 
 var lastPricesFetch = 0;
+var sparks = {};
+var sparkHist = {};
+try { sparkHist = JSON.parse(localStorage.getItem('sparkHist') || '{}'); } catch (e) {}
 async function fetchLivePrices() {
   if (document.hidden) return;
   lastPricesFetch = Date.now();
@@ -1355,6 +1385,22 @@ async function fetchLivePrices() {
       for (var sym in data.changes) changes[sym] = data.changes[sym];
       if (changes.ETH !== undefined) changes.WETH = changes.ETH;
     }
+    if (data && data.spark) { for (var sp in data.spark) sparks[sp] = data.spark[sp]; }
+    try {
+      var lh = JSON.parse(localStorage.getItem('sparkHist') || '{}');
+      var nowT = Date.now();
+      for (var s3 in prices) {
+        var p3 = prices[s3]; if (!p3) continue;
+        var arr3 = lh[s3] || [];
+        if (!arr3.length || nowT - arr3[arr3.length - 1].t > 300000) {
+          arr3.push({ t: nowT, p: p3 });
+          if (arr3.length > 96) arr3.shift();
+          lh[s3] = arr3;
+        }
+      }
+      localStorage.setItem('sparkHist', JSON.stringify(lh));
+      sparkHist = lh;
+    } catch (e) {}
   } catch (e) {
     console.error('Error obteniendo precios:', e);
   }

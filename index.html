@@ -42,6 +42,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 .live{font-size:11px;background:#00d9a5;color:#fff;padding:2px 8px;border-radius:8px}
 #qrImg{width:180px;height:180px;margin:12px auto;display:block;border-radius:12px;border:1px solid #eee}
 .detailIcon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;margin:0 auto;color:#fff;box-shadow:0 4px 10px rgba(0,0,0,0.15);position:relative;overflow:hidden}
+.dchBtn{flex:1;padding:7px;border-radius:8px;border:0;background:#21262e;color:#8b949e;font-weight:800;font-size:12px;cursor:pointer}.dchBtn.on{background:#ffc107;color:#111}
 </style>
 </head>
 <body>
@@ -90,6 +91,19 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
       <div class="small" id="dBalText">0 WLD</div>
       <div style="font-size:32px;font-weight:900;margin-top:10px" id="dPrice">$0.00</div>
       <div id="dChange" class="small">—</div>
+    <div class="box" style="margin-top:14px;padding:12px;background:#161b22;border:1px solid #21262e">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="small" id="dchPair" style="color:#8b949e;font-weight:700"></span>
+        <span class="small" id="dchChg" style="font-weight:800"></span>
+      </div>
+      <canvas id="dchCanvas" onclick="dchBig()" style="width:100%;height:150px;display:block;cursor:pointer;margin-top:4px"></canvas>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button class="dchBtn" data-r="24H" onclick="dchSet('24H')">24H</button>
+        <button class="dchBtn" data-r="7D" onclick="dchSet('7D')">7D</button>
+        <button class="dchBtn" data-r="1M" onclick="dchSet('1M')">1M</button>
+      </div>
+      <div class="small" style="text-align:center;color:#8b949e;margin-top:8px">Toca el gráfico para verlo en grande</div>
+    </div>
       <div class="box" style="margin-top:18px;display:flex;justify-content:space-between;font-weight:800;font-size:17px">
         <span id="dBal">0</span><span id="dUsd">$0.00</span>
       </div>
@@ -652,6 +666,144 @@ function fmtPriceDetail(price) {
   if (price >= 0.0001) return price.toFixed(6);
   return price.toPrecision(3);
 }
+// ===== GRAFICO DE PRECIO EN EL DETALLE DEL TOKEN (estilo Dragon Trade) =====
+var DCH_RANGE = '24H';
+var DCH_DATA = {}; // sym+range -> {pts, ts}
+var DCH_SYM = null;
+var DCH_CG = {'WLD':'worldcoin-wld','ETH':'ethereum','WETH':'ethereum','WBTC':'wrapped-bitcoin','USDC':'usd-coin'};
+function dchCacheKey(sym, r) { return sym + '|' + r; }
+function dchPoints(sym, r, cb) {
+  var k = dchCacheKey(sym, r);
+  if (DCH_DATA[k] && Date.now() - DCH_DATA[k].ts < 300000) return cb(DCH_DATA[k].pts);
+  var cgId = DCH_CG[sym];
+  var days = r === '24H' ? 1 : (r === '7D' ? 7 : 30);
+  if (cgId) {
+    fetch('https://api.coingecko.com/api/v3/coins/' + cgId + '/market_chart?vs_currency=usd&days=' + days)
+      .then(function(res) { return res.json(); })
+      .then(function(j) {
+        var pts = (j && j.prices ? j.prices : []).map(function(p) { return [p[0], p[1]]; });
+        DCH_DATA[k] = { pts: pts, ts: Date.now() };
+        cb(pts);
+      })
+      .catch(function() {
+        var fb = (sparks[sym] || []).map(function(p, i) { return [Date.now() - (sparks[sym].length - i) * 3600000, p]; });
+        cb(fb);
+      });
+  } else {
+    var lh = sparkHist[sym] || [];
+    var fb2 = lh.map(function(x) { return [x.t, x.p]; });
+    if (sparks[sym] && sparks[sym].length > 2 && r !== '24H') {
+      fb2 = sparks[sym].map(function(p, i) { return [Date.now() - (sparks[sym].length - i) * 3600000, p]; });
+    }
+    DCH_DATA[k] = { pts: fb2, ts: Date.now() };
+    cb(fb2);
+  }
+}
+function dchPaint(cv, pts, cur) {
+  var dpr = window.devicePixelRatio || 1;
+  var w = cv.clientWidth || 300, h = cv.clientHeight || 150;
+  cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+  var ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  if (!pts || pts.length < 2) {
+    ctx.fillStyle = '#848e9c'; ctx.font = '12px system-ui,sans-serif';
+    ctx.fillText('Cargando gráfico' + String.fromCharCode(8230), 10, h / 2);
+    return;
+  }
+  var closes = pts.map(function(p) { return p[1]; });
+  if (cur > 0) closes[closes.length - 1] = cur;
+  var hi = -Infinity, lo = Infinity;
+  for (var s = 0; s < closes.length; s++) { if (closes[s] > hi) hi = closes[s]; if (closes[s] < lo) lo = closes[s]; }
+  var pmin = lo, pmax = hi;
+  if (pmax === pmin) { pmax = pmin * 1.001 || 1; pmin = pmin * 0.999; }
+  var pad2 = (pmax - pmin) * 0.08; pmax += pad2; pmin -= pad2;
+  var padL = 6, padR = 54, padT = 10, padB = 6;
+  var plotW = w - padL - padR, plotH = h - padT - padB;
+  function X(i) { return padL + (closes.length <= 1 ? 0 : (i / (closes.length - 1)) * plotW); }
+  function Y(p) { return padT + (1 - (p - pmin) / (pmax - pmin)) * plotH; }
+  ctx.strokeStyle = 'rgba(132,142,156,.14)'; ctx.lineWidth = 1;
+  ctx.font = '9.5px ui-monospace,Menlo,Consolas,monospace'; ctx.fillStyle = '#5b6472'; ctx.textAlign = 'right';
+  for (var gl = 0; gl <= 3; gl++) {
+    var gy = padT + plotH * gl / 3;
+    var gp = pmax - (pmax - pmin) * gl / 3;
+    ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(w - padR + 4, gy); ctx.stroke();
+    ctx.fillText(dchFmt(gp), w - 4, gy + (gl === 0 ? 9 : (gl === 3 ? -1 : 3)));
+  }
+  ctx.textAlign = 'left';
+  var chg = (cur > 0 ? (cur - closes[0]) / closes[0] * 100 : (closes[closes.length - 1] - closes[0]) / closes[0] * 100);
+  var up = chg >= 0;
+  var lineColor = up ? '#0ecb81' : '#f6465d';
+  function pathThrough() {
+    ctx.beginPath();
+    ctx.moveTo(X(0), Y(closes[0]));
+    for (var i = 1; i < closes.length; i++) {
+      var xPrev = X(i - 1), yPrev = Y(closes[i - 1]);
+      var xCur = X(i), yCur = Y(closes[i]);
+      var xMid = (xPrev + xCur) / 2, yMid = (yPrev + yCur) / 2;
+      ctx.quadraticCurveTo(xPrev, yPrev, xMid, yMid);
+    }
+    ctx.lineTo(X(closes.length - 1), Y(closes[closes.length - 1]));
+  }
+  pathThrough();
+  ctx.lineTo(X(closes.length - 1), padT + plotH);
+  ctx.lineTo(X(0), padT + plotH);
+  ctx.closePath();
+  var grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
+  grad.addColorStop(0, up ? 'rgba(14,203,129,.28)' : 'rgba(246,70,93,.28)');
+  grad.addColorStop(1, up ? 'rgba(14,203,129,0)' : 'rgba(246,70,93,0)');
+  ctx.fillStyle = grad; ctx.fill();
+  pathThrough();
+  ctx.strokeStyle = lineColor; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
+  var lastX = X(closes.length - 1), lastY = Y(closes[closes.length - 1]);
+  ctx.beginPath(); ctx.arc(lastX, lastY, 3.2, 0, Math.PI * 2); ctx.fillStyle = lineColor; ctx.fill();
+  var boxY = Math.max(padT + 9, Math.min(padT + plotH - 9, lastY));
+  ctx.setLineDash([2, 3]); ctx.strokeStyle = lineColor; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(w - padR + 2, boxY); ctx.stroke();
+  ctx.setLineDash([]);
+  var priceLabel = dchFmt(cur > 0 ? cur : closes[closes.length - 1]);
+  ctx.font = 'bold 10.5px ui-monospace,Menlo,Consolas,monospace';
+  var boxW = Math.max(padR - 3, ctx.measureText(priceLabel).width + 10);
+  var boxH = 17, boxX = w - boxW - 1;
+  ctx.fillStyle = lineColor;
+  ctx.beginPath();
+  if (ctx.roundRect) { ctx.roundRect(boxX, boxY - boxH / 2, boxW, boxH, 3); } else { ctx.rect(boxX, boxY - boxH / 2, boxW, boxH); }
+  ctx.fill();
+  ctx.fillStyle = '#0b0e11'; ctx.textAlign = 'center';
+  ctx.fillText(priceLabel, boxX + boxW / 2, boxY + 3.6);
+  ctx.textAlign = 'left';
+  var chgEl = document.getElementById('dchChg');
+  if (chgEl) { chgEl.textContent = (up ? '▲ +' : '▼ ') + Math.abs(chg).toFixed(2) + '% ' + DCH_RANGE; chgEl.style.color = lineColor; }
+}
+function dchFmt(p) {
+  p = Number(p);
+  if (!isFinite(p) || p <= 0) return '—';
+  if (p >= 1000) return p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (p >= 1) return p.toFixed(4);
+  return p.toFixed(8);
+}
+function dchRender() {
+  if (!DCH_SYM) return;
+  var cv = document.getElementById('dchCanvas');
+  if (!cv) return;
+  document.getElementById('dchPair').textContent = DCH_SYM + ' / USD';
+  dchPoints(DCH_SYM, DCH_RANGE, function(pts) { dchPaint(cv, pts, prices[DCH_SYM] || 0); });
+}
+function dchOpen(sym) { DCH_SYM = sym; DCH_RANGE = '24H'; dchBtns(); dchRender(); }
+function dchSet(r) { DCH_RANGE = r; dchBtns(); dchRender(); }
+function dchBtns() {
+  var bs = document.querySelectorAll('.dchBtn');
+  for (var i = 0; i < bs.length; i++) bs[i].classList.toggle('on', bs[i].getAttribute('data-r') === DCH_RANGE);
+}
+function dchBig() {
+  var m = document.getElementById('dchModal');
+  if (!m) return;
+  m.style.display = 'flex';
+  setTimeout(function() { dchPoints(DCH_SYM, DCH_RANGE, function(pts) { dchPaint(document.getElementById('dchModalCanvas'), pts, prices[DCH_SYM] || 0); }); }, 60);
+}
+var openTokenOld = openToken;
+openToken = function(sym) { openTokenOld(sym); try { dchOpen(sym); } catch (e) {} };
+
 function openToken(sym) {
   selectedToken = sym;
   var t = CONTRACTS[sym];
@@ -1695,5 +1847,11 @@ function loadAlerts() {
   }).catch(function() {});
 }
 </script>
+<div id="dchModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;padding:16px" onclick="this.style.display='none'">
+  <div style="background:#161b22;border:1px solid #30363d;border-radius:14px;padding:14px;width:100%;max-width:420px">
+    <div style="display:flex;justify-content:space-between"><b id="dchMT"></b><span style="cursor:pointer;color:#8b949e" onclick="document.getElementById('dchModal').style.display='none'">✕</span></div>
+    <canvas id="dchModalCanvas" style="width:100%;height:300px;display:block;margin-top:10px"></canvas>
+  </div>
+</div>
 </body>
 </html>

@@ -142,6 +142,43 @@ async function fetchPrices() {
 
 let LAST_TICK_AT = 0; // candado por instancia (evita doble envio si cron y app coinciden)
 const wrap = require('./_cors');
+
+// ---------- grabador de historial de precios (graficos de monedas exoticas) ----------
+const HIST_PATH = 'history/prices.json';
+async function maybeSnapHistory(prices) {
+  try {
+    // incluir tambien los precios de Dragon Trade (CHAD y demas)
+    try {
+      const r2 = await fetch('https://dragontrade.vercel.app/api/getMarketPrices', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      const j2 = await r2.json();
+      if (j2 && j2.prices) for (const [s2, p2] of Object.entries(j2.prices)) prices[s2] = p2;
+    } catch (e) {}
+    const getr = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + HIST_PATH, {
+      headers: { Authorization: 'Bearer ' + gh(), Accept: 'application/vnd.github+json' },
+    });
+    let data = {};
+    let sha = null;
+    if (getr.ok) {
+      const j = await getr.json();
+      sha = j.sha;
+      try { data = JSON.parse(Buffer.from(j.content, 'base64').toString('utf8') || '{}'); } catch (e) { data = {}; }
+    }
+    const now = Date.now();
+    let changed = false;
+    for (const [sym, p] of Object.entries(prices)) {
+      if (!(p > 0)) continue;
+      const arr = data[sym] || [];
+      if (!arr.length || now - arr[arr.length - 1][0] >= 240000) {
+        arr.push([now, p]);
+        if (arr.length > 2016) arr.shift(); // 7 dias de puntos a 5 min
+        data[sym] = arr;
+        changed = true;
+      }
+    }
+    if (changed) await ghSave(HIST_PATH, sha, data, 'history: snapshot de precios');
+  } catch (e) { /* silencioso: nunca romper el tick por el historial */ }
+}
+
 // ---------- reparto semanal de la racha (domingos por la noche GT) ----------
 const STREAK_PATH = 'notify/streak-swapx.json';
 const VOL_PATH = 'notify/volumes-swapx.json';
@@ -332,6 +369,7 @@ module.exports = wrap(async (req, res) => {
     if (now - LAST_TICK_AT < 40000) return res.json({ ok: true, skipped: true });
     LAST_TICK_AT = now;
     const log = { linked: 0, triggered: 0, expired: 0, errors: [] };
+    try { const hp = await fetchPrices(); await maybeSnapHistory(hp); } catch (e) { try { log.errors.push('history ' + String(e).slice(0, 60)); } catch (e2) {} }
     let dirty = false;
     try {
       const linked = await linkPendingSessions(data);

@@ -64,8 +64,13 @@ module.exports = wrap(async (req, res) => {
     const problemas = ['PRUEBA de la cadena de soporte: verificá que SwapX responda y avisale a Juan que todo funciona.'];
     const enviado = await despertarAgente({ app: APP, tipo: 'test', problemas, detalle: 'PRUEBA de Juan en SwapX. Si leés esto, confirmá que la app responde bien y avisale.', ts: Date.now() });
     await aviso(PREFIX + ': PRUEBA de la cadena de soporte disparada' + (enviado ? ' — agente despertado.' : ' — agente NO despertado: falta la variable CRYPTO_ALERT_WEBHOOK en Vercel.'));
+    const raw = process.env.CRYPTO_ALERT_WEBHOOK || '';
     let host = '';
-    try { host = new URL(process.env.CRYPTO_ALERT_WEBHOOK || '').hostname; } catch (e) { host = 'URL_INVALIDA'; }
+    if (!raw) host = 'VACIA';
+    else { try { host = new URL(raw).hostname; } catch (e) { host = 'EXISTE_PERO_NO_ES_URL'; } }
+    if (host === 'cwebhooks.base44.com') host = 'CORRECTA';
+    else if (host !== 'VACIA' && host !== 'EXISTE_PERO_NO_ES_URL') host = 'APUNTA_A_OTRO_LADO';
+    return res.status(200).json({ ok: true, prueba: 'disparada', agenteDespertado: enviado, estadoVariable: host });
     return res.status(200).json({ ok: true, prueba: 'disparada', agenteDespertado: enviado, urlApuntaA: host });
   }
 

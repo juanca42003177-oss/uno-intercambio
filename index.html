@@ -184,7 +184,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
       <div id="myVaultDepositsList"></div>
     </div>
     <p class="small" style="text-align:center;margin:18px 0 10px">Trading de predicciones, disponible en nuestra segunda app</p>
-    <a href="https://world.org/mini-app?app_id=app_d0a270229b8199adb79b64d5c7aa7c0f&path=%2F" target="_top" onclick="window.location.href='https://world.org/mini-app?app_id=app_d0a270229b8199adb79b64d5c7aa7c0f&path=%2F';return false;" style="display:flex;align-items:center;gap:12px;background:#111;border:2px solid #f0b90b;border-radius:16px;padding:16px;text-decoration:none;margin:0 4px">
+    <a href="https://world.org/mini-app?app_id=app_91fc57acb47e001429f888794210c9f6&path=%2F" target="_top" onclick="window.location.href='https://world.org/mini-app?app_id=app_91fc57acb47e001429f888794210c9f6&path=%2F';return false;" style="display:flex;align-items:center;gap:12px;background:#111;border:2px solid #f0b90b;border-radius:16px;padding:16px;text-decoration:none;margin:0 4px">
       <img src="logos/app-logo.png" alt="Intercambio X SwapX" style="width:52px;height:52px;border-radius:50%;flex-shrink:0">
       <div style="flex:1">
         <b style="color:#f0b90b;font-size:16px">🐉 Dragon Trade</b>
@@ -893,7 +893,7 @@ async function resolveUsername(address) {
 async function connectWallet() {
   try {
     if (!window.MiniKit) return showOk('Abre dentro de World App', '⚠️');
-    MiniKit.install({ appId: 'app_d0a270229b8199adb79b64d5c7aa7c0f' });
+    MiniKit.install();
     var nonce = Math.random().toString(36).slice(2) + Date.now().toString(36);
     var result = await MiniKit.walletAuth({ nonce: nonce, statement: 'Conectar Intercambio X SwapX' });
     if (result && result.data && result.data.address) {
@@ -1617,7 +1617,7 @@ async function fetchLivePrices() {
 }
 
 window.addEventListener('load', function() {
-  if (window.MiniKit) { try { MiniKit.install({ appId: 'app_d0a270229b8199adb79b64d5c7aa7c0f' }); } catch(e) {} }
+  if (window.MiniKit) { try { MiniKit.install(); } catch(e) {} }
   renderTokenList();
   fetchLivePrices();
   setInterval(function() {

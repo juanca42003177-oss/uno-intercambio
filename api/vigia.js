@@ -82,11 +82,31 @@ module.exports = wrap(async (req, res) => {
     if (!f || !f.data || !Array.isArray(f.data.alerts)) problemas.push('bodega de alertas no responde (alerts.json en rama alerts-data)');
   } catch (e) { problemas.push('bodega de alertas falló: ' + String(e.message || e)); }
 
-  // 2) fuente de precios viva (Kraken, la que usan las alertas y los swaps)
-  try {
-    const r = await fetch('https://api.kraken.com/0/public/Ticker?pair=XBTUSD', { headers: { 'User-Agent': 'vigia' } });
-    if (!r.ok) problemas.push('fuente de precios (Kraken) responde HTTP ' + r.status);
-  } catch (e) { problemas.push('fuente de precios (Kraken) inalcanzable'); }
+  // 2) fuente de precios (Kraken, respaldo de CoinGecko). Kraken suelta 503
+  // pasajeros con frecuencia: reintentar 3 veces antes de alarmar, y si sigue
+  // caido, confirmar que SwapX SIGA cotizando con sus respaldos (CoinGecko +
+  // ultima memoria de precios). Solo es falla critica si la app no cotiza.
+  let krakenOk = false, krakenErr = 'inalcanzable';
+  for (let i = 0; i < 3 && !krakenOk; i++) {
+    try {
+      const r = await fetch('https://api.kraken.com/0/public/Ticker?pair=XBTUSD', { headers: { 'User-Agent': 'vigia', Accept: 'application/json' } });
+      if (r.ok) krakenOk = true;
+      else krakenErr = 'HTTP ' + r.status;
+    } catch (e) { krakenErr = String(e.message || e); }
+    if (!krakenOk) await new Promise((z) => setTimeout(z, 600 * (i + 1)));
+  }
+  let cotizando = null;
+  if (!krakenOk) {
+    try {
+      const base = 'https://' + (req.headers && req.headers.host ? req.headers.host : 'intercambiox.vercel.app');
+      const r2 = await fetch(base + '/api/getMarketPrices', { headers: { Accept: 'application/json' } });
+      const j2 = await r2.json();
+      cotizando = !!(j2 && j2.prices && isFinite(+j2.prices.USDC) && isFinite(+j2.prices.WLD) && +j2.prices.WLD > 0);
+    } catch (e) { cotizando = false; }
+  }
+  if (!krakenOk && !cotizando) {
+    problemas.push('fuente de precios caída: Kraken ' + krakenErr + ' y la app tampoco cotiza con respaldos');
+  }
 
   const ok = problemas.length === 0;
 
@@ -114,5 +134,5 @@ module.exports = wrap(async (req, res) => {
     } catch (e) { }
   }
 
-  res.status(ok ? 200 : 503).json({ ok, problemas });
+  res.status(ok ? 200 : 503).json({ ok, problemas, kraken: krakenOk ? 'ok' : (cotizando ? 'caido-respaldado' : 'caido'), appCotiza: cotizando === null ? true : cotizando });
 });

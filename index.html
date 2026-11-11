@@ -6,9 +6,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Intercambio X SwapX</title>
+<title>Billetera Dorada</title>
 <script type="module">
-  import { MiniKit } from 'https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@latest/+esm';
+  import { MiniKit } from 'https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@2.0.3/+esm';
   window.MiniKit = MiniKit;
 </script>
 <style>
@@ -50,7 +50,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
 <div id="home">
   <div class="top">
     <div class="avatar" style="padding:2px;overflow:hidden;border:2px solid #f0b90b"><img src="logos/app-logo.png" alt="Logo" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div>
-    <div style="flex:1;min-width:0"><b>Intercambio X SwapX</b><div class="small" id="walletInfo">No conectado • World Chain</div></div>
+    <div style="flex:1;min-width:0"><b>Billetera Dorada</b><div class="small" id="walletInfo">No conectado • World Chain</div></div>
     <button class="btnConnect" id="btnConnect" onclick="connectWallet()">Conectar</button>
     <button class="btnConnect" style="width:38px;margin-left:6px" title="Premios" onclick="showPrizes()">🎁</button>
     <button class="btnConnect" style="width:38px;margin-left:6px" title="Cómo funciona" onclick="showWelcome()">❓</button>
@@ -185,7 +185,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
     </div>
     <p class="small" style="text-align:center;margin:18px 0 10px">Trading de predicciones, disponible en nuestra segunda app</p>
     <a href="https://world.org/mini-app?app_id=app_91fc57acb47e001429f888794210c9f6&path=%2F" target="_top" onclick="window.location.href='https://world.org/mini-app?app_id=app_91fc57acb47e001429f888794210c9f6&path=%2F';return false;" style="display:flex;align-items:center;gap:12px;background:#111;border:2px solid #f0b90b;border-radius:16px;padding:16px;text-decoration:none;margin:0 4px">
-      <img src="logos/app-logo.png" alt="Intercambio X SwapX" style="width:52px;height:52px;border-radius:50%;flex-shrink:0">
+      <img src="logos/app-logo.png" alt="Billetera Dorada" style="width:52px;height:52px;border-radius:50%;flex-shrink:0">
       <div style="flex:1">
         <b style="color:#f0b90b;font-size:16px">🐉 Dragon Trade</b>
         <div style="font-size:12.5px;color:#999;margin-top:3px">Bóveda de staking + mercado de predicciones. Toca para abrir</div>
@@ -283,7 +283,7 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
   <div class="modalBox" style="max-width:420px;max-height:85vh;overflow-y:auto;text-align:left">
     <div style="text-align:center">
       <img src="logos/app-logo.png" alt="SwapX" style="width:72px;height:72px;border-radius:50%;border:2px solid #f0b90b">
-      <div style="font-weight:900;font-size:20px;margin-top:8px">Bienvenido a Intercambio X SwapX 💠</div>
+      <div style="font-weight:900;font-size:20px;margin-top:8px">Bienvenido a Billetera Dorada 💠</div>
       <div class="small" style="margin-top:4px">Swap, bóvedas y alertas de precio en World Chain</div>
     </div>
     <div style="margin-top:16px">
@@ -301,6 +301,16 @@ select{border:0;background:#111;color:#fff;padding:10px 14px;border-radius:20px;
     <div style="margin-top:14px">
       <div style="font-weight:800;color:#b8860b">↗ Enviar y ↓ Recibir</div>
       <div class="small" style="margin-top:4px;line-height:1.5">Envía tokens a cualquier dirección o comparte el tuyo con código QR, todo dentro de la app.</div>
+    </div>
+        <div style="margin-top:18px;padding-top:12px;border-top:1px solid rgba(240,185,11,.4)">
+      <div style="font-weight:900;font-size:13px">Aviso importante</div>
+      <div class="small" style="margin-top:4px;line-height:1.5">Servicio solo para <b>mayores de 18 años</b>. Operar con criptoactivos implica <b>riesgo de pérdida total</b> del dinero que uses. No es asesoría financiera y no garantizamos rendimientos. Verificá que sea legal en tu país.</div>
+      <div class="small" style="margin-top:8px;line-height:1.8">
+        <a href="/privacidad.html" style="color:#f0b90b;font-weight:900">Privacidad</a> &nbsp;·&nbsp;
+        <a href="/terminos.html" style="color:#f0b90b;font-weight:900">Términos</a> &nbsp;·&nbsp;
+        <a href="mailto:soporte.dragoexpres@gmail.com" style="color:#f0b90b;font-weight:900">Soporte</a>
+      </div>
+      <div class="small" style="margin-top:6px;line-height:1.5">Billetera Dorada es de Dragon Trade Labs y <b>no está afiliada a Tools for Humanity ni a World</b>.</div>
     </div>
     <button class="btnY" style="width:100%;margin-top:16px" onclick="document.getElementById('welcome').style.display='none';localStorage.setItem('swapxWelcomeKey','1')">¡Entendido, a intercambiar! 🚀</button>
   </div>
@@ -895,7 +905,7 @@ async function connectWallet() {
     if (!window.MiniKit) return showOk('Abre dentro de World App', '⚠️');
     MiniKit.install();
     var nonce = Math.random().toString(36).slice(2) + Date.now().toString(36);
-    var result = await MiniKit.walletAuth({ nonce: nonce, statement: 'Conectar Intercambio X SwapX' });
+    var result = await MiniKit.walletAuth({ nonce: nonce, statement: 'Conectar Billetera Dorada' });
     if (result && result.data && result.data.address) {
       currentAccount = result.data.address;
       updateUI(currentAccount);

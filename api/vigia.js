@@ -12,10 +12,25 @@ const BRANCH = 'alerts-data';
 const VIGIA_PATH = 'vigia.json';
 const RERECORDAR = 6 * 3600 * 1000;
 
+// GitHub puede responder 502/503 de forma transitoria. Reintentar lecturas
+// evita marcar la bodega como caída por un error puntual del proveedor.
+async function fetchReadRetry(url, options, attempts = 3) {
+  let lastError;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const r = await fetch(url, options);
+      if (r.status < 500 && r.status !== 429) return r;
+      lastError = new Error('HTTP ' + r.status);
+    } catch (e) { lastError = e; }
+    if (i + 1 < attempts) await new Promise((resolve) => setTimeout(resolve, 400 * (i + 1)));
+  }
+  throw lastError || new Error('lectura falló tras reintentos');
+}
+
 function gh() { return process.env.GITHUB_TOKEN || process.env.GITHUB_TOKEN_2 || ''; }
 
 async function loadFile(path) {
-  const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}?ref=${BRANCH}`, {
+  const r = await fetchReadRetry(`https://api.github.com/repos/${REPO}/contents/${path}?ref=${BRANCH}`, {
     headers: { Authorization: `token ${gh()}`, Accept: 'application/vnd.github.raw+json' },
   });
   if (r.status === 404) return { sha: null, data: null };

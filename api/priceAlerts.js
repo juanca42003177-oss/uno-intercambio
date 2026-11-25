@@ -9,6 +9,21 @@ const REPO = process.env.GITHUB_DATA_REPO || 'juanca42003177-oss/dragon-labs-dat
 const OFFICIAL_CHAT = '8022768138';
 const ALERT_PREFIX = '💠 Intercambio X SwapX';
 
+// GitHub puede devolver 502/503 transitorios al leer el archivo de alertas.
+// Reintentar brevemente evita que una falla momentánea interrumpa el servicio.
+async function fetchReadRetry(url, options, attempts = 3) {
+  let lastError;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const r = await fetch(url, options);
+      if (r.status < 500 && r.status !== 429) return r;
+      lastError = new Error('HTTP ' + r.status);
+    } catch (e) { lastError = e; }
+    if (i + 1 < attempts) await new Promise((resolve) => setTimeout(resolve, 400 * (i + 1)));
+  }
+  throw lastError || new Error('lectura falló tras reintentos');
+}
+
 function gh() { return process.env.GITHUB_TOKEN || process.env.GITHUB_TOKEN_2 || ''; }
 function tg(method, payload) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -37,7 +52,7 @@ function fmtPrice(v) {
 async function loadAlertsFile() {
   // via API (no raw.githubusercontent): el raw tiene cache CDN que sirve 404
   // viejos justo despues de crear el archivo y las alertas parecen perderse.
-  const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${ALERTS_PATH}?ref=${ALERTS_BRANCH}`, {
+  const r = await fetchReadRetry(`https://api.github.com/repos/${REPO}/contents/${ALERTS_PATH}?ref=${ALERTS_BRANCH}`, {
     headers: { Authorization: `token ${gh()}`, Accept: 'application/vnd.github.raw+json' },
   });
   if (r.status === 404) return { alerts: [] };
